@@ -64,16 +64,16 @@
 
 \vspace{1em}
 
-\section{ARMA Models: Combining Memory and Shocks}
-\secsub{Combine Autoregressive past memory with Moving Average shock corrections.}
+\section{White Noise, Dickey-Fuller Test \& ARMA Models}
+\secsub{Diagnose white noise residuals, test stationarity, and combine past memory with shocks.}
 
-The Autoregressive Moving Average model ARMA($p, q$) combines autoregressive terms (past values $y_{t-i}$) with moving average terms (past residual shocks $\epsilon_{t-j}$):
+A time series is white noise if $\epsilon_t \sim \text{i.i.d.}(0, \sigma^2)$ with zero autocovariance. The Dickey-Fuller test checks for a unit root ($\phi = 1$) in $\Delta y_t = (\phi - 1) y_{t-1} + \epsilon_t$. The ARMA($p, q$) model combines autoregressive memory with moving average shock corrections:
 \begin{equation}
 y_t = c + \phi_1 y_{t-1} + \dots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \dots + \theta_q \epsilon_{t-q}
 \end{equation}
 
 \begin{intuition}
-Your morning mood depends on yesterday's mood (Autoregressive memory) plus how much of yesterday's unexpected good/bad surprise still lingers today (Moving Average shock).
+White noise is pure static on a radio. The Dickey-Fuller test checks whether your radio station drift is stationary, while ARMA models memory plus lingering surprise shocks.
 \end{intuition}
 
 \housefig{figures/acf_pacf_patterns.png}{Autocorrelation Function (ACF) exponential decay vs Partial Autocorrelation (PACF) cutoff.}
@@ -118,7 +118,7 @@ Given $y_{99} = 115, y_{100} = 120 \implies w_{100} = 5$. Last error $\epsilon_{
 \begin{equation}
 \hat{w}_{101} = 0.4(5) + 0.3(1) = 2.0 + 0.3 = 2.3
 \end{equation}
-\item Un-difference to obtain level forecast $\hat{y}_{101}$:
+\item Un-difference to get level forecast $\hat{y}_{101}$:
 \begin{equation}
 \hat{y}_{101} = y_{100} + \hat{w}_{101} = 120 + 2.3 = 122.3
 \end{equation}
@@ -163,11 +163,13 @@ Given last quarter values $g_{99} = 2.0\%$ and $\pi_{99} = 3.0\%$.
 \end{worked}
 
 \begin{watchout}
-VAR models require all target series to be stationary. If series have unit roots, difference them first or fit a Vector Error Correction Model (VECM).
+VAR models require all target series to be stationary. Use the Dickey-Fuller test to verify stationarity before fitting VAR.
 \end{watchout}
 
 \begin{keytake}
 \begin{itemize}
+\item White Noise residuals indicate well-fitted model dynamics.
+\item Dickey-Fuller tests verify stationarity.
 \item ARMA combines past memory (AR) and shock residuals (MA).
 \item ARIMA uses differencing $d$ to stationarize trends; SARIMAX adds seasonal periods $m$ and external regressors $X$.
 \item VAR models multivariate time series systems with mutual feedback across variables.

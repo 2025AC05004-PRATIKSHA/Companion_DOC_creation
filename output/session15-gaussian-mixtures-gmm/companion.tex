@@ -125,28 +125,22 @@ p(x) = 0.50 \mathcal{N}(x \mid 4.10, 0.425) + 0.50 \mathcal{N}(x \mid 10.28, 0.7
 \end{steps}
 \end{worked}
 
-\section{Proportion Hypothesis Testing Practice}
-\secsub{Master core statistical tests: proportions and simple regression estimation.}
+\section{Proportions \& Chi-Square Independence Tests}
+\secsub{Test differences in proportions and independence in contingency tables.}
+
+To test proportion differences across samples or test independence in a $2 \times k$ contingency table, we compute expected frequencies $E_{ij} = \frac{R_i C_j}{N}$ and test statistic $\chi^2 = \sum \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$.
 
 \begin{worked}
-A company tested employee performance before and after training.
-Before: 400 out of 500 performed well ($p_1 = 0.800$).
-After: 440 out of 600 performed well ($p_2 = 0.7333$).
-Test for significant difference at $\alpha = 0.05$.
+Employees from Agency 1 (100 total: 67 For, 33 Against) and Agency 2 (150 total: 84 For, 66 Against) were surveyed about a pension plan. Test for equal proportions at $\alpha = 0.01$.
 \begin{steps}
-\item Compute pooled proportion $\hat{p}$:
-\begin{equation}
-\hat{p} = \frac{400 + 440}{500 + 600} = \frac{840}{1100} = 0.7636, \quad \hat{q} = 1 - 0.7636 = 0.2364
-\end{equation}
-\item Compute standard error:
-\begin{equation}
-SE = \sqrt{0.7636 \times 0.2364 \times \left(\frac{1}{500} + \frac{1}{600}\right)} = 0.0257
-\end{equation}
-\item Calculate Z-statistic:
-\begin{equation}
-Z = \frac{0.8000 - 0.7333}{0.0257} = \frac{0.0667}{0.0257} = 2.59
-\end{equation}
-Since $|Z| = 2.59 > 1.96$, reject $H_0$. There is a statistically significant difference in performance proportions.
+\item Overall pooled proportion favoring pension: $\hat{p} = \frac{67 + 84}{100 + 150} = \frac{151}{250} = 0.604$.
+\item Expected frequencies: $E_{11} = 100 \times 0.604 = 60.4$, $E_{21} = 150 \times 0.604 = 90.6$.
+\item Compute Chi-Square statistic:
+\begin{align*}
+\chi^2 &= \frac{(67 - 60.4)^2}{60.4} + \frac{(33 - 39.6)^2}{39.6} + \frac{(84 - 90.6)^2}{90.6} + \frac{(66 - 59.4)^2}{59.4} \\
+&= 0.721 + 1.100 + 0.481 + 0.733 = 3.035
+\end{align*}
+\item Critical value at $\alpha = 0.01, df = 1$ is $6.635$. Since $\chi^2 = 3.035 < 6.635$, fail to reject $H_0$. Proportions favoring the plan do not differ significantly between agencies.
 \end{steps}
 \end{worked}
 
@@ -158,7 +152,7 @@ In GMM parameter estimation, initialization matters! Bad initial guesses for com
 \begin{itemize}
 \item GMM models complex distributions as linear combinations of $K$ Gaussians with mixing weights $\pi_k$.
 \item EM algorithm alternates between E-step (computing posterior responsibilities) and M-step (updating means and covariances).
-\item Soft clustering assigns probabilities rather than hard binary boundaries.
+\item Chi-square contingency tests compare observed vs expected frequencies across categorical proportions.
 \end{itemize}
 \end{keytake}
 

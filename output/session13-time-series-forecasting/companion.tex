@@ -64,19 +64,19 @@
 
 \vspace{1em}
 
-\section{Moving Averages (Simple \& Weighted)}
-\secsub{Smooth out short-term fluctuations by averaging nearby historical observations.}
+\section{Moving Averages \& Forecast Error Accuracy}
+\secsub{Smooth out short-term fluctuations and evaluate forecast accuracy using MSE, MAD, MAPE.}
 
-Moving averages assume that future observations will resemble recent historical levels. Simple Moving Averages (SMA) weigh all $k$ recent periods equally, whereas Weighted Moving Averages (WMA) assign larger weights to more recent observations.
+Moving averages assume that future observations will resemble recent historical levels. Simple Moving Averages (SMA) weigh all $k$ recent periods equally, whereas Weighted Moving Averages (WMA) assign larger weights to more recent observations. Forecast error is $e_t = y_t - F_t$.
 
 \begin{intuition}
-A simple moving average is like taking the average temperature over the last 3 days to guess tomorrow's weather. A weighted moving average gives yesterday 50\% weight, two days ago 30\%, and three days ago 20\%.
+A simple moving average is like taking average temperature over the last 3 days to guess tomorrow's weather. Accuracy metrics like MSE (Mean Squared Error) and MAD (Mean Absolute Deviation) measure how far off your guesses are on average.
 \end{intuition}
 
 \subsection{Mathematical Formulas}
 \begin{align}
-\text{SMA}_t &= \frac{y_{t-1} + y_{t-2} + \dots + y_{t-k}}{k} \\
-\text{WMA}_t &= \frac{w_1 y_{t-1} + w_2 y_{t-2} + \dots + w_k y_{t-k}}{\sum w_i}
+\text{SMA}_t &= \frac{y_{t-1} + y_{t-2} + \dots + y_{t-k}}{k}, \quad \text{WMA}_t = \frac{w_1 y_{t-1} + w_2 y_{t-2} + \dots + w_k y_{t-k}}{\sum w_i} \\
+\text{MSE} &= \frac{1}{n} \sum (y_t - F_t)^2, \quad \text{MAD} = \frac{1}{n} \sum |y_t - F_t|, \quad \text{MAPE} = \frac{100\%}{n} \sum \left|\frac{y_t - F_t}{y_t}\right|
 \end{align}
 
 \housefig{figures/moving_average.png}{Comparison of raw production data against a 3-period moving average curve.}
@@ -129,7 +129,7 @@ F_3 = 0.3(505) + 0.7(485) = 151.5 + 339.5 = 491.0
 When data exhibits a persistent linear trend, simple exponential smoothing lags behind. Holt's Double Exponential Smoothing introduces a second smoothing equation to update the trend component $T_t$ alongside level $L_t$.
 
 \begin{intuition}
-If sales grow by 10 units every month, simple smoothing will always underestimate next month's sales. Holt's method tracks both the current height and the speed of growth.
+If sales grow by 10 units every month, simple smoothing will always underestimate next month's sales. Holt's method tracks both current height and growth speed.
 \end{intuition}
 
 \subsection{Holt's Equations}
@@ -148,6 +148,7 @@ Simple moving averages and single exponential smoothing are only suitable for st
 \begin{keytake}
 \begin{itemize}
 \item Simple Moving Averages average recent $k$ values equally; WMAs emphasize recent data.
+\item Error metrics MSE, MAD, and MAPE measure forecast accuracy.
 \item Exponential Smoothing updates forecasts by adding a fraction $\alpha$ of past forecast error.
 \item Holt's Double Exponential Smoothing incorporates a trend factor to eliminate lag on trending data.
 \end{itemize}

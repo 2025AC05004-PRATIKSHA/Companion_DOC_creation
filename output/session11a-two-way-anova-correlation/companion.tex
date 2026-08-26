@@ -20,7 +20,6 @@
 \definecolor{bitsgreen}{RGB}{46,125,82}
 \definecolor{bitsamber}{RGB}{200,136,30}
 \definecolor{bitsred}{RGB}{178,58,72}
-\definecolor{lightbg}{RGB}{245,247,250}
 
 % Callout Boxes
 \tcolorboxenvironment{intuition}{colback=bitsblue!8,colframe=bitsblue,title=\textbf{Everyday Picture \& Intuition},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
@@ -140,20 +139,20 @@ Conclusion: Nearly perfect strong negative correlation. Higher anxiety correlate
 \end{steps}
 \end{worked}
 
-\section{Simple Linear Regression Analysis}
-\secsub{Predict a continuous target variable using a straight-line trend model.}
+\section{Simple Linear Regression \& Coefficient of Determination ($R^2$)}
+\secsub{Predict a target variable and measure explained variation via $R^2 = SSR / SST$.}
 
-Simple linear regression models the target variable $Y$ as a linear function of predictor $X$ plus random noise: $Y = a + bX + \epsilon$.
+Simple linear regression models the target variable $Y$ as a linear function of predictor $X$ plus random noise: $Y = a + bX + \epsilon$. The Coefficient of Determination ($R^2 = r^2$) measures the proportion of total variation ($SST = SSR + SSE$) explained by the regression line ($SSR$).
 
 \begin{intuition}
-Think of simple regression as drawing a baseline path through scattered data points so that the total missed vertical distances are as small as possible.
+Think of simple regression as drawing a baseline path through scattered data points so that total missed vertical distances ($SSE$) are minimized, while $R^2$ tells you what percentage of scatter is explained by your path.
 \end{intuition}
 
-\subsection{Least Squares Formulas}
-Slope coefficient $b$ and intercept $a$ minimize squared errors:
+\subsection{Least Squares \& $R^2$ Formulas}
+Slope $b$, intercept $a$, and Coefficient of Determination $R^2$:
 \begin{align}
-b &= \frac{\sum (X - \bar{X})(Y - \bar{Y})}{\sum (X - \bar{X})^2} \\
-a &= \bar{Y} - b\bar{X}
+b &= \frac{\sum (X - \bar{X})(Y - \bar{Y})}{\sum (X - \bar{X})^2}, \quad a = \bar{Y} - b\bar{X} \\
+R^2 &= \frac{SSR}{SST} = 1 - \frac{SSE}{SST} = (r_{X,Y})^2
 \end{align}
 
 \housefig{figures/regression_line.png}{Fitted least-squares regression line estimating weekly movie gross revenue from advertising spend.}
@@ -163,6 +162,7 @@ A theater owner records advertising expenditure ($X$ in \$1,000s) and weekly gro
 Sample points $(X,Y)$: $(2, 9), (5, 16), (4, 15), (2.5, 11), (3, 13), (4, 14), (2.5, 10), (3, 12)$.
 Total sample size $n = 8$, $\bar{X} = 3.25$, $\bar{Y} = 12.50$.
 Given $\sum (X - \bar{X})^2 = 8.50$ and $\sum (X - \bar{X})(Y - \bar{Y}) = 20.00$.
+Suppose $SST = 42.00$ and $SSR = 35.29$.
 \begin{steps}
 \item Calculate slope $b$:
 \begin{equation}
@@ -172,7 +172,10 @@ b = \frac{20.00}{8.50} = 2.353 \approx 2.36
 \begin{equation}
 a = 12.50 - (2.353 \times 3.25) = 12.50 - 7.647 = 4.853 \approx 4.85
 \end{equation}
-\item Fitted regression model: $\hat{Y} = 4.85 + 2.36X$.
+\item Calculate Coefficient of Determination $R^2$:
+\begin{equation}
+R^2 = \frac{SSR}{SST} = \frac{35.29}{42.00} = 0.8402 \quad (84.02\% \text{ of revenue variation is explained by ad spend})
+\end{equation}
 \item Forecast revenue for ad spend $X = 4.5$ (\$4,500):
 \begin{equation}
 \hat{Y} = 4.85 + 2.36(4.5) = 4.85 + 10.62 = 15.47 \quad (\text{or \$15,470})
@@ -188,7 +191,7 @@ Correlation does not mean causation! High correlation between two variables does
 \begin{itemize}
 \item Two-Way ANOVA isolates row and column effects simultaneously.
 \item Karl Pearson's $r$ measures linear association strength on a scale from $-1$ to $+1$.
-\item Least-squares regression minimizes squared vertical errors to yield optimal prediction line parameters $a$ and $b$.
+\item Least-squares regression minimizes squared vertical errors; $R^2 = SSR / SST$ measures fit quality.
 \end{itemize}
 \end{keytake}
 
