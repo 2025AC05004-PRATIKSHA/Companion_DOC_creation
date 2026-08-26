@@ -1,0 +1,231 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.8cm,top=2.0cm,bottom=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+% Color definitions
+\definecolor{brandblue}{HTML}{2C5AA0}
+\definecolor{brandgreen}{HTML}{2E7D52}
+\definecolor{brandamber}{HTML}{C8881E}
+\definecolor{brandred}{HTML}{B23A48}
+\definecolor{brandpurple}{HTML}{6A4C93}
+\definecolor{brandink}{HTML}{21355E}
+\definecolor{bgfill}{HTML}{EAF0F7}
+
+% Custom tcolorbox environments
+\newtcolorbox{intuition}[1][Intuition]{
+  enhanced, breakable, colback=bgfill, colframe=brandblue,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{worked}[1][Worked Example]{
+  enhanced, breakable, colback=white, colframe=brandgreen,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{
+  enhanced, breakable, colback=bgfill!50, colframe=brandamber,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{watchout}[1][Watch Out]{
+  enhanced, breakable, colback=white, colframe=brandred,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{keytake}[1][Key Takeaways]{
+  enhanced, breakable, colback=bgfill, colframe=brandpurple,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newenvironment{steps}{
+  \begin{enumerate}[label=\textbf{Step \arabic*:}, leftmargin=*]
+}{
+  \end{enumerate}
+}
+
+\newcommand{\housefig}[2]{
+  \begin{center}
+    \includegraphics[width=0.88\textwidth]{#1}\\
+    \small\textcolor{brandink}{\textbf{Figure:} #2}
+  \end{center}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[enhanced, colback=brandink, colframe=brandink, arc=0pt, left=12pt, right=12pt, top=12pt, bottom=12pt]
+  \color{white}
+  \large\textbf{ISM Companion Reader} \hfill \textbf{Session 7}\\[4pt]
+  \huge\textbf{Probability Distributions \& Sampling Intro}\\[4pt]
+  \small Discrete and continuous models: Bernoulli, Binomial, Poisson, and Normal distributions.
+\end{tcolorbox}
+
+\vspace{10pt}
+
+\section{Introduction to Discrete Probability Distributions}
+
+A random variable assigns numerical outcomes to uncertain events. We separate these variables into discrete and continuous types. Discrete variables take jumpy countable values, such as the count of defective items in a batch.
+
+\begin{intuition}[Why Model Discrete Outcomes?]
+Before using math formulas, picture a coin flip or a quality inspector checking items on an assembly line. Each check yields either a success or a failure. Probability distributions provide the exact blueprint for how likelihood spreads across all possible outcome counts.
+\end{intuition}
+
+\subsection{Bernoulli Distribution}
+The Bernoulli distribution is the simplest building block in probability. It models a single trial with exactly two possible outcomes: success ($X = 1$) with probability $p$, or failure ($X = 0$) with probability $q = 1 - p$.
+
+\textbf{Mathematical Formulation:}
+\begin{align*}
+P(X = x) &= p^x (1-p)^{1-x}, \quad x \in \{0, 1\} \\
+\text{Mean } E[X] &= p \\
+\text{Variance } \text{Var}(X) &= p(1-p) = pq
+\end{align*}
+
+\housefig{figures/fig_bernoulli.png}{Bernoulli PMF showing the probability split for a single trial with success probability $p = 0.60$.}
+
+\subsection{Binomial Distribution}
+When you repeat $n$ independent Bernoulli trials under identical conditions, the total count of successes follows a Binomial distribution, denoted $X \sim \text{Binom}(n, p)$.
+
+\textbf{Mathematical Formulation:}
+\begin{align*}
+P(X = k) &= \binom{n}{k} p^k (1-p)^{n-k}, \quad k \in \{0, 1, \dots, n\} \\
+\text{Mean } E[X] &= np \\
+\text{Variance } \text{Var}(X) &= np(1-p)
+\end{align*}
+
+\housefig{figures/fig_binomial.png}{Binomial PMF for $n = 10$ independent trials with $p = 0.50$, forming a symmetric bell shape centered at $E[X] = 5$.}
+
+\begin{worked}[Slide Example 6: Binomial Defect Count]
+\textbf{Problem Statement:} A company produces electronic units with a 3\% defect rate ($p = 0.03$). In a sample of $n = 20$ units, find the probability that exactly 2 units are defective.
+
+\begin{steps}
+\item \textbf{Identify the parameters:} Sample size $n = 20$, success probability (defective) $p = 0.03$, target count $k = 2$.
+\item \textbf{Apply the Binomial formula:}
+\[
+P(X = 2) = \binom{20}{2} (0.03)^2 (0.97)^{18}
+\]
+\item \textbf{Calculate combination and terms:}
+\[
+\binom{20}{2} = \frac{20 \times 19}{2} = 190, \quad (0.03)^2 = 0.0009, \quad (0.97)^{18} \approx 0.5780
+\]
+\item \textbf{Compute the final probability:}
+\[
+P(X = 2) = 190 \times 0.0009 \times 0.5780 \approx 0.0988 \quad (9.88\%)
+\]
+\end{steps}
+\end{worked}
+
+\section{Poisson Distribution}
+
+The Poisson distribution models the number of rare events occurring within a fixed interval of time or space, given a constant average arrival rate $\lambda$.
+
+\textbf{Mathematical Formulation:}
+\begin{align*}
+P(X = k) &= \frac{e^{-\lambda} \lambda^k}{k!}, \quad k \in \{0, 1, 2, \dots\} \\
+\text{Mean } E[X] &= \lambda \\
+\text{Variance } \text{Var}(X) &= \lambda
+\end{align*}
+
+\housefig{figures/fig_poisson.png}{Poisson PMF for mean rate $\lambda = 4$, illustrating right-skewed probability mass across arrival counts.}
+
+\begin{worked}[Slide Example 7: Poisson Book Binding Defects]
+\textbf{Problem Statement:} In a book bindery, 5\% of bound books have defective bindings. Use the Poisson approximation to find the probability that a sample of 400 books contains at most 2 defective books.
+
+\begin{steps}
+\item \textbf{Determine the rate parameter $\lambda$:}
+\[
+\lambda = n \cdot p = 400 \times 0.05 = 20
+\]
+Wait! For $\lambda = 20$, let us evaluate $P(X \le 2) = P(X=0) + P(X=1) + P(X=2)$.
+\item \textbf{Calculate individual terms:}
+\[
+P(X = 0) = \frac{e^{-20} 20^0}{0!} = e^{-20} \approx 2.06 \times 10^{-9}
+\]
+\[
+P(X = 1) = \frac{e^{-20} 20^1}{1!} = 20 e^{-20} \approx 4.12 \times 10^{-8}
+\]
+\[
+P(X = 2) = \frac{e^{-20} 20^2}{2!} = 200 e^{-20} \approx 4.12 \times 10^{-7}
+\]
+\item \textbf{Sum the probabilities:}
+\[
+P(X \le 2) \approx 4.55 \times 10^{-7} \quad (\text{extremely small chance})
+\]
+\end{steps}
+\end{worked}
+
+\section{Continuous Normal Distribution}
+
+Unlike discrete counts, continuous variables take any real value in an interval. The Normal distribution $X \sim N(\mu, \sigma^2)$ is the most important continuous distribution in statistics.
+
+\textbf{Mathematical Formulation:}
+\[
+f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)
+\]
+
+\begin{everyday}[The Empirical 68-95-99.7 Rule]
+Every normal distribution spreads its data predictably:
+\begin{itemize}
+  \item About \textbf{68.26\%} of data falls within $\mu \pm 1\sigma$.
+  \item About \textbf{95.44\%} of data falls within $\mu \pm 2\sigma$.
+  \item About \textbf{99.73\%} of data falls within $\mu \pm 3\sigma$.
+\end{itemize}
+\end{everyday}
+
+\housefig{figures/fig_normal.png}{Standard Normal distribution density curve $Z \sim N(0,1)$ with shaded central area $\pm 1\sigma$.}
+
+\subsection{Standardizing to Z-scores}
+To calculate probabilities for any general normal variable $X \sim N(\mu, \sigma^2)$, we transform it into the standard normal variable $Z \sim N(0, 1)$ using:
+\[
+Z = \frac{X - \mu}{\sigma}
+\]
+
+\begin{worked}[Slide Example 9: Standard Normal Probabilities]
+\textbf{Problem Statement:} Given $Z \sim N(0, 1)$, find $P(0 \le Z \le 1.42)$.
+
+\begin{steps}
+\item \textbf{Use cumulative distribution values:}
+\[
+P(0 \le Z \le 1.42) = P(Z \le 1.42) - P(Z \le 0)
+\]
+\item \textbf{Look up table values:} $P(Z \le 1.42) = 0.9222$ and $P(Z \le 0) = 0.5000$.
+\item \textbf{Subtract to find the interval area:}
+\[
+P(0 \le Z \le 1.42) = 0.9222 - 0.5000 = 0.4222
+\]
+\end{steps}
+\end{worked}
+
+\begin{watchout}[Continuity Correction]
+When approximating a discrete distribution like the Binomial using a continuous Normal distribution, always apply a continuity correction of $\pm 0.5$. For example, $P(X \ge 10)$ becomes $P(X_{\text{normal}} \ge 9.5)$.
+\end{watchout}
+
+\begin{keytake}[Summary Checklist]
+\begin{itemize}
+  \item \textbf{Bernoulli:} Single trial, binary outcome, mean $p$, variance $pq$.
+  \item \textbf{Binomial:} $n$ independent trials, count of successes, mean $np$, variance $npq$.
+  \item \textbf{Poisson:} Count of rare events over fixed interval, rate parameter $\lambda$, mean = variance = $\lambda$.
+  \item \textbf{Normal:} Continuous bell curve defined by mean $\mu$ and standard deviation $\sigma$; standardized via $Z = (X - \mu) / \sigma$.
+\end{itemize}
+\end{keytake}
+
+\end{document}

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISM Session 7: Probability Distributions & Sampling Intro</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-amber: #fbbf24;
+      --accent-red: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    #sidebar {
+      width: 280px;
+      background: #020617;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #sidebar ul { list-style: none; }
+    #sidebar li { margin-bottom: 0.5rem; }
+    #sidebar a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    #sidebar a:hover, #sidebar a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+    #main-content {
+      margin-left: 280px;
+      padding: 2.5rem 3rem;
+      max-width: 900px;
+      width: 100%;
+    }
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    header h1 { font-size: 2.2rem; color: var(--text); margin-bottom: 0.5rem; }
+    header p { color: var(--muted); font-size: 1.1rem; }
+    section { margin-bottom: 3.5rem; scroll-margin-top: 2rem; }
+    h2 { font-size: 1.6rem; color: var(--accent); margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; color: var(--accent-green); margin: 1.5rem 0 0.75rem 0; }
+    p { margin-bottom: 1rem; color: #cbd5e1; }
+    .callout {
+      background: var(--card);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .callout-title { font-weight: bold; color: var(--accent); margin-bottom: 0.5rem; }
+    .lab-card {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .lab-title {
+      font-weight: bold;
+      color: var(--accent-amber);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .controls {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .control-group label { font-size: 0.85rem; color: var(--muted); }
+    canvas {
+      width: 100%;
+      height: 260px;
+      background: #030712;
+      border-radius: 8px;
+      display: block;
+    }
+    .math-block {
+      background: #090d16;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="sidebar">
+    <h2>ISM Session 7</h2>
+    <ul>
+      <li><a href="#overview" class="active">1. Overview</a></li>
+      <li><a href="#bernoulli">2. Bernoulli Distribution</a></li>
+      <li><a href="#binomial">3. Binomial Distribution</a></li>
+      <li><a href="#poisson">4. Poisson Distribution</a></li>
+      <li><a href="#normal">5. Normal Distribution</a></li>
+    </ul>
+  </nav>
+
+  <main id="main-content">
+    <header>
+      <h1>Session 7: Discrete & Continuous Distributions</h1>
+      <p>Introduction to Statistical Methods — Master the core probability models visually.</p>
+    </header>
+
+    <section id="overview">
+      <h2>1. Overview</h2>
+      <p>Uncertainty is at the heart of statistics. Probability distributions give us a full map of how likely different outcomes are. We split them into discrete distributions (counting distinct outcomes) and continuous distributions (measuring smooth quantities).</p>
+      <div class="callout">
+        <div class="callout-title">The Core Intuition</div>
+        <p>Think of a probability distribution as a recipe. It tells you the chance of every possible event before you collect any data.</p>
+      </div>
+    </section>
+
+    <section id="bernoulli">
+      <h2>2. Bernoulli Distribution</h2>
+      <p>A Bernoulli trial is a single experiment with exactly two outcomes: Success (\(X = 1\)) with probability \(p\), or Failure (\(X = 0\)) with probability \(q = 1 - p\).</p>
+
+      <div class="lab-card">
+        <div class="lab-title">Interactive Lab: Bernoulli Trial Visualizer</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="p-slider">Success Probability (p): <span id="p-val">0.60</span></label>
+            <input type="range" id="p-slider" min="0" max="1" step="0.05" value="0.6">
+          </div>
+        </div>
+        <canvas id="bernoulli-canvas"></canvas>
+      </div>
+    </section>
+
+    <section id="binomial">
+      <h2>3. Binomial Distribution</h2>
+      <p>When you perform \(n\) independent Bernoulli trials under equal conditions, the total count of successes follows a Binomial distribution.</p>
+      <div class="math-block">
+        \[ P(X = k) = \binom{n}{k} p^k (1-p)^{n-k} \]
+      </div>
+
+      <div class="lab-card">
+        <div class="lab-title">Interactive Lab: Binomial PMF Simulator</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="bin-n">Trials (n): <span id="bin-n-val">10</span></label>
+            <input type="range" id="bin-n" min="1" max="25" step="1" value="10">
+          </div>
+          <div class="control-group">
+            <label for="bin-p">Success Prob (p): <span id="bin-p-val">0.50</span></label>
+            <input type="range" id="bin-p" min="0.05" max="0.95" step="0.05" value="0.5">
+          </div>
+        </div>
+        <canvas id="binomial-canvas"></canvas>
+      </div>
+    </section>
+
+    <section id="poisson">
+      <h2>4. Poisson Distribution</h2>
+      <p>The Poisson distribution counts rare events happening over a fixed interval of time or space, given a constant average rate \(\lambda\).</p>
+      <div class="math-block">
+        \[ P(X = k) = \frac{e^{-\lambda} \lambda^k}{k!} \]
+      </div>
+
+      <div class="lab-card">
+        <div class="lab-title">Interactive Lab: Poisson Rate Visualizer</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="poi-lambda">Average Rate (&lambda;): <span id="poi-lambda-val">4.0</span></label>
+            <input type="range" id="poi-lambda" min="0.5" max="15" step="0.5" value="4">
+          </div>
+        </div>
+        <canvas id="poisson-canvas"></canvas>
+      </div>
+    </section>
+
+    <section id="normal">
+      <h2>5. Normal Distribution</h2>
+      <p>The Normal distribution is the classic bell curve. Continuous measurements like weights, scores, and heights naturally follow this curve.</p>
+
+      <div class="lab-card">
+        <div class="lab-title">Interactive Lab: Standard Normal Area Visualizer</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="norm-z">Z-Score Cutoff: <span id="norm-z-val">1.00</span></label>
+            <input type="range" id="norm-z" min="-3" max="3" step="0.1" value="1">
+          </div>
+        </div>
+        <canvas id="normal-canvas"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Helper function for combinations
+    function nCr(n, r) {
+      if (r < 0 || r > n) return 0;
+      if (r === 0 || r === n) return 1;
+      let res = 1;
+      for (let i = 1; i <= r; i++) {
+        res = res * (n - i + 1) / i;
+      }
+      return res;
+    }
+
+    // Helper factorial
+    function fact(n) {
+      if (n <= 1) return 1;
+      let res = 1;
+      for (let i = 2; i <= n; i++) res *= i;
+      return res;
+    }
+
+    // Bernoulli Lab
+    const pSlider = document.getElementById('p-slider');
+    const pVal = document.getElementById('p-val');
+    const bernCanvas = document.getElementById('bernoulli-canvas');
+    const bernCtx = bernCanvas.getContext('2d');
+
+    function drawBernoulli() {
+      const p = parseFloat(pSlider.value);
+      pVal.textContent = p.toFixed(2);
+      const w = bernCanvas.width = bernCanvas.clientWidth;
+      const h = bernCanvas.height = bernCanvas.clientHeight;
+      bernCtx.clearRect(0, 0, w, h);
+
+      const barW = 80;
+      const maxH = h - 80;
+
+      // Draw Failure Bar (0)
+      const h0 = (1 - p) * maxH;
+      bernCtx.fillStyle = '#f87171';
+      bernCtx.fillRect(w/3 - barW/2, h - 50 - h0, barW, h0);
+      bernCtx.fillStyle = '#f8fafc';
+      bernCtx.font = '14px sans-serif';
+      bernCtx.fillText('Failure (0)', w/3 - 30, h - 20);
+      bernCtx.fillText((1-p).toFixed(2), w/3 - 15, h - 60 - h0);
+
+      // Draw Success Bar (1)
+      const h1 = p * maxH;
+      bernCtx.fillStyle = '#38bdf8';
+      bernCtx.fillRect(2*w/3 - barW/2, h - 50 - h1, barW, h1);
+      bernCtx.fillText('Success (1)', 2*w/3 - 35, h - 20);
+      bernCtx.fillText(p.toFixed(2), 2*w/3 - 15, h - 60 - h1);
+    }
+    pSlider.addEventListener('input', drawBernoulli);
+    drawBernoulli();
+
+    // Binomial Lab
+    const binN = document.getElementById('bin-n');
+    const binNVal = document.getElementById('bin-n-val');
+    const binP = document.getElementById('bin-p');
+    const binPVal = document.getElementById('bin-p-val');
+    const binCanvas = document.getElementById('binomial-canvas');
+    const binCtx = binCanvas.getContext('2d');
+
+    function drawBinomial() {
+      const n = parseInt(binN.value);
+      const p = parseFloat(binP.value);
+      binNVal.textContent = n;
+      binPVal.textContent = p.toFixed(2);
+
+      const w = binCanvas.width = binCanvas.clientWidth;
+      const h = binCanvas.height = binCanvas.clientHeight;
+      binCtx.clearRect(0, 0, w, h);
+
+      const probs = [];
+      let maxP = 0;
+      for (let k = 0; k <= n; k++) {
+        const prob = nCr(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+        probs.push(prob);
+        if (prob > maxP) maxP = prob;
+      }
+
+      const barW = Math.max(10, (w - 100) / (n + 1) - 6);
+      const maxH = h - 80;
+
+      for (let k = 0; k <= n; k++) {
+        const barH = (probs[k] / (maxP || 1)) * maxH;
+        const x = 50 + k * ((w - 100) / (n + 1));
+        binCtx.fillStyle = '#4ade80';
+        binCtx.fillRect(x, h - 40 - barH, barW, barH);
+        binCtx.fillStyle = '#94a3b8';
+        binCtx.font = '11px sans-serif';
+        binCtx.fillText(k, x + barW/4, h - 20);
+      }
+    }
+    binN.addEventListener('input', drawBinomial);
+    binP.addEventListener('input', drawBinomial);
+    drawBinomial();
+
+    // Poisson Lab
+    const poiLam = document.getElementById('poi-lambda');
+    const poiLamVal = document.getElementById('poi-lambda-val');
+    const poiCanvas = document.getElementById('poisson-canvas');
+    const poiCtx = poiCanvas.getContext('2d');
+
+    function drawPoisson() {
+      const lam = parseFloat(poiLam.value);
+      poiLamVal.textContent = lam.toFixed(1);
+
+      const w = poiCanvas.width = poiCanvas.clientWidth;
+      const h = poiCanvas.height = poiCanvas.clientHeight;
+      poiCtx.clearRect(0, 0, w, h);
+
+      const maxK = Math.max(15, Math.ceil(lam * 2.5));
+      const probs = [];
+      let maxP = 0;
+
+      for (let k = 0; k <= maxK; k++) {
+        const prob = (Math.exp(-lam) * Math.pow(lam, k)) / fact(k);
+        probs.push(prob);
+        if (prob > maxP) maxP = prob;
+      }
+
+      const barW = Math.max(8, (w - 80) / (maxK + 1) - 4);
+      const maxH = h - 80;
+
+      for (let k = 0; k <= maxK; k++) {
+        const barH = (probs[k] / (maxP || 1)) * maxH;
+        const x = 40 + k * ((w - 80) / (maxK + 1));
+        poiCtx.fillStyle = '#fbbf24';
+        poiCtx.fillRect(x, h - 40 - barH, barW, barH);
+        poiCtx.fillStyle = '#94a3b8';
+        poiCtx.font = '10px sans-serif';
+        poiCtx.fillText(k, x + barW/4, h - 20);
+      }
+    }
+    poiLam.addEventListener('input', drawPoisson);
+    drawPoisson();
+
+    // Normal Lab
+    const normZ = document.getElementById('norm-z');
+    const normZVal = document.getElementById('norm-z-val');
+    const normCanvas = document.getElementById('normal-canvas');
+    const normCtx = normCanvas.getContext('2d');
+
+    function drawNormal() {
+      const zCut = parseFloat(normZ.value);
+      normZVal.textContent = zCut.toFixed(2);
+
+      const w = normCanvas.width = normCanvas.clientWidth;
+      const h = normCanvas.height = normCanvas.clientHeight;
+      normCtx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const scaleX = w / 8;
+      const maxH = h - 60;
+
+      normCtx.beginPath();
+      normCtx.strokeStyle = '#38bdf8';
+      normCtx.lineWidth = 3;
+
+      for (let x = 0; x < w; x++) {
+        const z = (x - cx) / scaleX;
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const y = h - 40 - pdf * maxH * 2.3;
+        if (x === 0) normCtx.moveTo(x, y);
+        else normCtx.lineTo(x, y);
+      }
+      normCtx.stroke();
+
+      // Draw shaded area under cutoff
+      normCtx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      normCtx.beginPath();
+      normCtx.moveTo(0, h - 40);
+      for (let x = 0; x <= cx + zCut * scaleX; x++) {
+        const z = (x - cx) / scaleX;
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const y = h - 40 - pdf * maxH * 2.3;
+        normCtx.lineTo(x, y);
+      }
+      normCtx.lineTo(cx + zCut * scaleX, h - 40);
+      normCtx.closePath();
+      normCtx.fill();
+    }
+    normZ.addEventListener('input', drawNormal);
+    drawNormal();
+
+    window.addEventListener('resize', () => {
+      drawBernoulli();
+      drawBinomial();
+      drawPoisson();
+      drawNormal();
+    });
+  </script>
+</body>
+</html>

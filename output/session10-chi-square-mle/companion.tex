@@ -1,0 +1,164 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.8cm,top=2.0cm,bottom=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+% Color definitions
+\definecolor{brandblue}{HTML}{2C5AA0}
+\definecolor{brandgreen}{HTML}{2E7D52}
+\definecolor{brandamber}{HTML}{C8881E}
+\definecolor{brandred}{HTML}{B23A48}
+\definecolor{brandpurple}{HTML}{6A4C93}
+\definecolor{brandink}{HTML}{21355E}
+\definecolor{bgfill}{HTML}{EAF0F7}
+
+% Custom tcolorbox environments
+\newtcolorbox{intuition}[1][Intuition]{
+  enhanced, breakable, colback=bgfill, colframe=brandblue,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{worked}[1][Worked Example]{
+  enhanced, breakable, colback=white, colframe=brandgreen,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{
+  enhanced, breakable, colback=bgfill!50, colframe=brandamber,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{watchout}[1][Watch Out]{
+  enhanced, breakable, colback=white, colframe=brandred,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{keytake}[1][Key Takeaways]{
+  enhanced, breakable, colback=bgfill, colframe=brandpurple,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newenvironment{steps}{
+  \begin{enumerate}[label=\textbf{Step \arabic*:}, leftmargin=*]
+}{
+  \end{enumerate}
+}
+
+\newcommand{\housefig}[2]{
+  \begin{center}
+    \includegraphics[width=0.88\textwidth]{#1}\\
+    \small\textcolor{brandink}{\textbf{Figure:} #2}
+  \end{center}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[enhanced, colback=brandink, colframe=brandink, arc=0pt, left=12pt, right=12pt, top=12pt, bottom=12pt]
+  \color{white}
+  \large\textbf{ISM Companion Reader} \hfill \textbf{Session 10}\\[4pt]
+  \huge\textbf{Student's t-Test, Chi-Square \& Maximum Likelihood Estimation}\\[4pt]
+  \small Small-sample testing, contingency independence, goodness-of-fit, and MLE point estimation.
+\end{tcolorbox}
+
+\vspace{10pt}
+
+\section{Student's t-Distribution for Small Samples}
+
+When sample size is small ($n < 30$) and the population standard deviation $\sigma$ is unknown, we estimate $\sigma$ using the sample standard deviation $S$. This extra uncertainty thickens the distribution tails, requiring Student's t-distribution with $df = n - 1$.
+
+\textbf{t-Test Statistic Formula:}
+\[
+t = \frac{\bar{X} - \mu_0}{S / \sqrt{n}}
+\]
+
+\housefig{figures/fig_t_distribution.png}{Student's t-distributions have heavier tails than the standard normal distribution for small degrees of freedom.}
+
+\begin{worked}[Slide Example: Sports Car Annual Mileage]
+\textbf{Problem Statement:} Sports car owners claim their cars are driven an average of $\bar{X} = 22,500$ km/year with sample standard deviation $S = 3,000$ km based on $n = 10$ cars. Test the hypothesis that $\mu = 20,000$ km vs $H_1: \mu > 20,000$ km at $\alpha = 0.01$.
+
+\begin{steps}
+\item \textbf{State Hypotheses:} $H_0: \mu \le 20,000$ vs $H_1: \mu > 20,000$.
+\item \textbf{Degrees of Freedom \& Critical Value:} $df = n - 1 = 9$. For right-tailed t-test at $\alpha = 0.01$, $t_{\text{crit}} = 2.821$.
+\item \textbf{Compute t Test Statistic:}
+\[
+t_{\text{cal}} = \frac{22500 - 20000}{3000 / \sqrt{10}} = \frac{2500}{948.68} \approx 2.635
+\]
+\item \textbf{Make Decision:} Since $t_{\text{cal}} = 2.635 < 2.821$, we fail to reject $H_0$. There is insufficient evidence at $\alpha = 0.01$ to prove higher annual mileage.
+\end{steps}
+\end{worked}
+
+\section{Chi-Square Test ($\chi^2$)}
+
+The Chi-Square test evaluates categorical data. It comes in two primary forms:
+\begin{itemize}
+  \item \textbf{Test of Independence:} Checks if two categorical variables (e.g., smoking habit vs hypertension) are independent in a contingency table.
+  \item \textbf{Goodness-of-Fit Test:} Checks if observed sample counts fit a theoretical distribution (e.g., Poisson or Uniform).
+\end{itemize}
+
+\textbf{Chi-Square Test Statistic:}
+\[
+\chi^2 = \sum \frac{(O_i - E_i)^2}{E_i}, \quad \text{where } E_i = \frac{\text{Row Total} \times \text{Col Total}}{\text{Grand Total}}
+\]
+
+\housefig{figures/fig_chi_square.png}{Chi-Square distribution shapes across degrees of freedom ($df = 2, 4, 8$).}
+
+\section{Maximum Likelihood Estimation (MLE)}
+
+Maximum Likelihood Estimation (MLE) finds the parameter value $\hat{\theta}$ that maximizes the likelihood of observing the collected sample data.
+
+\textbf{Likelihood Function:}
+\[
+L(\theta) = f(x_1; \theta) \cdot f(x_2; \theta) \cdots f(x_n; \theta) = \prod_{i=1}^n f(x_i; \theta)
+\]
+In practice, we maximize the \textbf{Log-Likelihood} $\ln L(\theta)$ by setting its derivative to zero.
+
+\housefig{figures/fig_mle_likelihood.png}{Likelihood function $L(p)$ for binomial trial yielding 3 successes in 10 flips, peaking at $\hat{p} = 0.30$.}
+
+\begin{worked}[Slide Example: Binomial MLE]
+\textbf{Problem Statement:} In a quality check of 10 bike helmets, 3 are found flawed ($k = 3, n = 10$). Find the Maximum Likelihood Estimator $\hat{p}$ for the flaw probability $p$.
+
+\begin{steps}
+\item \textbf{Write Likelihood Function:}
+\[
+L(p) = \binom{10}{3} p^3 (1-p)^7
+\]
+\item \textbf{Take Log-Likelihood:}
+\[
+\ln L(p) = \ln\binom{10}{3} + 3 \ln p + 7 \ln(1-p)
+\]
+\item \textbf{Differentiate and set to 0:}
+\[
+\frac{d}{dp} \ln L(p) = \frac{3}{p} - \frac{7}{1-p} = 0 \implies 3(1-p) = 7p \implies 3 = 10p \implies \hat{p} = \frac{3}{10} = 0.30
+\]
+\end{steps}
+\end{worked}
+
+\begin{keytake}[Summary Checklist]
+\begin{itemize}
+  \item \textbf{t-Test:} Use for $n < 30$ when $\sigma$ is unknown ($df = n-1$).
+  \item \textbf{Chi-Square ($\chi^2$):} Evaluates categorical independence ($df = (r-1)(c-1)$) and goodness-of-fit ($df = k - 1 - p$).
+  \item \textbf{MLE:} Maximizes sample probability by solving $\frac{d}{d\theta}\ln L(\theta) = 0$.
+\end{itemize}
+\end{keytake}
+
+\end{document}

@@ -1,0 +1,181 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.8cm,top=2.0cm,bottom=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+% Color definitions
+\definecolor{brandblue}{HTML}{2C5AA0}
+\definecolor{brandgreen}{HTML}{2E7D52}
+\definecolor{brandamber}{HTML}{C8881E}
+\definecolor{brandred}{HTML}{B23A48}
+\definecolor{brandpurple}{HTML}{6A4C93}
+\definecolor{brandink}{HTML}{21355E}
+\definecolor{bgfill}{HTML}{EAF0F7}
+
+% Custom tcolorbox environments
+\newtcolorbox{intuition}[1][Intuition]{
+  enhanced, breakable, colback=bgfill, colframe=brandblue,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{worked}[1][Worked Example]{
+  enhanced, breakable, colback=white, colframe=brandgreen,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{
+  enhanced, breakable, colback=bgfill!50, colframe=brandamber,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{watchout}[1][Watch Out]{
+  enhanced, breakable, colback=white, colframe=brandred,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{keytake}[1][Key Takeaways]{
+  enhanced, breakable, colback=bgfill, colframe=brandpurple,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newenvironment{steps}{
+  \begin{enumerate}[label=\textbf{Step \arabic*:}, leftmargin=*]
+}{
+  \end{enumerate}
+}
+
+\newcommand{\housefig}[2]{
+  \begin{center}
+    \includegraphics[width=0.88\textwidth]{#1}\\
+    \small\textcolor{brandink}{\textbf{Figure:} #2}
+  \end{center}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[enhanced, colback=brandink, colframe=brandink, arc=0pt, left=12pt, right=12pt, top=12pt, bottom=12pt]
+  \color{white}
+  \large\textbf{ISM Companion Reader} \hfill \textbf{Session 8}\\[4pt]
+  \huge\textbf{Central Limit Theorem \& Confidence Intervals}\\[4pt]
+  \small Sampling distributions, standard error, point estimation, and interval bounds.
+\end{tcolorbox}
+
+\vspace{10pt}
+
+\section{Sampling Distributions \& The Central Limit Theorem}
+
+In real-world data analysis, we rarely observe an entire population. Instead, we select a random sample and compute a summary statistic, such as the sample mean $\bar{X}$. Because different random samples produce slightly different sample means, the statistic $\bar{X}$ itself behaves as a random variable with its own probability distribution—known as the \textbf{sampling distribution of the mean}.
+
+\begin{intuition}[Why Sampling Distributions Matter]
+Imagine measuring customer ages across multiple stores. A single sample gives one average age. If you repeat this process 1,000 times, those 1,000 averages form a neat curve. The Central Limit Theorem guarantees that as long as your sample size $n$ is moderately large ($n \ge 30$), this curve becomes normal, no matter how skewed the original population was.
+\end{intuition}
+
+\subsection{The Central Limit Theorem (CLT)}
+For any population with mean $\mu$ and standard deviation $\sigma$, the sampling distribution of the sample mean $\bar{X}$ approaches a Normal distribution with:
+\begin{align*}
+E[\bar{X}] &= \mu \\
+\sigma_{\bar{X}} &= \frac{\sigma}{\sqrt{n}} \quad (\text{Standard Error})
+\end{align*}
+The standardized Z-score for the sample mean is given by:
+\[
+Z = \frac{\bar{X} - \mu}{\sigma / \sqrt{n}}
+\]
+
+\housefig{figures/fig_clt.png}{As sample size $n$ increases, the distribution of sample means concentrates tightly around the population mean $\mu$.}
+
+\housefig{figures/fig_se_decay.png}{Standard Error drops proportionally to $1/\sqrt{n}$, showing dimishing returns for larger sample sizes.}
+
+\begin{worked}[Slide Example 1: Vehicle Registration Age]
+\textbf{Problem Statement:} The average age of registered vehicles in the US is 8 years (96 months) with a standard deviation of 16 months. A random sample of $n = 64$ vehicles is drawn. What is the probability that the sample mean age is between 90 and 100 months?
+
+\begin{steps}
+\item \textbf{Calculate the Standard Error:}
+\[
+\sigma_{\bar{X}} = \frac{\sigma}{\sqrt{n}} = \frac{16}{\sqrt{64}} = \frac{16}{8} = 2 \text{ months}
+\]
+\item \textbf{Convert bounds to Z-scores:}
+\[
+Z_1 = \frac{90 - 96}{2} = -3.00, \quad Z_2 = \frac{100 - 96}{2} = 2.00
+\]
+\item \textbf{Find table areas:} $P(Z \le 2.00) = 0.9772$ and $P(Z \le -3.00) = 0.0013$.
+\item \textbf{Compute interval probability:}
+\[
+P(90 \le \bar{X} \le 100) = 0.9772 - 0.0013 = 0.9759 \quad (97.59\%)
+\]
+\end{steps}
+\end{worked}
+
+\section{Sampling Distribution of Sample Proportions}
+
+When measuring categorical outcomes (e.g., proportion of satisfied customers), the sample proportion $\bar{p} = X / n$ follows a normal distribution for large samples ($np \ge 5$ and $n(1-p) \ge 5$).
+
+\textbf{Mean and Standard Error for Proportions:}
+\[
+E[\bar{p}] = p, \quad \sigma_{\bar{p}} = \sqrt{\frac{p(1-p)}{n}}
+\]
+
+\section{Point Estimation \& Confidence Intervals}
+
+A \textbf{point estimate} provides a single best guess for an unknown parameter (e.g., sample mean $\bar{X}$ estimates $\mu$). However, point estimates rarely hit the exact parameter. A \textbf{confidence interval} adds a margin of error around the point estimate, offering a range of plausible values at a specified confidence level $(1 - \alpha)$.
+
+\textbf{Confidence Interval Formula for Population Mean $\mu$ ($\sigma$ known):}
+\[
+\text{CI} = \bar{X} \pm Z_{\alpha/2} \left( \frac{\sigma}{\sqrt{n}} \right)
+\]
+
+\housefig{figures/fig_ci_95.png}{A 95\% confidence interval leaves $\alpha/2 = 0.025$ in each tail, corresponding to critical $Z_{\alpha/2} = 1.96$.}
+
+\begin{worked}[Slide Example: Tire Store Expenditure]
+\textbf{Problem Statement:} Mean expenditure at a tire store is $\bar{X} = \$85.00$ with population standard deviation $\sigma = \$12.00$ based on a sample of $n = 36$ customers. Construct a 95\% confidence interval for the true mean expenditure.
+
+\begin{steps}
+\item \textbf{Identify parameters and critical value:} $\bar{X} = 85$, $\sigma = 12$, $n = 36$. For 95\% confidence level ($\alpha = 0.05$), $Z_{\alpha/2} = 1.96$.
+\item \textbf{Calculate Standard Error:}
+\[
+\sigma_{\bar{X}} = \frac{12}{\sqrt{36}} = \frac{12}{6} = 2.00
+\]
+\item \textbf{Compute Margin of Error:}
+\[
+\text{ME} = 1.96 \times 2.00 = 3.92
+\]
+\item \textbf{Formulate interval bounds:}
+\[
+\text{Lower Bound} = 85.00 - 3.92 = 81.08, \quad \text{Upper Bound} = 85.00 + 3.92 = 88.92
+\]
+Thus, we are 95\% confident that the population mean expenditure is between \$81.08 and \$88.92.
+\end{steps}
+\end{worked}
+
+\begin{watchout}[Interpreting Confidence Intervals]
+Never say "there is a 95\% probability that the population mean lies in this specific interval." The true mean is a fixed number, not a random variable. The 95\% probability refers to the long-run procedure: 95\% of intervals generated across many samples will contain $\mu$.
+\end{watchout}
+
+\begin{keytake}[Summary Checklist]
+\begin{itemize}
+  \item \textbf{Central Limit Theorem:} For $n \ge 30$, sample means $\bar{X}$ follow $N(\mu, \sigma/\sqrt{n})$ regardless of population shape.
+  \item \textbf{Standard Error:} $\sigma_{\bar{X}} = \sigma / \sqrt{n}$ measures the variation of sample means around $\mu$.
+  \item \textbf{Confidence Interval:} $\bar{X} \pm Z_{\alpha/2} (\sigma / \sqrt{n})$ balances point estimate with precision.
+\end{itemize}
+\end{keytake}
+
+\end{document}

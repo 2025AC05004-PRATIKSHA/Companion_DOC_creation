@@ -134,10 +134,15 @@ make-lecture-kit/
 ├─ VERSION                      current version (the updater compares this)
 ├─ CHANGELOG.md                 what changed in each version
 ├─ update_source.txt            where scripts/update.py pulls updates from
+├─ publish.sh                   instructors only: self-check, commit and push a release
 ├─ templates/
 │  ├─ companion.tex             LaTeX study-companion template (→ PDF)
-│  └─ lecture.html              complete interactive lecture template
+│  ├─ lecture.html              complete interactive lecture template
+│  └─ assets/
+│     ├─ bits-logo.png          BITS Pilani logo (PDF banner + HTML sidebar; optional)
+│     └─ README.md              how to swap the logo (placement, base64 embed, fallback)
 ├─ references/
+│  ├─ plain_language.md         the easy-English rulebook (both linters enforce it)
 │  ├─ quality_rubric.md         the quality bar + ship checklist (both)
 │  ├─ companion_style.md        how to expand slides into the companion
 │  ├─ lecture_style.md          how to build the complete interactive lecture
@@ -147,6 +152,7 @@ make-lecture-kit/
 ├─ scripts/
 │  ├─ figstyle.py               matplotlib house style + reusable plotters
 │  ├─ build_pdf.py              run figures + compile companion.tex → PDF
+│  ├─ _plain_language.py        shared word lists used by both linters
 │  ├─ lint.py                   lecture HTML quality gate (readability, no-overflow, keyless)
 │  ├─ lint_tex.py               companion PDF-source language + layout gate
 │  ├─ selfcheck.py              verify the whole kit is healthy
@@ -168,7 +174,10 @@ nothing needs an API key.
 
 ## The promise
 
-Built around five rules: **easy words**, **relatable analogies**,
-**step-by-step math intuition**, **generous fully-solved examples**, and
-**interactions that uncover the intuition** — with a hard no-clutter,
-no-overflow guarantee so text never runs off the page or screen.
+Built around seven rules: **easy words**, **simple things kept simple** (the most
+intuitive way in, right-sized — never complicated), **relatable analogies in one
+story-world**, **step-by-step math intuition**, **generous fully-solved
+examples**, **interactions that uncover the intuition**, and **lead with the
+whole idea in one line** (headline titles, open by doing, close on a pocket
+card) — with a hard no-clutter, no-overflow guarantee so text never runs off
+the page or screen.

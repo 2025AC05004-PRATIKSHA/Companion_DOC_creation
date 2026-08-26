@@ -1,0 +1,163 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.8cm,top=2.0cm,bottom=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+% Color definitions
+\definecolor{brandblue}{HTML}{2C5AA0}
+\definecolor{brandgreen}{HTML}{2E7D52}
+\definecolor{brandamber}{HTML}{C8881E}
+\definecolor{brandred}{HTML}{B23A48}
+\definecolor{brandpurple}{HTML}{6A4C93}
+\definecolor{brandink}{HTML}{21355E}
+\definecolor{bgfill}{HTML}{EAF0F7}
+
+% Custom tcolorbox environments
+\newtcolorbox{intuition}[1][Intuition]{
+  enhanced, breakable, colback=bgfill, colframe=brandblue,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{worked}[1][Worked Example]{
+  enhanced, breakable, colback=white, colframe=brandgreen,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{
+  enhanced, breakable, colback=bgfill!50, colframe=brandamber,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{watchout}[1][Watch Out]{
+  enhanced, breakable, colback=white, colframe=brandred,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{keytake}[1][Key Takeaways]{
+  enhanced, breakable, colback=bgfill, colframe=brandpurple,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newenvironment{steps}{
+  \begin{enumerate}[label=\textbf{Step \arabic*:}, leftmargin=*]
+}{
+  \end{enumerate}
+}
+
+\newcommand{\housefig}[2]{
+  \begin{center}
+    \includegraphics[width=0.88\textwidth]{#1}\\
+    \small\textcolor{brandink}{\textbf{Figure:} #2}
+  \end{center}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[enhanced, colback=brandink, colframe=brandink, arc=0pt, left=12pt, right=12pt, top=12pt, bottom=12pt]
+  \color{white}
+  \large\textbf{ISM Companion Reader} \hfill \textbf{Session 11}\\[4pt]
+  \huge\textbf{Analysis of Variance (ANOVA)}\\[4pt]
+  \small One-way ANOVA, two-way ANOVA without interaction, Sum of Squares, and F-ratio tests.
+\end{tcolorbox}
+
+\vspace{10pt}
+
+\section{Introduction to Analysis of Variance (ANOVA)}
+
+Analysis of Variance (ANOVA) compares means across three or more populations simultaneously. Running multiple two-sample t-tests increases the overall Type I error rate. ANOVA avoids this by testing all means in a single F-ratio test.
+
+\begin{intuition}[Between-Group vs Within-Group Variance]
+Imagine testing three teaching methods across classrooms. Total variation in test scores comes from two sources:
+\begin{enumerate}
+  \item \textbf{Between-Group Variation (Treatment):} Differences caused by using different teaching methods.
+  \item \textbf{Within-Group Variation (Error):} Random individual variation among students inside the same classroom.
+\end{enumerate}
+If between-group variance is significantly larger than within-group noise, the teaching methods produce real differences.
+\end{intuition}
+
+\section{One-Way ANOVA Framework}
+
+For $k$ treatment groups and total sample size $n = \sum n_i$, total variance splits into:
+\[
+\text{SST} = \text{SSTR} + \text{SSE}
+\]
+where $\text{SST}$ is Total Sum of Squares, $\text{SSTR}$ is Treatment Sum of Squares, and $\text{SSE}$ is Error Sum of Squares.
+
+\housefig{figures/fig_anova_ss.png}{Breakdown of Total Sum of Squares ($\text{SST}$) into Treatment ($\text{SSTR}$) and Error ($\text{SSE}$).}
+
+\textbf{One-Way ANOVA Table:}
+\begin{center}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Source of Variation} & \textbf{Sum of Squares (SS)} & \textbf{Degrees of Freedom (df)} & \textbf{Mean Square (MS)} & \textbf{F-Ratio} \\
+\midrule
+Treatments (Between) & $\text{SSTR}$ & $k - 1$ & $\text{MSTR} = \frac{\text{SSTR}}{k-1}$ & $F = \frac{\text{MSTR}}{\text{MSE}}$ \\
+Error (Within) & $\text{SSE}$ & $n - k$ & $\text{MSE} = \frac{\text{SSE}}{n-k}$ & -- \\
+\midrule
+Total & $\text{SST}$ & $n - 1$ & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{center}
+
+\housefig{figures/fig_f_distribution.png}{Fisher F-distribution curve $F(2, 12)$ with critical cutoff $F_{0.05} = 3.89$.}
+
+\begin{worked}[Slide Example: One-Way ANOVA Table]
+\textbf{Problem Statement:} A study compares 3 normal populations with 5 samples each ($k = 3, n = 15$). Given Grand Total $G = 179$, $\text{SSTR} = 24.0$, and $\text{SSE} = 72.0$, construct the ANOVA table and test for mean equality at $\alpha = 0.05$.
+
+\begin{steps}
+\item \textbf{Hypotheses:} $H_0: \mu_1 = \mu_2 = \mu_3$ vs $H_1:$ at least one mean differs.
+\item \textbf{Calculate Degrees of Freedom:}
+\[
+df_{\text{treatment}} = k - 1 = 2, \quad df_{\text{error}} = n - k = 12, \quad df_{\text{total}} = 14
+\]
+\item \textbf{Compute Mean Squares:}
+\[
+\text{MSTR} = \frac{24.0}{2} = 12.0, \quad \text{MSE} = \frac{72.0}{12} = 6.0
+\]
+\item \textbf{Compute F Test Statistic:}
+\[
+F_{\text{cal}} = \frac{\text{MSTR}}{\text{MSE}} = \frac{12.0}{6.0} = 2.00
+\]
+\item \textbf{Decision:} Critical value $F_{0.05}(2, 12) = 3.89$. Since $F_{\text{cal}} = 2.00 < 3.89$, we fail to reject $H_0$. There is no significant difference among the population means.
+\end{steps}
+\end{worked}
+
+\section{Two-Way ANOVA (Without Interaction)}
+
+In Two-Way ANOVA, data is classified by two factors: Treatments ($k$ groups) and Blocks ($m$ blocks).
+
+\[
+\text{SST} = \text{SSTR} + \text{SSBL} + \text{SSE}
+\]
+
+\begin{keytake}[Summary Checklist]
+\begin{itemize}
+  \item \textbf{ANOVA Purpose:} Tests equality of $k \ge 3$ population means simultaneously.
+  \item \textbf{F-Statistic:} $F = \text{MSTR} / \text{MSE}$. Large $F$ indicates significant treatment differences.
+  \item \textbf{Two-Way ANOVA:} Controls for blocking factor, reducing error variance ($\text{SSE}$).
+\end{itemize}
+\end{keytake}
+
+\end{document}

@@ -1,0 +1,181 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1.8cm,top=2.0cm,bottom=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+% Color definitions
+\definecolor{brandblue}{HTML}{2C5AA0}
+\definecolor{brandgreen}{HTML}{2E7D52}
+\definecolor{brandamber}{HTML}{C8881E}
+\definecolor{brandred}{HTML}{B23A48}
+\definecolor{brandpurple}{HTML}{6A4C93}
+\definecolor{brandink}{HTML}{21355E}
+\definecolor{bgfill}{HTML}{EAF0F7}
+
+% Custom tcolorbox environments
+\newtcolorbox{intuition}[1][Intuition]{
+  enhanced, breakable, colback=bgfill, colframe=brandblue,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{worked}[1][Worked Example]{
+  enhanced, breakable, colback=white, colframe=brandgreen,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{
+  enhanced, breakable, colback=bgfill!50, colframe=brandamber,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{watchout}[1][Watch Out]{
+  enhanced, breakable, colback=white, colframe=brandred,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newtcolorbox{keytake}[1][Key Takeaways]{
+  enhanced, breakable, colback=bgfill, colframe=brandpurple,
+  fonttitle=\bfseries\color{white}, title={#1},
+  boxrule=0.8pt, arc=3pt, left=10pt, right=10pt, top=8pt, bottom=8pt
+}
+
+\newenvironment{steps}{
+  \begin{enumerate}[label=\textbf{Step \arabic*:}, leftmargin=*]
+}{
+  \end{enumerate}
+}
+
+\newcommand{\housefig}[2]{
+  \begin{center}
+    \includegraphics[width=0.88\textwidth]{#1}\\
+    \small\textcolor{brandink}{\textbf{Figure:} #2}
+  \end{center}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[enhanced, colback=brandink, colframe=brandink, arc=0pt, left=12pt, right=12pt, top=12pt, bottom=12pt]
+  \color{white}
+  \large\textbf{ISM Companion Reader} \hfill \textbf{Session 9}\\[4pt]
+  \huge\textbf{Testing of Hypothesis Foundations}\\[4pt]
+  \small Null & alternative hypotheses, Type I & II errors, p-values, Z-tests for means and proportions.
+\end{tcolorbox}
+
+\vspace{10pt}
+
+\section{Principles of Hypothesis Testing}
+
+Hypothesis testing is a structured statistical framework used to validate claims about population parameters using sample data.
+
+\begin{intuition}[The Courtroom Analogy]
+In a criminal trial, the defendant is assumed innocent until proven guilty beyond a reasonable doubt.
+\begin{itemize}
+  \item \textbf{Null Hypothesis ($H_0$):} Defendant is innocent (status quo / no effect).
+  \item \textbf{Alternative Hypothesis ($H_1$):} Defendant is guilty (the claim we seek to prove).
+  \item \textbf{Burden of Proof:} We only reject $H_0$ if sample evidence is overwhelmingly unlikely under $H_0$.
+\end{itemize}
+\end{intuition}
+
+\section{Type I and Type II Errors}
+
+Because sample data carries randomness, statistical decisions can lead to two types of errors:
+\begin{itemize}
+  \item \textbf{Type I Error ($\alpha$):} Rejecting $H_0$ when $H_0$ is actually true (False Alarm).
+  \item \textbf{Type II Error ($\beta$):} Failing to reject $H_0$ when $H_1$ is true (Missed Detection).
+  \item \textbf{Power of the Test ($1 - \beta$):} Probability of correctly rejecting a false $H_0$.
+\end{itemize}
+
+\housefig{figures/fig_errors.png}{Trade-offs between Type I Error $\alpha$, Type II Error $\beta$, and Test Power $1 - \beta$.}
+
+\section{One-Tailed vs Two-Tailed Z-Tests}
+
+Depending on the alternative hypothesis, rejection regions sit in one tail or split across both tails.
+
+\begin{align*}
+\text{Two-Tailed Test:} \quad & H_0: \mu = \mu_0 \quad \text{vs} \quad H_1: \mu \neq \mu_0 \\
+\text{Right-Tailed Test:} \quad & H_0: \mu \le \mu_0 \quad \text{vs} \quad H_1: \mu > \mu_0 \\
+\text{Left-Tailed Test:} \quad & H_0: \mu \ge \mu_0 \quad \text{vs} \quad H_1: \mu < \mu_0
+\end{align*}
+
+\housefig{figures/fig_two_tailed.png}{Two-tailed Z-test with critical bounds $Z = \pm 1.96$ at significance level $\alpha = 0.05$.}
+
+\housefig{figures/fig_right_tailed.png}{Right-tailed Z-test with critical bound $Z = +1.645$ at significance level $\alpha = 0.05$.}
+
+\begin{worked}[Slide Example: Testing Difference of Two Population Means]
+\textbf{Problem Statement:} Two machine processes produce steel rods. A sample of $n_1 = 50$ rods from Machine 1 yields mean breaking strength $\bar{X}_1 = 38$ kg with $\sigma_1 = 4$ kg. A sample of $n_2 = 60$ rods from Machine 2 yields $\bar{X}_2 = 35$ kg with $\sigma_2 = 5$ kg. Test if there is a significant difference between the true population means at $\alpha = 0.05$.
+
+\begin{steps}
+\item \textbf{State Hypotheses:}
+\[
+H_0: \mu_1 - \mu_2 = 0 \quad \text{vs} \quad H_1: \mu_1 - \mu_2 \neq 0
+\]
+\item \textbf{Determine Critical Value:} For a two-tailed Z-test at $\alpha = 0.05$, critical values are $Z_{\text{crit}} = \pm 1.96$.
+\item \textbf{Calculate Standard Error of Difference:}
+\[
+\text{SE}_{\bar{X}_1 - \bar{X}_2} = \sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}} = \sqrt{\frac{4^2}{50} + \frac{5^2}{60}} = \sqrt{\frac{16}{50} + \frac{25}{60}} = \sqrt{0.320 + 0.417} = \sqrt{0.737} \approx 0.858
+\]
+\item \textbf{Compute Z Test Statistic:}
+\[
+Z_{\text{cal}} = \frac{(\bar{X}_1 - \bar{X}_2) - 0}{\text{SE}} = \frac{38 - 35}{0.858} = \frac{3}{0.858} \approx 3.50
+\]
+\item \textbf{Make Decision:} Since $Z_{\text{cal}} = 3.50 > 1.96$, we reject $H_0$. There is strong evidence of a significant difference between the two machines.
+\end{steps}
+\end{worked}
+
+\begin{worked}[Slide Example: Test of Significance for Single Proportion]
+\textbf{Problem Statement:} A phone survey claims that 60\% ($p_0 = 0.60$) of voters favor candidate A. In a sample of $n = 400$ voters, $X = 220$ favor candidate A ($\bar{p} = 220/400 = 0.55$). Test if candidate support is significantly lower than claimed at $\alpha = 0.05$.
+
+\begin{steps}
+\item \textbf{State Hypotheses:}
+\[
+H_0: p \ge 0.60 \quad \text{vs} \quad H_1: p < 0.60 \quad (\text{Left-Tailed Test})
+\]
+\item \textbf{Determine Critical Value:} For left-tailed test at $\alpha = 0.05$, $Z_{\text{crit}} = -1.645$.
+\item \textbf{Calculate Standard Error:}
+\[
+\text{SE}_{\bar{p}} = \sqrt{\frac{p_0(1-p_0)}{n}} = \sqrt{\frac{0.60 \times 0.40}{400}} = \sqrt{\frac{0.24}{400}} = \sqrt{0.0006} \approx 0.0245
+\]
+\item \textbf{Compute Z Test Statistic:}
+\[
+Z_{\text{cal}} = \frac{\bar{p} - p_0}{\text{SE}_{\bar{p}}} = \frac{0.55 - 0.60}{0.0245} = \frac{-0.05}{0.0245} \approx -2.04
+\]
+\item \textbf{Make Decision:} Since $Z_{\text{cal}} = -2.04 < -1.645$, we reject $H_0$. Support is significantly lower than 60\%.
+\end{steps}
+\end{worked}
+
+\begin{watchout}[p-Value Decision Rule]
+Always compare $p$-value directly to significance level $\alpha$:
+\begin{itemize}
+  \item If $p\text{-value} \le \alpha$, \textbf{Reject $H_0$} ("If $p$ is low, $H_0$ must go").
+  \item If $p\text{-value} > \alpha$, \textbf{Fail to reject $H_0$}.
+\end{itemize}
+\end{watchout}
+
+\begin{keytake}[Summary Checklist]
+\begin{itemize}
+  \item \textbf{$H_0$ vs $H_1$:} $H_0$ assumes equality/no effect; $H_1$ holds the claim to prove.
+  \item \textbf{Type I Error $\alpha$:} False alarm probability set by the analyst.
+  \item \textbf{Decision Rule:} Reject $H_0$ when $|Z_{\text{cal}}| > Z_{\text{crit}}$ or $p\text{-value} \le \alpha$.
+\end{itemize}
+\end{keytake}
+
+\end{document}
