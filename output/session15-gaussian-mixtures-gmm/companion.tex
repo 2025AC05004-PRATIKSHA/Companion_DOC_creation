@@ -1,0 +1,165 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{fancyhdr}
+
+% Custom Colors matching house style
+\definecolor{bitsnavy}{RGB}{33,53,94}
+\definecolor{bitsblue}{RGB}{44,90,160}
+\definecolor{bitsgreen}{RGB}{46,125,82}
+\definecolor{bitsamber}{RGB}{200,136,30}
+\definecolor{bitsred}{RGB}{178,58,72}
+
+% Callout Boxes
+\tcolorboxenvironment{intuition}{colback=bitsblue!8,colframe=bitsblue,title=\textbf{Everyday Picture \& Intuition},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{worked}{colback=bitsgreen!8,colframe=bitsgreen,title=\textbf{Fully Worked Example},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{everyday}{colback=bitsnavy!5,colframe=bitsnavy,title=\textbf{Real-World Picture},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{watchout}{colback=bitsred!8,colframe=bitsred,title=\textbf{Watch Out! Pitfalls},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{keytake}{colback=bitsamber!10,colframe=bitsamber,title=\textbf{Key Takeaways},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+
+\newenvironment{intuition}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{worked}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{everyday}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{watchout}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{keytake}{\begin{tcolorbox}}{\end{tcolorbox}}
+
+\newenvironment{steps}{\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]}{\end{enumerate}}
+
+\newcommand{\secsub}[1]{\noindent\textit{\large #1}\vspace{0.8em}}
+\newcommand{\housefig}[2]{
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{#1}
+\caption{#2}
+\end{figure}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\color{bitsnavy}\bfseries WILP, BITS Pilani}
+\lhead{\color{bitsnavy}\bfseries ISM Session 15 Study Companion}
+\rfoot{Page \thepage}
+
+\begin{document}
+
+% Banner
+\begin{tcolorbox}[colback=bitsnavy,colframe=bitsnavy,arc=0pt,outer arc=0pt,top=12pt,bottom=12pt]
+\color{white}
+\centering
+{\large\bfseries WILP, BITS Pilani}\\[4pt]
+{\LARGE\bfseries Session 15: Gaussian Mixture Models \& Practice Problems}\\[4pt]
+{\small Course: Introduction to Statistical Methods (ISM) \quad|\quad Instructor: Dr. YVK Ravi Kumar}
+\end{tcolorbox}
+
+\vspace{1em}
+
+\section{Gaussian Mixture Models (GMM)}
+\secsub{Model complex multimodal data by combining several weighted Gaussian distributions.}
+
+A Gaussian Mixture Model represents an overall population probability density as a linear combination of $K$ underlying Gaussian components:
+\begin{equation}
+p(x) = \sum_{k=1}^K \pi_k \mathcal{N}(x \mid \mu_k, \Sigma_k)
+\end{equation}
+where $\pi_k$ are mixing coefficients satisfying $\sum_{k=1}^K \pi_k = 1$ and $\pi_k \ge 0$.
+
+\begin{intuition}
+Suppose share prices of Company A average \$90 and Company B average \$100. When combined into one pool, the price distribution shows two distinct peaks. GMM models this combined density as a weighted blend of two bell curves.
+\end{intuition}
+
+\housefig{figures/gmm_mixture_density.png}{Bimodal student step count density modeled using a 2-component Gaussian Mixture Model.}
+
+\section{The Expectation-Maximization (EM) Algorithm}
+\secsub{Iteratively estimate component parameters and soft cluster responsibilities.}
+
+Because cluster assignments are unobserved latent variables $z_k \in \{0, 1\}$, parameter likelihood cannot be solved in closed form. The Expectation-Maximization (EM) algorithm alternates between two steps until convergence:
+
+\subsection{E-Step (Expectation)}
+Compute posterior responsibilities $\gamma(z_k)$ using Bayes' theorem:
+\begin{equation}
+\gamma(z_k) = P(z_k = 1 \mid x) = \frac{\pi_k \mathcal{N}(x \mid \mu_k, \Sigma_k)}{\sum_{j=1}^K \pi_j \mathcal{N}(x \mid \mu_j, \Sigma_j)}
+\end{equation}
+
+\subsection{M-Step (Maximization)}
+Re-estimate component parameters using current responsibilities $N_k = \sum_{i=1}^N \gamma(z_{ik})$:
+\begin{align}
+\mu_k^{\text{new}} &= \frac{1}{N_k} \sum_{i=1}^N \gamma(z_{ik}) x_i \\
+\Sigma_k^{\text{new}} &= \frac{1}{N_k} \sum_{i=1}^N \gamma(z_{ik}) (x_i - \mu_k^{\text{new}})(x_i - \mu_k^{\text{new}})^T \\
+\pi_k^{\text{new}} &= \frac{N_k}{N}
+\end{align}
+
+\housefig{figures/em_responsibilities.png}{Soft cluster responsibilities $\gamma_k(x)$ assigning probabilities across data points.}
+
+\begin{worked}
+A wellness app logs step counts (in thousands) of 10 students: $\{3.2, 3.8, 4.1, 4.5, 4.9, 9.2, 9.8, 10.3, 10.7, 11.4\}$.
+Component 1 consists of the first 5 values (sedentary); Component 2 consists of the last 5 values (active).
+\begin{steps}
+\item Calculate mixing coefficients:
+\begin{equation}
+\pi_1 = \frac{5}{10} = 0.50, \quad \pi_2 = \frac{5}{10} = 0.50
+\end{equation}
+\item Calculate component means:
+\begin{align*}
+\mu_1 &= \frac{3.2 + 3.8 + 4.1 + 4.5 + 4.9}{5} = \frac{20.5}{5} = 4.10 \\
+\mu_2 &= \frac{9.2 + 9.8 + 10.3 + 10.7 + 11.4}{5} = \frac{51.4}{5} = 10.28
+\end{align*}
+\item Calculate component variances $s^2 = \frac{\sum (x - \bar{x})^2}{n-1}$:
+\begin{align*}
+s_1^2 &= \frac{(-0.9)^2 + (-0.3)^2 + 0^2 + 0.4^2 + 0.8^2}{4} = \frac{1.70}{4} = 0.425 \\
+s_2^2 &= \frac{(-1.08)^2 + (-0.48)^2 + 0.02^2 + 0.42^2 + 1.12^2}{4} = \frac{2.828}{4} = 0.707
+\end{align*}
+\item Formulate total GMM PDF:
+\begin{equation}
+p(x) = 0.50 \mathcal{N}(x \mid 4.10, 0.425) + 0.50 \mathcal{N}(x \mid 10.28, 0.707)
+\end{equation}
+\end{steps}
+\end{worked}
+
+\section{Proportion Hypothesis Testing Practice}
+\secsub{Master core statistical tests: proportions and simple regression estimation.}
+
+\begin{worked}
+A company tested employee performance before and after training.
+Before: 400 out of 500 performed well ($p_1 = 0.800$).
+After: 440 out of 600 performed well ($p_2 = 0.7333$).
+Test for significant difference at $\alpha = 0.05$.
+\begin{steps}
+\item Compute pooled proportion $\hat{p}$:
+\begin{equation}
+\hat{p} = \frac{400 + 440}{500 + 600} = \frac{840}{1100} = 0.7636, \quad \hat{q} = 1 - 0.7636 = 0.2364
+\end{equation}
+\item Compute standard error:
+\begin{equation}
+SE = \sqrt{0.7636 \times 0.2364 \times \left(\frac{1}{500} + \frac{1}{600}\right)} = 0.0257
+\end{equation}
+\item Calculate Z-statistic:
+\begin{equation}
+Z = \frac{0.8000 - 0.7333}{0.0257} = \frac{0.0667}{0.0257} = 2.59
+\end{equation}
+Since $|Z| = 2.59 > 1.96$, reject $H_0$. There is a statistically significant difference in performance proportions.
+\end{steps}
+\end{worked}
+
+\begin{watchout}
+In GMM parameter estimation, initialization matters! Bad initial guesses for component means can cause the EM algorithm to get stuck in local optima.
+\end{watchout}
+
+\begin{keytake}
+\begin{itemize}
+\item GMM models complex distributions as linear combinations of $K$ Gaussians with mixing weights $\pi_k$.
+\item EM algorithm alternates between E-step (computing posterior responsibilities) and M-step (updating means and covariances).
+\item Soft clustering assigns probabilities rather than hard binary boundaries.
+\end{itemize}
+\end{keytake}
+
+\end{document}

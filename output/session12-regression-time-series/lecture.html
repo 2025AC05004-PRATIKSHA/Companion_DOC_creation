@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · Session 12: Multiple Regression & Time Series</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-logo{height:30px;width:auto;border-radius:4px;background:#fff;padding:2px 4px;flex:0 0 auto}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE LAB";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:75px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan);overflow-x:auto}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+canvas{display:block;max-width:100%}
+
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+
+[data-theme="light"] body{background:#eef2f8;color:#16223d}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] .card{background:#ffffff;border-color:#dde4f0}
+[data-theme="light"] .sidebar{background:#ffffff;border-right-color:#dde4f0}
+</style>
+</head>
+<body>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><img class="bits-logo" src="assets/bits-logo.png" alt="BITS Pilani logo" onerror="this.style.display='none'"><div>WILP, BITS Pilani<small>Session 12 Lecture</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Start here</div>
+    <a href="#intro"><span class="n">00</span> Overview</a>
+    <div class="grp">Topics</div>
+    <a href="#multi"><span class="n">01</span> Multiple Regression</a>
+    <a href="#decomp"><span class="n">02</span> Time Series Breakdown</a>
+    <a href="#stationarity"><span class="n">03</span> Stationarity Test</a>
+    <div class="grp">Wrap up</div>
+    <a href="#summary"><span class="n">04</span> Summary Card</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">ISM Session 12</div>
+  <h1>Multiple Regression \& Time Series Analysis</h1>
+  <p class="bits-credit">Prepared for <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">Explore multiple predictor regression, curved polynomial trends, time series component decomposition (Trend, Seasonal, Cyclical, Irregular), and stationarity split-half testing.</p>
+  <div class="grid3">
+    <div class="card"><h4>1. Multiple Regression</h4><p class="muted" style="font-size:14px">Model target outcomes using several explanatory predictors simultaneously.</p></div>
+    <div class="card"><h4>2. 4 Components</h4><p class="muted" style="font-size:14px">Decompose time series into Secular Trend, Seasonal, Cyclical, and Irregular noise.</p></div>
+    <div class="card"><h4>3. Stationarity</h4><p class="muted" style="font-size:14px">Use split-half mean tests and first differencing $w_t = y_t - y_{t-1}$ to stabilize trends.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="multi">
+ <div class="wrap">
+  <div class="kicker">01 &middot; Complex Models</div>
+  <h2>Multiple \& Quadratic Regression</h2>
+  <p class="lead">Multiple regression fits target outcomes across several explanatory inputs. Non-linear models add quadratic or log terms to model diminishing returns.</p>
+
+  <div class="eqbox">$$ Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2^2 + \epsilon $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Quadratic Curve Fit Simulator</h4>
+    <p class="muted" style="font-size:14px">Adjust linear parameter $b$ and quadratic parameter $c$ to see how curvature fits non-linear data trends.</p>
+    <div class="grid2">
+      <div>
+        <div id="quadSliders"></div>
+        <div class="readout" id="quadOut"></div>
+      </div>
+      <div>
+        <canvas id="quadCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="decomp">
+ <div class="wrap">
+  <div class="kicker">02 &middot; Time Series Breakdown</div>
+  <h2>Decomposition into 4 Components</h2>
+  <p class="lead">Every time series combines long-term Secular Trend ($T_t$), periodic Seasonality ($S_t$), economic Cycles ($C_t$), and random Irregular noise ($I_t$).</p>
+
+  <div class="eqbox">$$ \text{Additive: } y_t = T_t + S_t + C_t + I_t \quad \Big| \quad \text{Multiplicative: } y_t = T_t \times S_t \times C_t \times I_t $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Time Series Synthesizer</h4>
+    <p class="muted" style="font-size:14px">Toggle components on and off to observe how trend, seasonal waves, and random noise combine.</p>
+    <div class="grid2">
+      <div>
+        <div id="tsSliders"></div>
+        <div class="readout" id="tsOut"></div>
+      </div>
+      <div>
+        <canvas id="tsCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="stationarity">
+ <div class="wrap">
+  <div class="kicker">03 &middot; Data Stability</div>
+  <h2>Stationarity \& Split-Half Mean Test</h2>
+  <p class="lead">Stationary series maintain constant mean and variance over time. If means differ across halves, apply first differencing $w_t = y_t - y_{t-1}$.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Differencing \& Stationarity Tester</h4>
+    <p class="muted" style="font-size:14px">Toggle raw non-stationary series versus differenced series to verify constant mean stability.</p>
+    <div class="grid2">
+      <div>
+        <div id="statSliders"></div>
+        <div class="readout" id="statOut"></div>
+      </div>
+      <div>
+        <canvas id="statCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">04 &middot; Summary Card</div>
+  <h2>Session 12 Pocket Cheat-Sheet</h2>
+  <div class="grid3">
+    <div class="card"><h4>Quadratic Models</h4><p class="muted" style="font-size:14px">$Y = a + bX + cX^2$. Models curved non-linear patterns.</p></div>
+    <div class="card"><h4>Decomposition</h4><p class="muted" style="font-size:14px">$y_t = T_t + S_t + C_t + I_t$ (Additive) or $T_t \times S_t \times C_t \times I_t$ (Multiplicative).</p></div>
+    <div class="card"><h4>First Difference</h4><p class="muted" style="font-size:14px">$w_t = y_t - y_{t-1}$. Removes linear trends to achieve stationarity.</p></div>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  WILP, BITS Pilani &middot; ISM Session 12 Interactive Lecture Page.
+</div>
+</main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(opt.step.includes('.')?opt.step.split('.')[1].length:0);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  window.addEventListener('resize',resize);
+  resize();
+  return {redraw:()=>drawFn(ctx,canvas.getBoundingClientRect().width||canvas.width,(canvas.getBoundingClientRect().width||canvas.width)*(canvas.height/canvas.width))};
+}
+
+// Nav Scroll Spy
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+window.addEventListener('scroll',()=>{
+  const st=window.scrollY;
+  let idx=0;
+  sections.forEach((sec,i)=>{if(sec&&sec.offsetTop-120<=st)idx=i;});
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+  $('#progbar').style.width=(100*st/((document.body.scrollHeight-window.innerHeight)||1))+'%';
+});
+
+// Theme toggle
+$('#themeBtn').addEventListener('click',()=>{
+  const root=document.documentElement;
+  if(root.getAttribute('data-theme')==='light'){root.removeAttribute('data-theme');$('#themeBtn').innerHTML='&#9728; Light';}
+  else{root.setAttribute('data-theme','light');$('#themeBtn').innerHTML='&#127769; Dark';}
+});
+
+// Quadratic Lab
+const quadHost=$('#quadSliders');
+const getB=makeSlider(quadHost,{id:'qb',label:'Linear b',min:'-2',max:'4',step:'0.2',value:'2.0'},()=>renderQuad());
+const getC=makeSlider(quadHost,{id:'qc',label:'Quad c',min:'-0.5',max:'0.5',step:'0.05',value:'-0.1'},()=>renderQuad());
+
+const quadCv=setupCanvas($('#quadCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const b=getB(), c=getC();
+  ctx.strokeStyle='#19c4ff';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=40;px<=W-40;px++){
+    let x=(px-40)/(W-80)*10;
+    let y=5 + b*x + c*x*x;
+    let py=H-40-(y/30)*(H-80);
+    if(px===40)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+});
+
+function renderQuad(){
+  quadCv.redraw();
+  const b=getB(), c=getC();
+  $('#quadOut').innerHTML='Quadratic Equation: Y = 5.0 + '+b.toFixed(1)+'X + ('+c.toFixed(2)+')X^2\n'+
+    'For X = 5: Y = '+(5 + b*5 + c*25).toFixed(2)+' | For X = 10: Y = '+(5 + b*10 + c*100).toFixed(2);
+}
+renderQuad();
+
+// Time Series Breakdown Lab
+const tsHost=$('#tsSliders');
+const getTrend=makeSlider(tsHost,{id:'tamp',label:'Trend Slope',min:'0',max:'1.5',step:'0.1',value:'0.5'},()=>renderTS());
+const getSeas=makeSlider(tsHost,{id:'samp',label:'Seasonal Wave',min:'0',max:'5',step:'0.5',value:'3.0'},()=>renderTS());
+
+const tsCv=setupCanvas($('#tsCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const tr=getTrend(), se=getSeas();
+  ctx.strokeStyle='#62e88a';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=40;px<=W-40;px++){
+    let t=(px-40)/(W-80)*24;
+    let y=10 + tr*t + se*Math.sin(2*Math.PI*t/4);
+    let py=H-40-(y/40)*(H-80);
+    if(px===40)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+});
+
+function renderTS(){
+  tsCv.redraw();
+  const tr=getTrend(), se=getSeas();
+  $('#tsOut').innerHTML='Synthesized Model: y_t = (10 + '+tr.toFixed(1)+'t) + '+se.toFixed(1)+' * sin(2*pi*t/4)\n'+
+    'Captures linear secular growth plus 4-quarter periodic seasonal swings.';
+}
+renderTS();
+
+// Stationarity Lab
+const statHost=$('#statSliders');
+const getDiff=makeSlider(statHost,{id:'diffMode',label:'Diff Mode',min:'0',max:'1',step:'1',value:'0'},()=>renderStat());
+
+const statCv=setupCanvas($('#statCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const isDiff=getDiff()===1;
+  const raw=[4,6,5,7,9,8,10,12,11,13];
+  const diff=[2,-1,2,2,-1,2,2,-1,2];
+  const pts=isDiff?diff:raw;
+  ctx.strokeStyle=isDiff?'#ff6b81':'#38f0d8';ctx.lineWidth=2;
+  ctx.beginPath();
+  pts.forEach((y,i)=>{
+    let px=40+i/(pts.length-1)*(W-80);
+    let py=H-40-(y-(isDiff?-3:0))/(isDiff?8:16)*(H-80);
+    if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  });
+  ctx.stroke();
+});
+
+function renderStat(){
+  statCv.redraw();
+  const isDiff=getDiff()===1;
+  if(!isDiff){
+    $('#statOut').innerHTML='<span class="hl">Raw Series (yt):</span> Mean 1st half = 6.20 | Mean 2nd half = 10.80\nMeans differ significantly -> Non-Stationary (trending mean).';
+  } else {
+    $('#statOut').innerHTML='<span class="g">First Differenced Series (wt = yt - yt-1):</span> Mean ~ 1.00 constant\nVariance stable -> Stationarity Achieved!';
+  }
+}
+renderStat();
+</script>
+</body>
+</html>

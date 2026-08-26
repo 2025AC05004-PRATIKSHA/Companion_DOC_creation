@@ -1,0 +1,156 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{fancyhdr}
+
+% Custom Colors matching house style
+\definecolor{bitsnavy}{RGB}{33,53,94}
+\definecolor{bitsblue}{RGB}{44,90,160}
+\definecolor{bitsgreen}{RGB}{46,125,82}
+\definecolor{bitsamber}{RGB}{200,136,30}
+\definecolor{bitsred}{RGB}{178,58,72}
+
+% Callout Boxes
+\tcolorboxenvironment{intuition}{colback=bitsblue!8,colframe=bitsblue,title=\textbf{Everyday Picture \& Intuition},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{worked}{colback=bitsgreen!8,colframe=bitsgreen,title=\textbf{Fully Worked Example},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{everyday}{colback=bitsnavy!5,colframe=bitsnavy,title=\textbf{Real-World Picture},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{watchout}{colback=bitsred!8,colframe=bitsred,title=\textbf{Watch Out! Pitfalls},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{keytake}{colback=bitsamber!10,colframe=bitsamber,title=\textbf{Key Takeaways},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+
+\newenvironment{intuition}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{worked}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{everyday}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{watchout}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{keytake}{\begin{tcolorbox}}{\end{tcolorbox}}
+
+\newenvironment{steps}{\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]}{\end{enumerate}}
+
+\newcommand{\secsub}[1]{\noindent\textit{\large #1}\vspace{0.8em}}
+\newcommand{\housefig}[2]{
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{#1}
+\caption{#2}
+\end{figure}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\color{bitsnavy}\bfseries WILP, BITS Pilani}
+\lhead{\color{bitsnavy}\bfseries ISM Session 13 Study Companion}
+\rfoot{Page \thepage}
+
+\begin{document}
+
+% Banner
+\begin{tcolorbox}[colback=bitsnavy,colframe=bitsnavy,arc=0pt,outer arc=0pt,top=12pt,bottom=12pt]
+\color{white}
+\centering
+{\large\bfseries WILP, BITS Pilani}\\[4pt]
+{\LARGE\bfseries Session 13: Time Series Forecasting Methods}\\[4pt]
+{\small Course: Introduction to Statistical Methods (ISM) \quad|\quad Instructor: Dr. YVK Ravi Kumar}
+\end{tcolorbox}
+
+\vspace{1em}
+
+\section{Moving Averages (Simple \& Weighted)}
+\secsub{Smooth out short-term fluctuations by averaging nearby historical observations.}
+
+Moving averages assume that future observations will resemble recent historical levels. Simple Moving Averages (SMA) weigh all $k$ recent periods equally, whereas Weighted Moving Averages (WMA) assign larger weights to more recent observations.
+
+\begin{intuition}
+A simple moving average is like taking the average temperature over the last 3 days to guess tomorrow's weather. A weighted moving average gives yesterday 50\% weight, two days ago 30\%, and three days ago 20\%.
+\end{intuition}
+
+\subsection{Mathematical Formulas}
+\begin{align}
+\text{SMA}_t &= \frac{y_{t-1} + y_{t-2} + \dots + y_{t-k}}{k} \\
+\text{WMA}_t &= \frac{w_1 y_{t-1} + w_2 y_{t-2} + \dots + w_k y_{t-k}}{\sum w_i}
+\end{align}
+
+\housefig{figures/moving_average.png}{Comparison of raw production data against a 3-period moving average curve.}
+
+\begin{worked}
+Demand observations for recent months: Month 49 = 130, Month 50 = 128, Month 51 = 137.
+\begin{steps}
+\item Compute 3-month Simple Moving Average forecast for Month 52:
+\begin{equation}
+F_{52} = \frac{137 + 128 + 130}{3} = \frac{395}{3} = 131.67
+\end{equation}
+\item Compute Weighted Moving Average with weights $w = [3, 2, 1]$ (highest weight on most recent period):
+\begin{equation}
+F_{52} = \frac{3(137) + 2(128) + 1(130)}{3 + 2 + 1} = \frac{411 + 256 + 130}{6} = \frac{797}{6} = 132.83
+\end{equation}
+\end{steps}
+\end{worked}
+
+\section{Simple Exponential Smoothing}
+\secsub{Assign exponentially decaying weights to past historical observations.}
+
+Simple Exponential Smoothing (SES) updates forecasts using a smoothing constant $\alpha \in [0, 1]$:
+\begin{equation}
+F_{t+1} = \alpha y_t + (1 - \alpha) F_t = F_t + \alpha (y_t - F_t)
+\end{equation}
+
+\begin{intuition}
+Exponential smoothing is like updating your guess for commute time. Your new guess equals your old guess plus a fraction $\alpha$ of your error from today's commute.
+\end{intuition}
+
+\housefig{figures/exponential_smoothing.png}{Sensitivity of exponential smoothing forecasts under different smoothing constants $\alpha = 0.2$ vs $\alpha = 0.8$.}
+
+\begin{worked}
+Suppose forecast for the first week of March was $F_1 = 500$ units, but actual demand was $y_1 = 450$ units. Let $\alpha = 0.3$.
+\begin{steps}
+\item Calculate forecast for week 2:
+\begin{equation}
+F_2 = 0.3(450) + (1 - 0.3)(500) = 135 + 350 = 485
+\end{equation}
+\item Suppose actual demand in week 2 is $y_2 = 505$ units. Calculate forecast for week 3:
+\begin{equation}
+F_3 = 0.3(505) + 0.7(485) = 151.5 + 339.5 = 491.0
+\end{equation}
+\end{steps}
+\end{worked}
+
+\section{Holt's Double Exponential Smoothing}
+\secsub{Track both baseline level and linear trend simultaneously in trending series.}
+
+When data exhibits a persistent linear trend, simple exponential smoothing lags behind. Holt's Double Exponential Smoothing introduces a second smoothing equation to update the trend component $T_t$ alongside level $L_t$.
+
+\begin{intuition}
+If sales grow by 10 units every month, simple smoothing will always underestimate next month's sales. Holt's method tracks both the current height and the speed of growth.
+\end{intuition}
+
+\subsection{Holt's Equations}
+\begin{align}
+L_t &= \alpha y_t + (1 - \alpha)(L_{t-1} + T_{t-1}) \\
+T_t &= \beta (L_t - L_{t-1}) + (1 - \beta) T_{t-1} \\
+\hat{y}_{t+h} &= L_t + h T_t
+\end{align}
+
+\housefig{figures/holt_double_exp.png}{Holt's double exponential smoothing tracking trending time series without lagging.}
+
+\begin{watchout}
+Simple moving averages and single exponential smoothing are only suitable for stationary series. For trending data, use Holt's method or ARIMA.
+\end{watchout}
+
+\begin{keytake}
+\begin{itemize}
+\item Simple Moving Averages average recent $k$ values equally; WMAs emphasize recent data.
+\item Exponential Smoothing updates forecasts by adding a fraction $\alpha$ of past forecast error.
+\item Holt's Double Exponential Smoothing incorporates a trend factor to eliminate lag on trending data.
+\end{itemize}
+\end{keytake}
+
+\end{document}

@@ -1,0 +1,177 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{fancyhdr}
+
+% Custom Colors matching house style
+\definecolor{bitsnavy}{RGB}{33,53,94}
+\definecolor{bitsblue}{RGB}{44,90,160}
+\definecolor{bitsgreen}{RGB}{46,125,82}
+\definecolor{bitsamber}{RGB}{200,136,30}
+\definecolor{bitsred}{RGB}{178,58,72}
+
+% Callout Boxes
+\tcolorboxenvironment{intuition}{colback=bitsblue!8,colframe=bitsblue,title=\textbf{Everyday Picture \& Intuition},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{worked}{colback=bitsgreen!8,colframe=bitsgreen,title=\textbf{Fully Worked Example},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{everyday}{colback=bitsnavy!5,colframe=bitsnavy,title=\textbf{Real-World Picture},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{watchout}{colback=bitsred!8,colframe=bitsred,title=\textbf{Watch Out! Pitfalls},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{keytake}{colback=bitsamber!10,colframe=bitsamber,title=\textbf{Key Takeaways},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+
+\newenvironment{intuition}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{worked}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{everyday}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{watchout}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{keytake}{\begin{tcolorbox}}{\end{tcolorbox}}
+
+\newenvironment{steps}{\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]}{\end{enumerate}}
+
+\newcommand{\secsub}[1]{\noindent\textit{\large #1}\vspace{0.8em}}
+\newcommand{\housefig}[2]{
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{#1}
+\caption{#2}
+\end{figure}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\color{bitsnavy}\bfseries WILP, BITS Pilani}
+\lhead{\color{bitsnavy}\bfseries ISM Session 14 Study Companion}
+\rfoot{Page \thepage}
+
+\begin{document}
+
+% Banner
+\begin{tcolorbox}[colback=bitsnavy,colframe=bitsnavy,arc=0pt,outer arc=0pt,top=12pt,bottom=12pt]
+\color{white}
+\centering
+{\large\bfseries WILP, BITS Pilani}\\[4pt]
+{\LARGE\bfseries Session 14: Advanced Time Series (ARIMA, SARIMAX, VAR)}\\[4pt]
+{\small Course: Introduction to Statistical Methods (ISM) \quad|\quad Instructor: Dr. YVK Ravi Kumar}
+\end{tcolorbox}
+
+\vspace{1em}
+
+\section{ARMA Models: Combining Memory and Shocks}
+\secsub{Combine Autoregressive past memory with Moving Average shock corrections.}
+
+The Autoregressive Moving Average model ARMA($p, q$) combines autoregressive terms (past values $y_{t-i}$) with moving average terms (past residual shocks $\epsilon_{t-j}$):
+\begin{equation}
+y_t = c + \phi_1 y_{t-1} + \dots + \phi_p y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \dots + \theta_q \epsilon_{t-q}
+\end{equation}
+
+\begin{intuition}
+Your morning mood depends on yesterday's mood (Autoregressive memory) plus how much of yesterday's unexpected good/bad surprise still lingers today (Moving Average shock).
+\end{intuition}
+
+\housefig{figures/acf_pacf_patterns.png}{Autocorrelation Function (ACF) exponential decay vs Partial Autocorrelation (PACF) cutoff.}
+
+\begin{worked}
+Given an ARMA(1,1) model: $y_t = 3 + 0.5 y_{t-1} + \epsilon_t + 0.4 \epsilon_{t-1}$.
+Last observed value $y_{100} = 10$, and last residual $\epsilon_{100} = 2$.
+\begin{steps}
+\item Forecast 1 step ahead ($t = 101$):
+\begin{equation}
+\hat{y}_{101} = 3 + 0.5(10) + 0.4(2) = 3 + 5 + 0.8 = 8.8
+\end{equation}
+\item Forecast 2 steps ahead ($t = 102$):
+Since $\epsilon_{101}$ is unknown, its expected value $E[\epsilon_{101}] = 0$. The MA term drops out:
+\begin{equation}
+\hat{y}_{102} = 3 + 0.5(8.8) = 3 + 4.4 = 7.4
+\end{equation}
+Notice how the MA shock term only affects the immediate 1-step forecast!
+\end{steps}
+\end{worked}
+
+\section{ARIMA \& SARIMAX: Differencing, Seasonality, and External Factors}
+\secsub{Stationarize trending data via differencing and layer seasonal and exogenous terms.}
+
+ARIMA($p,d,q$) differences non-stationary series $d$ times ($w_t = \Delta^d y_t$) before fitting ARMA. SARIMAX extends this by adding seasonal periods $m$ and exogenous regressors $X_t$:
+\begin{equation}
+\Phi_P(B^m) \phi_p(B) \Delta^d \Delta_m^D y_t = \beta X_t + \Theta_Q(B^m) \theta_q(B) \epsilon_t
+\end{equation}
+
+\begin{intuition}
+ARIMA strips away constant upward trends. SARIMAX adds seasonal calendars (e.g. December holiday surges) and external drivers like promotional marketing discounts.
+\end{intuition}
+
+\housefig{figures/arima_sarimax_forecast.png}{Multi-step forecasts comparing ARIMA baseline vs SARIMAX promotion-adjusted forecasts.}
+
+\begin{worked}
+Consider an ARIMA(1,1,1) model fitted on differenced series $w_t = y_t - y_{t-1}$:
+Fitted equation: $w_t = 0.4 w_{t-1} + \epsilon_t + 0.3 \epsilon_{t-1}$.
+Given $y_{99} = 115, y_{100} = 120 \implies w_{100} = 5$. Last error $\epsilon_{100} = 1$.
+\begin{steps}
+\item Forecast differenced value $\hat{w}_{101}$:
+\begin{equation}
+\hat{w}_{101} = 0.4(5) + 0.3(1) = 2.0 + 0.3 = 2.3
+\end{equation}
+\item Un-difference to obtain level forecast $\hat{y}_{101}$:
+\begin{equation}
+\hat{y}_{101} = y_{100} + \hat{w}_{101} = 120 + 2.3 = 122.3
+\end{equation}
+\item Forecast step 2 differenced value $\hat{w}_{102}$ ($E[\epsilon_{101}] = 0$):
+\begin{equation}
+\hat{w}_{102} = 0.4(2.3) = 0.92 \implies \hat{y}_{102} = 122.3 + 0.92 = 123.22
+\end{equation}
+\end{steps}
+\end{worked}
+
+\section{Vector Autoregression (VAR \& VARMAX)}
+\secsub{Model multiple interdependent time series with mutual cross-lag feedback.}
+
+VAR($p$) models a vector of time series $\mathbf{Y}_t$, where each series depends on past values of itself and past values of every other series in the system:
+\begin{equation}
+\mathbf{Y}_t = \mathbf{c} + \mathbf{A}_1 \mathbf{Y}_{t-1} + \dots + \mathbf{A}_p \mathbf{Y}_{t-p} + \boldsymbol{\epsilon}_t
+\end{equation}
+
+\begin{intuition}
+GDP growth affects inflation, but inflation also feeds back into GDP growth. VAR treats both as equal partners in a joint dynamic ecosystem.
+\end{intuition}
+
+\housefig{figures/var_system_forecast.png}{Multivariate VAR(1) joint forecast tracking interdependencies between GDP growth and inflation.}
+
+\begin{worked}
+Given a 2-variable VAR(1) system for GDP growth ($g_t$) and Inflation ($\pi_t$):
+\begin{align*}
+g_t &= 0.3 + 0.5 g_{t-1} + 0.1 \pi_{t-1} \\
+\pi_t &= 0.2 + 0.2 g_{t-1} + 0.6 \pi_{t-1}
+\end{align*}
+Given last quarter values $g_{99} = 2.0\%$ and $\pi_{99} = 3.0\%$.
+\begin{steps}
+\item Forecast GDP growth for quarter 100:
+\begin{equation}
+\hat{g}_{100} = 0.3 + 0.5(2.0) + 0.1(3.0) = 0.3 + 1.0 + 0.3 = 1.6\%
+\end{equation}
+\item Forecast Inflation for quarter 100:
+\begin{equation}
+\hat{\pi}_{100} = 0.2 + 0.2(2.0) + 0.6(3.0) = 0.2 + 0.4 + 1.8 = 2.4\%
+\end{equation}
+\end{steps}
+\end{worked}
+
+\begin{watchout}
+VAR models require all target series to be stationary. If series have unit roots, difference them first or fit a Vector Error Correction Model (VECM).
+\end{watchout}
+
+\begin{keytake}
+\begin{itemize}
+\item ARMA combines past memory (AR) and shock residuals (MA).
+\item ARIMA uses differencing $d$ to stationarize trends; SARIMAX adds seasonal periods $m$ and external regressors $X$.
+\item VAR models multivariate time series systems with mutual feedback across variables.
+\end{itemize}
+\end{keytake}
+
+\end{document}

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · Session 13: Time Series Forecasting</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-logo{height:30px;width:auto;border-radius:4px;background:#fff;padding:2px 4px;flex:0 0 auto}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE LAB";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:75px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan);overflow-x:auto}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+canvas{display:block;max-width:100%}
+
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+
+[data-theme="light"] body{background:#eef2f8;color:#16223d}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] .card{background:#ffffff;border-color:#dde4f0}
+[data-theme="light"] .sidebar{background:#ffffff;border-right-color:#dde4f0}
+</style>
+</head>
+<body>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><img class="bits-logo" src="assets/bits-logo.png" alt="BITS Pilani logo" onerror="this.style.display='none'"><div>WILP, BITS Pilani<small>Session 13 Lecture</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Start here</div>
+    <a href="#intro"><span class="n">00</span> Overview</a>
+    <div class="grp">Topics</div>
+    <a href="#ma"><span class="n">01</span> Moving Averages</a>
+    <a href="#exp"><span class="n">02</span> Exponential Smoothing</a>
+    <a href="#holt"><span class="n">03</span> Holt's Double Exp</a>
+    <div class="grp">Wrap up</div>
+    <a href="#summary"><span class="n">04</span> Summary Card</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">ISM Session 13</div>
+  <h1>Time Series Forecasting Methods</h1>
+  <p class="bits-credit">Prepared for <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">Master classic smoothing methods: Simple \& Weighted Moving Averages, Simple Exponential Smoothing ($\alpha$), and Holt's Double Exponential Smoothing for trending data.</p>
+  <div class="grid3">
+    <div class="card"><h4>1. Moving Averages</h4><p class="muted" style="font-size:14px">Smooth stationary noise by taking simple or weighted averages over past $k$ periods.</p></div>
+    <div class="card"><h4>2. Exponential Smoothing</h4><p class="muted" style="font-size:14px">Assign exponentially decaying weights to historical errors via constant $\alpha$.</p></div>
+    <div class="card"><h4>3. Holt's Double Exp</h4><p class="muted" style="font-size:14px">Track both level and slope trend simultaneously to eliminate forecast lag.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="ma">
+ <div class="wrap">
+  <div class="kicker">01 &middot; Equal & Weighted Averages</div>
+  <h2>Moving Averages (SMA \& WMA)</h2>
+  <p class="lead">SMA averages $k$ recent observations equally. WMA places higher weights on more recent observations to respond faster to shifts.</p>
+
+  <div class="eqbox">$$ F_{52} = \frac{3 y_{51} + 2 y_{50} + 1 y_{49}}{6} $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; WMA Weight Adjuster</h4>
+    <p class="muted" style="font-size:14px">Adjust the latest month weight $w_1$ to see how WMA shifts forecast responsiveness.</p>
+    <div class="grid2">
+      <div>
+        <div id="maSliders"></div>
+        <div class="readout" id="maOut"></div>
+      </div>
+      <div>
+        <canvas id="maCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="exp">
+ <div class="wrap">
+  <div class="kicker">02 &middot; Recursive Updating</div>
+  <h2>Simple Exponential Smoothing</h2>
+  <p class="lead">Exponential smoothing updates next period's forecast by adding a fraction $\alpha$ of the current forecast error: $F_{t+1} = F_t + \alpha(y_t - F_t)$.</p>
+
+  <div class="eqbox">$$ F_{t+1} = \alpha y_t + (1-\alpha) F_t $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; $\alpha$ Sensitivity Simulator</h4>
+    <p class="muted" style="font-size:14px">Slide smoothing constant $\alpha$ from $0.05$ (heavy smoothing) to $0.95$ (fast tracking).</p>
+    <div class="grid2">
+      <div>
+        <div id="expSliders"></div>
+        <div class="readout" id="expOut"></div>
+      </div>
+      <div>
+        <canvas id="expCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="holt">
+ <div class="wrap">
+  <div class="kicker">03 &middot; Trend Tracking</div>
+  <h2>Holt's Double Exponential Smoothing</h2>
+  <p class="lead">Holt's method estimates both current level $L_t$ and trend velocity $T_t$, forecasting $h$ steps ahead via $\hat{y}_{t+h} = L_t + h T_t$.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Holt's Trend Tracker</h4>
+    <p class="muted" style="font-size:14px">Adjust trend growth velocity $T$ to observe how Holt's forecast projects ahead without lagging.</p>
+    <div class="grid2">
+      <div>
+        <div id="holtSliders"></div>
+        <div class="readout" id="holtOut"></div>
+      </div>
+      <div>
+        <canvas id="holtCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">04 &middot; Summary Card</div>
+  <h2>Session 13 Pocket Cheat-Sheet</h2>
+  <div class="grid3">
+    <div class="card"><h4>SMA / WMA</h4><p class="muted" style="font-size:14px">Averages recent $k$ points. Best for stationary data without trends.</p></div>
+    <div class="card"><h4>Single Exp ($\alpha$)</h4><p class="muted" style="font-size:14px">$F_{t+1} = F_t + \alpha(y_t - F_t)$. Higher $\alpha$ reacts faster to noise.</p></div>
+    <div class="card"><h4>Holt's Double Exp</h4><p class="muted" style="font-size:14px">Tracks level + trend. Prevents forecast lag on rising/falling data.</p></div>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  WILP, BITS Pilani &middot; ISM Session 13 Interactive Lecture Page.
+</div>
+</main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(opt.step.includes('.')?opt.step.split('.')[1].length:0);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  window.addEventListener('resize',resize);
+  resize();
+  return {redraw:()=>drawFn(ctx,canvas.getBoundingClientRect().width||canvas.width,(canvas.getBoundingClientRect().width||canvas.width)*(canvas.height/canvas.width))};
+}
+
+// Nav Scroll Spy
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+window.addEventListener('scroll',()=>{
+  const st=window.scrollY;
+  let idx=0;
+  sections.forEach((sec,i)=>{if(sec&&sec.offsetTop-120<=st)idx=i;});
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+  $('#progbar').style.width=(100*st/((document.body.scrollHeight-window.innerHeight)||1))+'%';
+});
+
+// Theme toggle
+$('#themeBtn').addEventListener('click',()=>{
+  const root=document.documentElement;
+  if(root.getAttribute('data-theme')==='light'){root.removeAttribute('data-theme');$('#themeBtn').innerHTML='&#9728; Light';}
+  else{root.setAttribute('data-theme','light');$('#themeBtn').innerHTML='&#127769; Dark';}
+});
+
+// WMA Lab
+const maHost=$('#maSliders');
+const getW1=makeSlider(maHost,{id:'w1val',label:'Weight w1',min:'1',max:'5',step:'1',value:'3'},()=>renderMA());
+
+const maCv=setupCanvas($('#maCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const w1=getW1();
+  const y49=130, y50=128, y51=137;
+  const wma=(w1*y51 + 2*y50 + 1*y49)/(w1+2+1);
+  ctx.fillStyle='#38f0d8';
+  ctx.fillRect(60, H-40-(y49-100)*4, 40, (y49-100)*4);
+  ctx.fillRect(140, H-40-(y50-100)*4, 40, (y50-100)*4);
+  ctx.fillRect(220, H-40-(y51-100)*4, 40, (y51-100)*4);
+  ctx.fillStyle='#ff6b81';
+  ctx.fillRect(300, H-40-(wma-100)*4, 40, (wma-100)*4);
+});
+
+function renderMA(){
+  maCv.redraw();
+  const w1=getW1();
+  const y49=130, y50=128, y51=137;
+  const wma=(w1*y51 + 2*y50 + 1*y49)/(w1+2+1);
+  $('#maOut').innerHTML='Given Past Data: [130, 128, 137]\nWeights: ['+w1+', 2, 1]\nWMA Forecast F52 = <span class="g">'+wma.toFixed(2)+'</span>';
+}
+renderMA();
+
+// Exponential Smoothing Lab
+const expHost=$('#expSliders');
+const getAlpha=makeSlider(expHost,{id:'alphaval',label:'Alpha (α)',min:'0.05',max:'0.95',step:'0.05',value:'0.3'},()=>renderExp());
+
+const expCv=setupCanvas($('#expCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const a=getAlpha();
+  let f=500, y=450;
+  let f2=a*y + (1-a)*f;
+  ctx.strokeStyle='#19c4ff';ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(40, H-40-(f-400)/200*(H-80));
+  ctx.lineTo(200, H-40-(y-400)/200*(H-80));
+  ctx.lineTo(360, H-40-(f2-400)/200*(H-80));
+  ctx.stroke();
+});
+
+function renderExp(){
+  expCv.redraw();
+  const a=getAlpha();
+  let f=500, y=450;
+  let f2=a*y + (1-a)*f;
+  $('#expOut').innerHTML='F1 = 500, Actual Y1 = 450, Alpha = '+a.toFixed(2)+'\n'+
+    'Updated Forecast F2 = '+a.toFixed(2)+'(450) + '+(1-a).toFixed(2)+'(500) = <span class="g">'+f2.toFixed(2)+'</span>';
+}
+renderExp();
+
+// Holt's Double Exp Lab
+const holtHost=$('#holtSliders');
+const getT=makeSlider(holtHost,{id:'tvel',label:'Trend Slope T',min:'0',max:'5',step:'0.5',value:'2.5'},()=>renderHolt());
+
+const holtCv=setupCanvas($('#holtCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const T=getT();
+  let L=10;
+  ctx.strokeStyle='#62e88a';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let i=0;i<10;i++){
+    let y=L + i*T;
+    let px=40+i/9*(W-80);
+    let py=H-40-(y/60)*(H-80);
+    if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+});
+
+function renderHolt(){
+  holtCv.redraw();
+  const T=getT();
+  $('#holtOut').innerHTML="Holt's Level L0 = 10, Trend T = "+T.toFixed(1)+"\n"+
+    'Forecast step h=5: y_hat(t+5) = 10 + 5*('+T.toFixed(1)+') = <span class="g">'+(10+5*T).toFixed(1)+'</span>';
+}
+renderHolt();
+</script>
+</body>
+</html>

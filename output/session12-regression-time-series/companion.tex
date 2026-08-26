@@ -1,0 +1,149 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{fancyhdr}
+
+% Custom Colors matching house style
+\definecolor{bitsnavy}{RGB}{33,53,94}
+\definecolor{bitsblue}{RGB}{44,90,160}
+\definecolor{bitsgreen}{RGB}{46,125,82}
+\definecolor{bitsamber}{RGB}{200,136,30}
+\definecolor{bitsred}{RGB}{178,58,72}
+
+% Callout Boxes
+\tcolorboxenvironment{intuition}{colback=bitsblue!8,colframe=bitsblue,title=\textbf{Everyday Picture \& Intuition},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{worked}{colback=bitsgreen!8,colframe=bitsgreen,title=\textbf{Fully Worked Example},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{everyday}{colback=bitsnavy!5,colframe=bitsnavy,title=\textbf{Real-World Picture},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{watchout}{colback=bitsred!8,colframe=bitsred,title=\textbf{Watch Out! Pitfalls},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+\tcolorboxenvironment{keytake}{colback=bitsamber!10,colframe=bitsamber,title=\textbf{Key Takeaways},fonttitle=\bfseries,boxrule=0.8pt,arc=3pt}
+
+\newenvironment{intuition}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{worked}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{everyday}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{watchout}{\begin{tcolorbox}}{\end{tcolorbox}}
+\newenvironment{keytake}{\begin{tcolorbox}}{\end{tcolorbox}}
+
+\newenvironment{steps}{\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]}{\end{enumerate}}
+
+\newcommand{\secsub}[1]{\noindent\textit{\large #1}\vspace{0.8em}}
+\newcommand{\housefig}[2]{
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\linewidth]{#1}
+\caption{#2}
+\end{figure}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\color{bitsnavy}\bfseries WILP, BITS Pilani}
+\lhead{\color{bitsnavy}\bfseries ISM Session 12 Study Companion}
+\rfoot{Page \thepage}
+
+\begin{document}
+
+% Banner
+\begin{tcolorbox}[colback=bitsnavy,colframe=bitsnavy,arc=0pt,outer arc=0pt,top=12pt,bottom=12pt]
+\color{white}
+\centering
+{\large\bfseries WILP, BITS Pilani}\\[4pt]
+{\LARGE\bfseries Session 12: Multiple Regression \& Intro to Time Series}\\[4pt]
+{\small Course: Introduction to Statistical Methods (ISM) \quad|\quad Instructor: Dr. YVK Ravi Kumar}
+\end{tcolorbox}
+
+\vspace{1em}
+
+\section{Multiple \& Non-Linear Regression}
+\secsub{Extend simple lines to multiple predictors and curved non-linear patterns.}
+
+Multiple linear regression models a continuous target variable $Y$ using multiple explanatory variables: $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \dots + \beta_k X_k + \epsilon$. Non-linear models apply transformations like logarithms or quadratic terms when data follows curves.
+
+\begin{intuition}
+Predicting house price is not just about square footage. You also need bedrooms, neighborhood age, and distance to public transport. Multiple regression assigns weights to all predictors simultaneously.
+\end{intuition}
+
+\subsection{Non-Linear Transformations}
+For diminishing returns, logarithmic transformations $Y = \beta_0 + \beta_1 \ln(X)$ or quadratic forms $Y = \beta_0 + \beta_1 X + \beta_2 X^2$ fit non-linear curved trends while remaining linear in parameters.
+
+\housefig{figures/nonlinear_regression.png}{Polynomial and logarithmic regression curves fitting non-linear relationships.}
+
+\begin{worked}
+Consider fitting a quadratic regression $Y = 5.0 + 2.0X - 0.1X^2$ to estimate yield ($Y$) based on fertilizer dosage ($X$).
+\begin{steps}
+\item Evaluate predicted yield at $X = 5$:
+\begin{equation}
+\hat{Y} = 5.0 + 2.0(5) - 0.1(5^2) = 5.0 + 10.0 - 2.5 = 12.5
+\end{equation}
+\item Evaluate predicted yield at $X = 10$:
+\begin{equation}
+\hat{Y} = 5.0 + 2.0(10) - 0.1(10^2) = 5.0 + 20.0 - 10.0 = 15.0
+\end{equation}
+Notice how doubling $X$ from 5 to 10 does not double the yield due to diminishing returns.
+\end{steps}
+\end{worked}
+
+\section{Time Series Components}
+\secsub{Decompose historical sequence observations into structural components.}
+
+A time series is a set of quantitative observations ordered over successive periods. It breaks down into four primary components: Secular Trend ($T_t$), Seasonal variation ($S_t$), Cyclical variation ($C_t$), and Irregular noise ($I_t$).
+
+\begin{intuition}
+Think of sales data like ocean waves. The tide rising over years is the trend. Summer beach surges are seasonality. Multi-year economic booms are cycles. Random unexpected storm days are irregular noise.
+\end{intuition}
+
+\subsection{Additive vs. Multiplicative Models}
+\begin{itemize}
+\item \textbf{Additive Model:} $y_t = T_t + S_t + C_t + I_t$ (used when seasonal swings remain constant in dollar magnitude).
+\item \textbf{Multiplicative Model:} $y_t = T_t \times S_t \times C_t \times I_t$ (used when seasonal swings grow proportionally with overall trend level).
+\end{itemize}
+
+\housefig{figures/time_series_components.png}{Decomposition of time series into trend, seasonal, cyclical, and irregular noise components.}
+
+\section{Stationarity and the Split-Half Test}
+\secsub{Check whether time series statistical properties remain constant over time.}
+
+A time series is stationary if its mean, variance, and autocorrelation structure do not depend on time. Non-stationary series must be transformed (e.g., via first differencing $w_t = y_t - y_{t-1}$) prior to modeling.
+
+\begin{intuition}
+A stationary process is like a steady thermostat reading around 72 degrees. A non-stationary process is like a room heating up over time where the average temperature keeps rising.
+\end{intuition}
+
+\housefig{figures/stationarity_split.png}{Split-half test comparing sub-sample means to diagnose non-stationarity.}
+
+\begin{worked}
+Given time series data ($n = 10$): $y_t = [4, 6, 5, 7, 9, 8, 10, 12, 11, 13]$.
+\begin{steps}
+\item Split data into two equal halves:
+First half ($t=1..5$): $4, 6, 5, 7, 9 \implies \bar{y}_1 = \frac{31}{5} = 6.20$.
+Second half ($t=6..10$): $8, 10, 12, 11, 13 \implies \bar{y}_2 = \frac{54}{5} = 10.80$.
+\item Compare means: Means differ significantly ($10.80 - 6.20 = 4.60$), indicating non-stationarity due to upward trend.
+\item Apply first differencing $w_t = y_t - y_{t-1}$:
+$w_t = [6-4, 5-6, 7-5, 9-7, 8-9, 10-8, 12-10, 11-12, 13-11] = [2, -1, 2, 2, -1, 2, 2, -1, 2]$.
+New differenced mean $\bar{w} \approx 1.0$, which remains stable over time. Differencing once ($d=1$) restores stationarity!
+\end{steps}
+\end{worked}
+
+\begin{watchout}
+Fitting standard linear regression directly on non-stationary time series leads to spurious regression with inflated $R^2$ values.
+\end{watchout}
+
+\begin{keytake}
+\begin{itemize}
+\item Multiple regression isolates simultaneous impacts of several predictor variables.
+\item Time series data decomposes into Trend, Seasonal, Cyclical, and Irregular components.
+\item Non-stationary time series have changing means or variances over time and require differencing.
+\end{itemize}
+\end{keytake}
+
+\end{document}
