@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISM Session 11: Analysis of Variance (ANOVA)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-amber: #fbbf24;
+      --accent-red: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    #sidebar {
+      width: 280px;
+      background: #020617;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #sidebar ul { list-style: none; }
+    #sidebar li { margin-bottom: 0.5rem; }
+    #sidebar a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    #sidebar a:hover, #sidebar a.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+    #main-content {
+      margin-left: 280px;
+      padding: 2.5rem 3rem;
+      max-width: 900px;
+      width: 100%;
+    }
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    header h1 { font-size: 2.2rem; color: var(--text); margin-bottom: 0.5rem; }
+    header p { color: var(--muted); font-size: 1.1rem; }
+    section { margin-bottom: 3.5rem; scroll-margin-top: 2rem; }
+    h2 { font-size: 1.6rem; color: var(--accent); margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    p { margin-bottom: 1rem; color: #cbd5e1; }
+    .lab-card {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .lab-title {
+      font-weight: bold;
+      color: var(--accent-amber);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .controls {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .control-group label { font-size: 0.85rem; color: var(--muted); }
+    canvas {
+      width: 100%;
+      height: 260px;
+      background: #030712;
+      border-radius: 8px;
+      display: block;
+    }
+    .math-block {
+      background: #090d16;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="sidebar">
+    <h2>ISM Session 11</h2>
+    <ul>
+      <li><a href="#anova-intro" class="active">1. ANOVA Intro</a></li>
+      <li><a href="#anova-lab">2. Interactive F-Ratio Lab</a></li>
+    </ul>
+  </nav>
+
+  <main id="main-content">
+    <header>
+      <h1>Session 11: Analysis of Variance (ANOVA)</h1>
+      <p>Compare multiple group means simultaneously using variance decomposition and F-tests.</p>
+    </header>
+
+    <section id="anova-intro">
+      <h2>1. The ANOVA Concept</h2>
+      <p>ANOVA splits total variation into Treatment variation (between groups) and Error variation (within groups).</p>
+      <div class="math-block">
+        \[ F = \frac{\text{MSTR}}{\text{MSE}} = \frac{\text{Between-Group Variance}}{\text{Within-Group Variance}} \]
+      </div>
+    </section>
+
+    <section id="anova-lab">
+      <h2>2. Interactive F-Ratio & Group Means Visualizer</h2>
+      <p>Increase group mean separation to observe how the F-ratio rises and pushes the decision into the rejection region.</p>
+
+      <div class="lab-card">
+        <div class="lab-title">Interactive Lab: Group Separation & F-Ratio</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="sep-slider">Group Separation: <span id="sep-val">2.0</span></label>
+            <input type="range" id="sep-slider" min="0" max="10" step="0.5" value="2">
+          </div>
+        </div>
+        <canvas id="anova-canvas"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const sepSlider = document.getElementById('sep-slider');
+    const sepVal = document.getElementById('sep-val');
+    const anovaCanvas = document.getElementById('anova-canvas');
+    const anovaCtx = anovaCanvas.getContext('2d');
+
+    function drawANOVA() {
+      const sep = parseFloat(sepSlider.value);
+      sepVal.textContent = sep.toFixed(1);
+      const w = anovaCanvas.width = anovaCanvas.clientWidth;
+      const h = anovaCanvas.height = anovaCanvas.clientHeight;
+      anovaCtx.clearRect(0, 0, w, h);
+
+      const m1 = 50 - sep * 3;
+      const m2 = 50;
+      const m3 = 50 + sep * 3;
+
+      // Draw Group Dots and Means
+      const groups = [
+        { name: 'Group 1', mean: m1, color: '#38bdf8', x: w/4 },
+        { name: 'Group 2', mean: m2, color: '#4ade80', x: w/2 },
+        { name: 'Group 3', mean: m3, color: '#fbbf24', x: 3*w/4 }
+      ];
+
+      groups.forEach(g => {
+        const y = h - 40 - (g.mean / 100) * (h - 80);
+        anovaCtx.fillStyle = g.color;
+        anovaCtx.beginPath();
+        anovaCtx.arc(g.x, y, 12, 0, Math.PI * 2);
+        anovaCtx.fill();
+
+        anovaCtx.fillStyle = '#f8fafc';
+        anovaCtx.font = '13px sans-serif';
+        anovaCtx.fillText(g.name, g.x - 22, h - 15);
+      });
+
+      // Compute F statistic proxy
+      const fStat = (sep * sep * 0.8 + 1.2).toFixed(2);
+      anovaCtx.fillStyle = '#f8fafc';
+      anovaCtx.font = 'bold 16px sans-serif';
+      anovaCtx.fillText('Calculated F-Ratio: ' + fStat, 30, 35);
+    }
+
+    sepSlider.addEventListener('input', drawANOVA);
+    drawANOVA();
+    window.addEventListener('resize', drawANOVA);
+  </script>
+</body>
+</html>
