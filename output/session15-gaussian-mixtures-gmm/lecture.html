@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · Session 15: Gaussian Mixture Models</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-logo{height:30px;width:auto;border-radius:4px;background:#fff;padding:2px 4px;flex:0 0 auto}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE LAB";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:75px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan);overflow-x:auto}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+canvas{display:block;max-width:100%}
+
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+
+[data-theme="light"] body{background:#eef2f8;color:#16223d}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] .card{background:#ffffff;border-color:#dde4f0}
+[data-theme="light"] .sidebar{background:#ffffff;border-right-color:#dde4f0}
+</style>
+</head>
+<body>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><img class="bits-logo" src="assets/bits-logo.png" alt="BITS Pilani logo" onerror="this.style.display='none'"><div>WILP, BITS Pilani<small>Session 15 Lecture</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Start here</div>
+    <a href="#intro"><span class="n">00</span> Overview</a>
+    <div class="grp">Topics</div>
+    <a href="#gmm"><span class="n">01</span> Gaussian Mixtures</a>
+    <a href="#em"><span class="n">02</span> The EM Algorithm</a>
+    <a href="#practice"><span class="n">03</span> Practice Problems</a>
+    <div class="grp">Wrap up</div>
+    <a href="#summary"><span class="n">04</span> Summary Card</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">ISM Session 15</div>
+  <h1>Gaussian Mixture Models \& EM Algorithm</h1>
+  <p class="bits-credit">Prepared for <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">Explore soft clustering, Gaussian mixture density estimation, the Expectation-Maximization (EM) algorithm, and practical statistical proportion testing.</p>
+  <div class="grid3">
+    <div class="card"><h4>1. Gaussian Mixtures</h4><p class="muted" style="font-size:14px">Model multimodal populations as linear blends of $K$ bell curves with weights $\pi_k$.</p></div>
+    <div class="card"><h4>2. EM Algorithm</h4><p class="muted" style="font-size:14px">Alternate E-step responsibilities $\gamma(z_k)$ with M-step parameter estimation.</p></div>
+    <div class="card"><h4>3. Practice Problems</h4><p class="muted" style="font-size:14px">Solve bimodal step count estimation and two-sample proportion Z-tests.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="gmm">
+ <div class="wrap">
+  <div class="kicker">01 &middot; Multimodal Density</div>
+  <h2>Gaussian Mixture Formulation</h2>
+  <p class="lead">GMMs combine $K$ Gaussian components with mixing proportions $\pi_k$ to model complex, overlapping data distributions.</p>
+
+  <div class="eqbox">$$ p(x) = \sum_{k=1}^K \pi_k \mathcal{N}(x \mid \mu_k, \sigma_k^2) $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Bimodal Step Count Density Visualizer</h4>
+    <p class="muted" style="font-size:14px">Adjust component mean $\mu_2$ to watch active student step density separate from sedentary students.</p>
+    <div class="grid2">
+      <div>
+        <div id="gmmSliders"></div>
+        <div class="readout" id="gmmOut"></div>
+      </div>
+      <div>
+        <canvas id="gmmCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="em">
+ <div class="wrap">
+  <div class="kicker">02 &middot; Soft Clustering</div>
+  <h2>EM Algorithm Responsibilities</h2>
+  <p class="lead">The E-step computes posterior membership probabilities $\gamma(z_k) = P(z_k=1 \mid x)$ via Bayes' theorem.</p>
+
+  <div class="eqbox">$$ \gamma(z_k) = \frac{\pi_k \mathcal{N}(x \mid \mu_k, \sigma_k^2)}{\sum_{j=1}^K \pi_j \mathcal{N}(x \mid \mu_j, \sigma_j^2)} $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Soft Responsibility Curve Fitter</h4>
+    <p class="muted" style="font-size:14px">Slide observation value $x$ to inspect soft assignment probabilities across sedentary vs active clusters.</p>
+    <div class="grid2">
+      <div>
+        <div id="emSliders"></div>
+        <div class="readout" id="emOut"></div>
+      </div>
+      <div>
+        <canvas id="emCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="practice">
+ <div class="wrap">
+  <div class="kicker">03 &middot; Numerical Applications</div>
+  <h2>Proportion Difference Test Practice</h2>
+  <p class="lead">Test whether employee performance proportions changed significantly after training: $H_0: p_1 = p_2$.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Two-Sample Proportion Z-Test Calculator</h4>
+    <p class="muted" style="font-size:14px">Adjust post-training success count $x_2$ to observe Z-score and critical p-value decisions.</p>
+    <div class="grid2">
+      <div>
+        <div id="propSliders"></div>
+        <div class="readout" id="propOut"></div>
+      </div>
+      <div>
+        <canvas id="propCanvas" width="400" height="300" style="width:100%;height:auto"></canvas>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">04 &middot; Summary Card</div>
+  <h2>Session 15 Pocket Cheat-Sheet</h2>
+  <div class="grid3">
+    <div class="card"><h4>GMM Density</h4><p class="muted" style="font-size:14px">$p(x) = \sum \pi_k \mathcal{N}(x \mid \mu_k, \Sigma_k)$. Linear combination of Gaussians.</p></div>
+    <div class="card"><h4>E-Step</h4><p class="muted" style="font-size:14px">Computes $\gamma(z_k) = P(z_k=1 \mid x)$. Soft cluster assignment.</p></div>
+    <div class="card"><h4>M-Step</h4><p class="muted" style="font-size:14px">Updates $\mu_k, \Sigma_k, \pi_k$ weighted by current responsibilities.</p></div>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  WILP, BITS Pilani &middot; ISM Session 15 Interactive Lecture Page.
+</div>
+</main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(opt.step.includes('.')?opt.step.split('.')[1].length:0);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  window.addEventListener('resize',resize);
+  resize();
+  return {redraw:()=>drawFn(ctx,canvas.getBoundingClientRect().width||canvas.width,(canvas.getBoundingClientRect().width||canvas.width)*(canvas.height/canvas.width))};
+}
+
+// Nav Scroll Spy
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+window.addEventListener('scroll',()=>{
+  const st=window.scrollY;
+  let idx=0;
+  sections.forEach((sec,i)=>{if(sec&&sec.offsetTop-120<=st)idx=i;});
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+  $('#progbar').style.width=(100*st/((document.body.scrollHeight-window.innerHeight)||1))+'%';
+});
+
+// Theme toggle
+$('#themeBtn').addEventListener('click',()=>{
+  const root=document.documentElement;
+  if(root.getAttribute('data-theme')==='light'){root.removeAttribute('data-theme');$('#themeBtn').innerHTML='&#9728; Light';}
+  else{root.setAttribute('data-theme','light');$('#themeBtn').innerHTML='&#127769; Dark';}
+});
+
+// GMM Lab
+const gmmHost=$('#gmmSliders');
+const getMu2=makeSlider(gmmHost,{id:'mu2val',label:'Mean μ2',min:'7.0',max:'13.0',step:'0.2',value:'10.3'},()=>renderGmm());
+
+const gmmCv=setupCanvas($('#gmmCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const mu2=getMu2();
+  ctx.strokeStyle='#38f0d8';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=40;px<=W-40;px++){
+    let x=(px-40)/(W-80)*15;
+    let c1=0.5*(1/(0.65*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((x-4.1)/0.65,2));
+    let c2=0.5*(1/(0.83*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((x-mu2)/0.83,2));
+    let mix=c1+c2;
+    let py=H-40-(mix/0.4)*(H-80);
+    if(px===40)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+});
+
+function renderGmm(){
+  gmmCv.redraw();
+  const mu2=getMu2();
+  $('#gmmOut').innerHTML='Comp 1 (Sedentary): μ1 = 4.10, s1^2 = 0.425\n'+
+    'Comp 2 (Active): μ2 = '+mu2.toFixed(2)+', s2^2 = 0.707\nTotal Mixture Density p(x) = 0.5 N(4.1, 0.425) + 0.5 N('+mu2.toFixed(2)+', 0.707)';
+}
+renderGmm();
+
+// EM Responsibilities Lab
+const emHost=$('#emSliders');
+const getXobs=makeSlider(emHost,{id:'xobsval',label:'Step Count x',min:'2.0',max:'13.0',step:'0.2',value:'6.5'},()=>renderEm());
+
+const emCv=setupCanvas($('#emCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const xobs=getXobs();
+  let c1=0.5*(1/(0.65*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((xobs-4.1)/0.65,2));
+  let c2=0.5*(1/(0.83*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((xobs-10.28)/0.83,2));
+  let r1=c1/(c1+c2), r2=c2/(c1+c2);
+
+  ctx.fillStyle='#ffcb6b'; ctx.fillRect(100, H-40-r1*(H-80), 60, r1*(H-80));
+  ctx.fillStyle='#62e88a'; ctx.fillRect(240, H-40-r2*(H-80), 60, r2*(H-80));
+});
+
+function renderEm(){
+  emCv.redraw();
+  const xobs=getXobs();
+  let c1=0.5*(1/(0.65*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((xobs-4.1)/0.65,2));
+  let c2=0.5*(1/(0.83*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((xobs-10.28)/0.83,2));
+  let r1=c1/(c1+c2), r2=c2/(c1+c2);
+  $('#emOut').innerHTML='Observed Step Count x = '+xobs.toFixed(1)+'k steps\n'+
+    'Posterior Responsibilities: γ1(Sedentary) = <span class="hl">'+(r1*100).toFixed(1)+'%</span> | γ2(Active) = <span class="g">'+(r2*100).toFixed(1)+'%</span>';
+}
+renderEm();
+
+// Proportion Test Lab
+const propHost=$('#propSliders');
+const getX2=makeSlider(propHost,{id:'x2val',label:'Post Count x2',min:'380',max:'480',step:'5',value:'440'},()=>renderProp());
+
+const propCv=setupCanvas($('#propCanvas'),(ctx,W,H)=>{
+  ctx.clearRect(0,0,W,H);
+  const x2=getX2();
+  let p1=400/500, p2=x2/600;
+  let phat=(400+x2)/1100;
+  let se=Math.sqrt(phat*(1-phat)*(1/500 + 1/600));
+  let z=(p1-p2)/se;
+
+  ctx.strokeStyle='#19c4ff';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=40;px<=W-40;px++){
+    let zv=-4 + (px-40)/(W-80)*8;
+    let pdf=(1/Math.sqrt(2*Math.PI))*Math.exp(-0.5*zv*zv);
+    let py=H-40-(pdf/0.45)*(H-80);
+    if(px===40)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+
+  let zpx=40+(z+4)/8*(W-80);
+  ctx.fillStyle='#ff6b81';
+  ctx.beginPath();ctx.arc(zpx, H-40, 6, 0, 7);ctx.fill();
+});
+
+function renderProp(){
+  propCv.redraw();
+  const x2=getX2();
+  let p1=400/500, p2=x2/600;
+  let phat=(400+x2)/1100;
+  let se=Math.sqrt(phat*(1-phat)*(1/500 + 1/600));
+  let z=(p1-p2)/se;
+  $('#propOut').innerHTML='p1 = 0.800 (Before) | p2 = '+p2.toFixed(4)+' (After)\n'+
+    'Test Statistic Z = <span class="hl">'+z.toFixed(2)+'</span> | Decision: '+(Math.abs(z)>1.96?'<span class="g">Reject H0 (Significant Difference)</span>':'Fail to Reject H0');
+}
+renderProp();
+</script>
+</body>
+</html>
