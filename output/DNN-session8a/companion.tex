@@ -1,0 +1,429 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---- Encoding & fonts -------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}              % protrusion/kerning -> fewer overfull boxes
+
+% ---- Geometry (~1in margins) ------------------------------------------------
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+
+% ---- Math -------------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+
+% ---- Graphics, tables, colour ----------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+
+% ---- Callout boxes (breakable pill-tab tcolorboxes) -------------------------
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% ---- Callout glyphs ---------------------------------------------------------
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+
+% ---- Lists & spacing --------------------------------------------------------
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}                % blank-line paragraph spacing, no indent
+
+% ---- Headers / footers ------------------------------------------------------
+\usepackage{fancyhdr}
+
+% ---- Section styling --------------------------------------------------------
+\usepackage{titlesec}
+
+% ---- Links (hidden) + URL line-breaking -------------------------------------
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+% =============================================================================
+%  COLOURS — navy chrome + the FIVE taxonomy ramps
+% =============================================================================
+\definecolor{navy}{HTML}{21355E}        % banner + headings
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}     % body ink
+\definecolor{mutedtext}{HTML}{6B7280}   % header / meta grey
+
+% Intuition — blue
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+% Everyday — amber
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+% Worked — green
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+% Watch out — red
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+% Key takeaway — purple/violet
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+% Wait, what? — teal
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+% =============================================================================
+%  RUNNING HEADER / FOOTER
+% =============================================================================
+\newcommand{\CourseShort}{Deep Neural Networks}
+\newcommand{\SessionNo}{8A}
+\newcommand{\LectureTitle}{CNN Architectures, Dilated Convolutions \& Design Frameworks}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyrule!55}\leaders\hrule height \headrulewidth\hfill}}
+
+% =============================================================================
+%  SECTION HEADINGS
+% =============================================================================
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{navy}}
+  {\thesection}
+  {0.8em}
+  {}
+  [{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}
+  {\sffamily\large\bfseries\color{navy!92}}
+  {\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+
+\newcommand{\secsub}[1]{%
+  \noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+
+\newcommand{\flipanswer}[1]{\rotatebox[origin=c]{180}{\parbox{0.92\linewidth}{\small #1}}}
+
+% =============================================================================
+%  PILL-TAB CALLOUTS
+% =============================================================================
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{%
+  housecallout={intuFrame}{intuFill},
+  title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+
+\newtcolorbox{everyday}{%
+  housecallout={everyFrame}{everyFill},
+  title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+
+\newtcolorbox{worked}[1]{%
+  housecallout={workFrame}{workFill},
+  title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+
+\newtcolorbox{watchout}{%
+  housecallout={watchFrame}{watchFill},
+  title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+
+\newtcolorbox{keytake}{%
+  housecallout={keyFrame}{keyFill},
+  title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+
+\newtcolorbox{waitwhat}{%
+  housecallout={waitFrame}{waitFill},
+  title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newif\ifbitslogo \bitslogofalse
+\IfFileExists{assets/bits-logo.png}%
+  {\bitslogotrue \def\bitslogopath{assets/bits-logo.png}}%
+  {\IfFileExists{../../templates/assets/bits-logo.png}%
+     {\bitslogotrue \def\bitslogopath{../../templates/assets/bits-logo.png}}%
+     {}}
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\bitslogochip}{\ifbitslogo\colorbox{white}{\,\raisebox{-0.2ex}{\includegraphics[height=26pt]{\bitslogopath}}\,}\fi}
+
+\providecommand{\addfontfeatureslike}[1]{#1}
+\newcommand{\titlebanner}[4]{%
+  \begin{tcolorbox}[
+    enhanced, breakable=false,
+    colback=navy, colframe=navy,
+    boxrule=0pt, arc=3pt, outer arc=3pt,
+    left=16pt, right=16pt, top=16pt, bottom=16pt,
+    before skip=2pt, after skip=14pt,
+    width=\linewidth ]
+    \noindent
+    \begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.26\linewidth}\raggedleft\bitslogochip\end{minipage}\par
+    \vspace{9pt}
+    {\sffamily\footnotesize\bfseries\color{white!85}%
+      \MakeUppercase{\addfontfeatureslike{#1}}}\par
+    \vspace{6pt}
+    {\sffamily\bfseries\fontsize{30}{34}\selectfont\color{white} #2\par}
+    \vspace{5pt}
+    {\sffamily\large\color{white!88} #3\par}
+    \vspace{9pt}
+    {\color{white!55}\rule{\linewidth}{0.4pt}}\par
+    \vspace{6pt}
+    {\sffamily\footnotesize\color{white!82} #4\par}
+  \end{tcolorbox}%
+}
+
+\newcommand{\housefig}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{#1}%
+    \caption{#2}
+  \end{figure}%
+}
+
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\titlebanner
+  {Deep Neural Networks \textperiodcentered\ Companion Reader}
+  {CNN Architecture Design \& Advanced Operations}
+  {A comprehensive deep dive into hierarchical feature learning, strided and dilated convolutions, multi-channel processing, parameter counting, and ResNet/Bottleneck design patterns.}
+  {Session 8A \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full}
+
+\smallskip
+\noindent{\small\color{mutedtext}%
+Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}
+\smallskip
+
+\noindent\textbf{How to use this companion.}
+This guide extends basic CNN principles into advanced convolutional operations, exact parameter counting, multi-scale feature extraction, and modern architectural design patterns (VGG, ResNet, Inception, EfficientNet). Every formula is broken down step by step, and all numerical examples from the lecture deck are solved in full.
+
+\colorbox{intuFrame!10}{\textcolor{intuFrame}{\textbf{Blue}}} boxes explain intuition; \colorbox{workFrame!10}{\textcolor{workFrame}{\textbf{Green}}} boxes present fully solved numerical problems; \colorbox{watchFrame!10}{\textcolor{watchFrame}{\textbf{Red}}} boxes highlight design pitfalls; \colorbox{keyFrame!10}{\textcolor{keyFrame}{\textbf{Purple}}} boxes summarize core takeaways.
+
+\linewidth\medskip
+
+\section{Hierarchical feature learning and CNN layer breakdown}
+\secsub{How deep networks build high-level concepts from low-level visual primitives.}
+
+Convolutional Neural Networks (CNNs) process images through a sequence of hierarchical transformations:
+$$\text{INPUT} \to [\text{CONV} \to \text{ACTIVATION} \to \text{POOL}] \times N \to \text{FC} \to \text{OUTPUT}$$
+
+As information flows through the network:
+\begin{enumerate}[leftmargin=1.5em]
+  \item \textbf{Early Layers (Layers 1--2):} Detect simple, low-level features such as vertical/horizontal edges, color gradients, and corners. Filters act like localized Gabor filters.
+  \item \textbf{Middle Layers (Layers 3--4):} Combine low-level primitives into mid-level shapes, textures, and repeating patterns (e.g., circles, grilles, wheels).
+  \item \textbf{Deep Layers (Layers 5+):} Assemble shapes into high-level object parts and full semantic concepts (e.g., dog faces, car bodies, text characters).
+\end{enumerate}
+
+\begin{intuition}
+Hierarchical feature learning is like reading a book. First you recognize individual stroke angles (edges), combine them into letters (simple shapes), assemble letters into words (object parts), and finally grasp the full sentence meaning (complete object classification).
+\end{intuition}
+
+\begin{keytake}
+CNNs learn visual hierarchies automatically from data: early layers capture spatial edges, middle layers group shapes, and deep layers identify complex semantic objects.
+\end{keytake}
+
+
+\section{Advanced convolution operations: Stride, padding, and dilated convolutions}
+\secsub{Control spatial dimensions and expand receptive fields without inflating parameter counts.}
+
+\noindent\textbf{1. Padding:}
+Without padding, convolving an $N \times N$ image with a $K \times K$ kernel shrinks the output to $(N - K + 1) \times (N - K + 1)$, stripping border information rapidly.
+To preserve input dimensions (\vocab{Same Padding}), we pad the border with zeros. For kernel size $K$ and stride $S=1$:
+\begin{equation}
+P = \frac{K - 1}{2}
+\end{equation}
+
+\noindent\textbf{2. Stride:}
+Stride $S$ is the step size the filter takes as it slides across the image. Striving $S > 1$ downsamples the spatial resolution directly during convolution.
+
+\noindent\textbf{General Output Dimension Formula:}
+\begin{equation}
+O = \left\lfloor \frac{N + 2P - K}{S} \right\rfloor + 1
+\end{equation}
+
+\noindent\textbf{3. Dilated (Atrous) Convolutions:}
+Dilated convolution inserts spaces (holes) between kernel elements according to a \vocab{dilation rate} $r$.
+\begin{itemize}[leftmargin=1.5em]
+  \item For rate $r = 1$: Standard convolution (no spaces).
+  \item For rate $r = 2$: Inserts 1 zero between adjacent filter weights.
+  \item \textbf{Effective Kernel Size:} $K' = K + (K - 1)(r - 1)$.
+\end{itemize}
+Dilated convolutions expand the network's receptive field exponentially without losing spatial resolution or adding learnable parameters!
+
+\housefig{figures/fig_dilated_conv.png}{Standard Convolution (r=1, 3x3) vs Dilated Convolution (r=2, 5x5 effective field) with identical 9 parameters.}
+
+\begin{worked}{Solving slide problem 29: Convolution, Channels, and Max-Pooling}
+Let us solve the exact multi-part problem from Slide 29:
+\begin{steps}
+  \item \textbf{Part (a):} Given an $8 \times 8$ input matrix, kernel size $3 \times 3$, stride $S=1$, no padding ($P=0$). Determine output shape. \\
+        $O = \left\lfloor \frac{8 + 2(0) - 3}{1} \right\rfloor + 1 = \frac{5}{1} + 1 = 6 \implies 6 \times 6$.
+  \item \textbf{Part (b):} If $5$ such filters are applied, what is the output shape? \\
+        Applying $5$ filters creates $5$ output feature channels. Output shape: $6 \times 6 \times 5$.
+  \item \textbf{Part (c):} Apply a $4 \times 4$ max-pooling filter with stride $S=2$ to the output of Part (b). What is the final shape? \\
+        Spatial output: $O_{\text{pool}} = \left\lfloor \frac{6 - 4}{2} \right\rfloor + 1 = \frac{2}{2} + 1 = 2 \implies 2 \times 2$. \\
+        Pooling preserves the channel depth of $5$. \\
+        Final Output Shape: $2 \times 2 \times 5$.
+\end{steps}
+\end{worked}
+
+
+\section{Pooling layers: Spatial reduction with zero parameters}
+\secsub{Downsample feature maps while guaranteeing zero added weights or biases.}
+
+Pooling layers perform spatial downsampling across height and width while operating independently on each channel.
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Max Pooling:} Extracts the maximum value in each $k \times k$ region. Retains the strongest feature activations and grants local translation invariance.
+  \item \textbf{Average Pooling:} Computes the arithmetic mean over each region. Provides smoother downsampling.
+\end{itemize}
+
+\housefig{figures/fig_pooling_params.png}{Parameter counts across CNN layers: Pooling layers contribute exactly ZERO learnable parameters.}
+
+\begin{watchout}
+Remember: Pooling layers contain NO learnable weights or biases! Their parameters are fixed mathematical functions (max or mean). They possess hyperparameters ($k, S$), but zero parameters.
+\end{watchout}
+
+\begin{keytake}
+Pooling reduces spatial dimensions $(H, W) \to (H', W')$ and lowers memory usage while preserving feature depth $C$ with zero trainable parameters.
+\end{keytake}
+
+
+\section{Fully Connected (FC) layers vs Global Average Pooling}
+\secsub{Transitioning spatial feature maps into class classification scores.}
+
+In a traditional CNN, feature maps $(H \times W \times C)$ are flattened into a 1D vector of length $H \cdot W \cdot C$ and passed through one or more Fully Connected (FC) layers:
+$$\mathbf{y} = f(\mathbf{W} \mathbf{x} + \mathbf{b})$$
+For input dimension $n$ and output neurons $m$, parameter count is $m(n + 1)$.
+
+\noindent\textbf{Disadvantages of FC layers:}
+\begin{enumerate}[leftmargin=1.5em]
+  \item Extreme parameter consumption (often $> 80\%$ of total network weights).
+  \item High risk of overfitting.
+  \item Completely destroys spatial relationships.
+\end{enumerate}
+
+\noindent\textbf{Modern Alternative: Global Average Pooling (GAP):}
+Instead of flattening, GAP averages each $H \times W$ feature map into a single scalar value, converting $(H \times W \times C) \to (1 \times 1 \times C)$. This eliminates millions of FC parameters while enforcing direct correspondence between feature maps and categories.
+
+\begin{keytake}
+Modern architectures replace parameter-heavy FC layers with Global Average Pooling (GAP) and $1 \times 1$ convolutions to prevent overfitting and support flexible input resolutions.
+\end{keytake}
+
+
+\section{Architectural design patterns: ResNet, Bottlenecks, and Inception}
+\secsub{Master key modular patterns used in state-of-the-art vision models.}
+
+Modern deep CNN architectures (ResNet, Inception, MobileNet) rely on five fundamental design patterns:
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item \textbf{Spatial Reduction + Channel Expansion:} Halving spatial resolution $(H/2, W/2)$ while doubling channel depth $(2C)$ maintains total representation capacity.
+  \item \textbf{Repetitive Modular Blocks:} Stacking identical modular building blocks (like VGG $3 \times 3$ blocks or ResNet residual blocks) simplifies network scaling.
+  \item \textbf{Skip/Residual Connections:} Adds identity shortcuts $\mathbf{y} = F(\mathbf{x}) + \mathbf{x}$. Gradients flow directly through identity paths during backpropagation, solving the vanishing gradient problem and enabling 100+ layer networks.
+  \item \textbf{Bottleneck Design:} Uses $1 \times 1$ convolutions to squeeze channels before expensive $3 \times 3$ convolutions, then expands channels back. Reduces parameter counts by over $8\times$.
+  \item \textbf{Multi-Scale Processing (Inception):} Applies $1\times1, 3\times3$, and $5\times5$ filters in parallel to capture multi-scale spatial features simultaneously.
+\end{enumerate}
+
+\housefig{figures/fig_bottleneck.png}{Parameter comparison: Standard $3\times3$ Conv vs Bottleneck ResNet Block achieving an 8.5x reduction in weights.}
+
+\begin{worked}{Bottleneck Block Parameter Reduction Calculation}
+Compare parameters for processing a 256-channel feature map:
+\begin{steps}
+  \item \textbf{Standard $3 \times 3$ Convolution (256 in, 256 out):} \\
+        $\text{Params} = (3 \times 3 \times 256 + 1) \times 256 \approx 3 \times 3 \times 256 \times 256 = 589,824$ parameters.
+  \item \textbf{Bottleneck Block ($1\times1$ reduce to 64 $\to$ $3\times3$ conv $\to$ $1\times1$ expand to 256):} \\
+        Layer 1 ($1\times1$ conv, 256 $\to$ 64): $1 \times 1 \times 256 \times 64 = 16,384$. \\
+        Layer 2 ($3\times3$ conv, 64 $\to$ 64): $3 \times 3 \times 64 \times 64 = 36,864$. \\
+        Layer 3 ($1\times1$ conv, 64 $\to$ 256): $1 \times 1 \times 64 \times 256 = 16,384$. \\
+        $\text{Total Bottleneck Params} = 16,384 + 36,864 + 16,384 = 69,632$ parameters.
+  \item \textbf{Compute Reduction Factor:} \\
+        $\frac{589,824}{69,632} \approx 8.47 \times$ fewer parameters!
+\end{steps}
+\end{worked}
+
+
+\section{Trade-offs: Depth vs. Width and Design Framework}
+\secsub{How to systematically choose model depth, width, and resolution.}
+
+\noindent\textbf{Depth vs. Width Guidelines:}
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Aspect} & \textbf{Deeper (More Layers)} & \textbf{Wider (More Channels)} \\ \midrule
+Feature Complexity & High hierarchical features & Moderate features \\
+Receptive Field & Expands with depth & Unchanged \\
+Training Difficulty & Harder (requires skip connections) & Easier gradient flow \\
+Inference Speed & Slower (sequential operations) & Faster (parallel computing) \\ \bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Systematic Design Decision Framework:}
+\begin{enumerate}[leftmargin=1.5em]
+  \item \textbf{Start with a proven baseline:} Use pretrained ResNet-50 or EfficientNet via transfer learning.
+  \item \textbf{Estimate constraints:} Small dataset ($<10\text{K}$ samples) $\implies$ shallow network or fine-tuning to prevent overfitting. Large dataset ($>1\text{M}$ samples) $\implies$ deep model ($50$--$152$ layers).
+  \item \textbf{Apply compound scaling (EfficientNet):} Scale depth, width, and image resolution jointly using a fixed ratio for optimal efficiency.
+\end{enumerate}
+
+\begin{keytake}
+Residual connections permit extreme depth ($100+$ layers), bottleneck blocks keep compute lean, and compound scaling balances depth, width, and resolution.
+\end{keytake}
+
+
+\section*{Glossary \& symbols}
+\addcontentsline{toc}{section}{Glossary \& symbols}
+
+\noindent\textbf{Key terms.}
+\begin{description}[leftmargin=9.5em,style=nextline,font=\normalfont\bfseries\color{navy}]
+  \item[Same Padding] Zeros added around image borders so output height/width match input dimensions.
+  \item[Stride] Step size in pixels taken by a convolution filter as it slides over the input grid.
+  \item[Dilated Conv] Convolution inserting spaces between filter weights to expand receptive field.
+  \item[Global Average Pooling] Averaging entire spatial feature maps to scalars, replacing FC layers.
+  \item[Residual Connection] Identity shortcut connection $y = F(\mathbf{x}) + \mathbf{x}$ enabling stable gradient flow in deep networks.
+  \item[Bottleneck Block] $1\times1 \to 3\times3 \to 1\times1$ convolution structure reducing channel dimensionality and parameter cost.
+\end{description}
+
+\label{symb}
+\medskip
+\noindent\textbf{Symbols at a glance.}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule \textbf{Symbol} & \textbf{Meaning} \\ \midrule
+$N, K, P, S$ & Input size, Kernel size, Padding size, and Stride \\
+$r$ & Dilation rate for dilated convolutions \\
+$C_{\text{in}}, C_{\text{out}}$ & Number of input channels and output filters \\
+$F(\mathbf{x}) + \mathbf{x}$ & Residual mapping formulation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}
