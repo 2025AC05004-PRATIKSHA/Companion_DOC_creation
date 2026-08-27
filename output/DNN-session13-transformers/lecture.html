@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Transformers & LLM Architectures</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --heading: #f0f6fc;
+      --accent: #58a6ff;
+      --accent-hover: #1f6feb;
+      --success: #2ea043;
+      --warning: #d29922;
+      --danger: #f85149;
+      --purple: #bc8cff;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      overflow-x: auto;
+      overflow-wrap: break-word;
+    }
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 280px;
+      background: #010409;
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    .brand {
+      font-weight: bold;
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    .subbrand {
+      color: #8b949e;
+      font-size: 0.85rem;
+      margin-bottom: 25px;
+    }
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .nav-list li {
+      margin-bottom: 8px;
+    }
+    .nav-list a {
+      color: #8b949e;
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-list a:hover, .nav-list a.active {
+      color: var(--accent);
+      background: #161b22;
+    }
+    .main {
+      margin-left: 280px;
+      padding: 40px;
+      max-width: 900px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      color: var(--heading);
+      margin: 0 0 10px 0;
+      font-size: 2.2rem;
+    }
+    .hero p {
+      color: #8b949e;
+      margin: 0;
+    }
+    .chapter {
+      margin-bottom: 60px;
+      scroll-margin-top: 40px;
+    }
+    h2 {
+      color: var(--heading);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      font-size: 1.5rem;
+    }
+    .lab-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--heading);
+    }
+    input[type=range] {
+      accent-color: var(--accent);
+    }
+    canvas {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 100%;
+      height: 260px;
+    }
+    .callout {
+      background: #161b22;
+      border-left: 4px solid var(--accent);
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .callout-title {
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    .quiz-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .quiz-options button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #21262d;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 15px;
+      border-radius: 6px;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+    .quiz-options button:hover {
+      border-color: var(--accent);
+    }
+    .quiz-feedback {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="brand">WILP, BITS Pilani</div>
+    <div class="subbrand">DNN · Session 13</div>
+    <ul class="nav-list">
+      <li><a href="#ch1">1. Intuition & Positional Encoding</a></li>
+      <li><a href="#ch2">2. Layer Normalization</a></li>
+      <li><a href="#ch3">3. Scaled Dot-Product Attention</a></li>
+      <li><a href="#ch4">4. Multi-Head Attention Lab</a></li>
+      <li><a href="#ch5">5. Causal Masking (Decoder)</a></li>
+      <li><a href="#ch6">6. Cross-Attention Alignment</a></li>
+      <li><a href="#ch7">7. BERT & Model Taxonomy</a></li>
+      <li><a href="#quiz">8. Knowledge Check Quiz</a></li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="hero">
+      <h1>Transformers & LLM Architectures</h1>
+      <p>Session 13 Interactive Lecture · Work Integrated Learning Programmes, BITS Pilani</p>
+    </div>
+
+    <!-- Chapter 1 -->
+    <div id="ch1" class="chapter">
+      <h2>1. Intuition & Positional Encoding</h2>
+      <p>Self-attention is an order-blind operation. To give words sequence order, we add sinusoidal positional encoding vectors to token embeddings.</p>
+
+      <div class="lab-box">
+        <div class="controls">
+          <label>Dimension i: <input type="range" id="peDim" min="0" max="3" value="0" oninput="drawPE()"></label>
+          <span id="peDimVal">0 (sin)</span>
+        </div>
+        <canvas id="peCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 2 -->
+    <div id="ch2" class="chapter">
+      <h2>2. Layer Normalization</h2>
+      <p>LayerNorm computes the mean and variance across feature dimensions for a single token independently of batch size.</p>
+      <div class="callout">
+        <div class="callout-title">Key Equation</div>
+        $$\hat{x}_i = \frac{x_i - \mu}{\sqrt{\sigma^2 + \epsilon}} \cdot \gamma + \beta$$
+      </div>
+    </div>
+
+    <!-- Chapter 3 -->
+    <div id="ch3" class="chapter">
+      <h2>3. Scaled Dot-Product Attention</h2>
+      <p>Queries $Q$, Keys $K$, and Values $V$ produce contextualized representations via scaled dot products.</p>
+      <div class="lab-box">
+        <div class="controls">
+          <label>Scale factor $\sqrt{d_k}$: <input type="range" id="scaleVal" min="1" max="10" value="2" step="0.5" oninput="drawAttention()"></label>
+          <span id="scaleDisp">2.0</span>
+        </div>
+        <canvas id="attCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 4 -->
+    <div id="ch4" class="chapter">
+      <h2>4. Multi-Head Attention Lab</h2>
+      <p>Multiple attention heads project tokens into different representation subspaces simultaneously.</p>
+      <div class="lab-box">
+        <div class="controls">
+          <label>Active Head:
+            <select id="headSelect" onchange="drawMultiHead()">
+              <option value="1">Head 1 (Syntax Focus)</option>
+              <option value="2">Head 2 (Semantic Focus)</option>
+            </select>
+          </label>
+        </div>
+        <canvas id="mhaCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 5 -->
+    <div id="ch5" class="chapter">
+      <h2>5. Causal Masking (Decoder-Only)</h2>
+      <p>Decoders use upper-triangular $-\infty$ masking to prevent tokens from attending to future words during autoregressive generation.</p>
+      <div class="lab-box">
+        <div class="controls">
+          <label><input type="checkbox" id="maskToggle" checked onchange="drawCausalMask()"> Apply Causal Mask</label>
+        </div>
+        <canvas id="maskCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 6 -->
+    <div id="ch6" class="chapter">
+      <h2>6. Cross-Attention Alignment</h2>
+      <p>In sequence-to-sequence translation, decoder queries meet encoder keys and values to align translated words.</p>
+      <div class="lab-box">
+        <canvas id="crossCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 7 -->
+    <div id="ch7" class="chapter">
+      <h2>7. BERT & Model Taxonomy</h2>
+      <p>Transformers split into Encoder-Only (BERT, bidirectional), Decoder-Only (GPT, causal), and Encoder-Decoder (T5, cross-attention) architectures.</p>
+      <ul>
+        <li><strong>BERT Base:</strong> 12 layers, 12 heads, 110M parameters.</li>
+        <li><strong>BERT Large:</strong> 24 layers, 16 heads, 340M parameters.</li>
+        <li><strong>Distillation:</strong> TinyBERT and DistilBERT compress models up to 9x faster while retaining 95%+ performance.</li>
+      </ul>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz" class="chapter">
+      <h2>8. Knowledge Check Quiz</h2>
+      <div class="quiz-card">
+        <p><strong>Q1: Why divide dot products by $\sqrt{d_k}$ in scaled dot-product attention?</strong></p>
+        <div class="quiz-options">
+          <button onclick="checkQuiz(this, false)">To reduce the number of parameters</button>
+          <button onclick="checkQuiz(this, true)">To prevent vanishing gradients caused by large softmax inputs</button>
+          <button onclick="checkQuiz(this, false)">To make positional encodings redundant</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function drawPE() {
+  const dim = parseInt(document.getElementById('peDim').value);
+  document.getElementById('peDimVal').innerText = dim + (dim % 2 === 0 ? " (sin)" : " (cos)");
+  const canvas = document.getElementById('peCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = '#58a6ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let pos = 0; pos < 20; pos++) {
+    const val = dim % 2 === 0 ?
+      Math.sin(pos / Math.pow(10000, dim / 4)) :
+      Math.cos(pos / Math.pow(10000, (dim - 1) / 4));
+    const x = (pos / 19) * (canvas.width - 60) + 30;
+    const y = canvas.height / 2 - val * (canvas.height / 3);
+    if (pos === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+  }
+  ctx.stroke();
+}
+
+function drawAttention() {
+  const scale = parseFloat(document.getElementById('scaleVal').value);
+  document.getElementById('scaleDisp').innerText = scale.toFixed(1);
+  const canvas = document.getElementById('attCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const rawScores = [1.0, 4.0, 2.0];
+  const scaled = rawScores.map(s => s / scale);
+  const exps = scaled.map(Math.exp);
+  const sum = exps.reduce((a, b) => a + b, 0);
+  const weights = exps.map(e => e / sum);
+
+  const labels = ["I", "love", "NLP"];
+  const barWidth = 60;
+  labels.forEach((lbl, i) => {
+    const x = 50 + i * 100;
+    const h = weights[i] * (canvas.height - 80);
+    const y = canvas.height - 40 - h;
+    ctx.fillStyle = '#bc8cff';
+    ctx.fillRect(x, y, barWidth, h);
+    ctx.fillStyle = '#f0f6fc';
+    ctx.font = '14px sans-serif';
+    ctx.fillText(lbl, x + 15, canvas.height - 15);
+    ctx.fillText(weights[i].toFixed(2), x + 10, y - 10);
+  });
+}
+
+function drawMultiHead() {
+  const canvas = document.getElementById('mhaCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const head = document.getElementById('headSelect').value;
+  ctx.fillStyle = head === "1" ? '#2ea043' : '#d29922';
+  ctx.font = '16px sans-serif';
+  ctx.fillText("Active Subspace Visualization: Head " + head, 20, 30);
+
+  const tokens = ["x1", "x2"];
+  tokens.forEach((t, i) => {
+    ctx.fillStyle = '#58a6ff';
+    ctx.beginPath();
+    ctx.arc(80 + i * 150, 120, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(t, 72 + i * 150, 125);
+  });
+
+  ctx.strokeStyle = head === "1" ? '#2ea043' : '#d29922';
+  ctx.lineWidth = head === "1" ? 4 : 2;
+  ctx.beginPath();
+  ctx.moveTo(105, 120);
+  ctx.lineTo(205, 120);
+  ctx.stroke();
+}
+
+function drawCausalMask() {
+  const masked = document.getElementById('maskToggle').checked;
+  const canvas = document.getElementById('maskCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const matrix = [
+    [1.0, masked ? 0 : 0.5, masked ? 0 : 0.2],
+    [0.3, 0.7, masked ? 0 : 0.4],
+    [0.2, 0.3, 0.5]
+  ];
+
+  matrix.forEach((row, r) => {
+    row.forEach((val, c) => {
+      ctx.fillStyle = val === 0 ? '#161b22' : `rgba(88, 166, 255, ${val})`;
+      ctx.fillRect(40 + c * 70, 30 + r * 70, 60, 60);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(val === 0 ? "-inf" : val.toFixed(1), 50 + c * 70, 65 + r * 70);
+    });
+  });
+}
+
+function drawCross() {
+  const canvas = document.getElementById('crossCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const fr = ["<sos>", "Mon", "nom", "est"];
+  const en = ["My", "name", "is", "Ravi"];
+
+  fr.forEach((f, i) => {
+    ctx.fillStyle = '#bc8cff';
+    ctx.fillText(f, 30, 50 + i * 50);
+  });
+  en.forEach((e, j) => {
+    ctx.fillStyle = '#58a6ff';
+    ctx.fillText(e, 220, 50 + j * 50);
+  });
+
+  // Alignment line Mon -> My
+  ctx.strokeStyle = '#2ea043';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(80, 95);
+  ctx.lineTo(210, 45);
+  ctx.stroke();
+}
+
+function checkQuiz(btn, isCorrect) {
+  const card = btn.closest('.quiz-card');
+  const feedback = card.querySelector('.quiz-feedback');
+  if (isCorrect) {
+    feedback.innerText = "Correct! Scaling prevents large values from driving softmax gradients to zero.";
+    feedback.style.color = "var(--success)";
+  } else {
+    feedback.innerText = "Incorrect. Try again!";
+    feedback.style.color = "var(--danger)";
+  }
+}
+
+window.onload = function() {
+  drawPE();
+  drawAttention();
+  drawMultiHead();
+  drawCausalMask();
+  drawCross();
+};
+</script>
+</body>
+</html>

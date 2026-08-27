@@ -1,0 +1,418 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---- Encoding & fonts -------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ---- Geometry (~1in margins) ------------------------------------------------
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+
+% ---- Math -------------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+
+% ---- Graphics, tables, colour ----------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+
+% ---- Callout boxes (breakable pill-tab tcolorboxes) -------------------------
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% ---- Callout glyphs ---------------------------------------------------------
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+
+% ---- Lists & spacing --------------------------------------------------------
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+
+% ---- Headers / footers ------------------------------------------------------
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+% ---- Colours ----------------------------------------------------------------
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+% ---- Running Header / Footer ------------------------------------------------
+\newcommand{\CourseShort}{DNN}
+\newcommand{\SessionNo}{13}
+\newcommand{\LectureTitle}{Transformers \& LLM Architectures}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyrule!55}\leaders\hrule height \headrulewidth\hfill}}
+
+% ---- Section Formatting -----------------------------------------------------
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{navy}}
+  {\thesection}
+  {0.8em}
+  {}
+  [{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}
+  {\sffamily\large\bfseries\color{navy!92}}
+  {\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+
+\newcommand{\secsub}[1]{%
+  \noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+
+\newcommand{\flipanswer}[1]{\rotatebox[origin=c]{180}{\parbox{0.92\linewidth}{\small #1}}}
+
+% ---- Callouts ---------------------------------------------------------------
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+% ---- BITS Brand -------------------------------------------------------------
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\bitslogochip}{}
+
+\newcommand{\titlebanner}[4]{%
+  \begin{tcolorbox}[
+    enhanced, breakable=false,
+    colback=navy, colframe=navy,
+    boxrule=0pt, arc=3pt, outer arc=3pt,
+    left=16pt, right=16pt, top=16pt, bottom=16pt,
+    before skip=2pt, after skip=14pt,
+    width=\linewidth ]
+    \noindent
+    \begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.26\linewidth}\raggedleft\bitslogochip\end{minipage}\par
+    \vspace{9pt}
+    {\sffamily\footnotesize\bfseries\color{white!85}%
+      \MakeUppercase{#1}}\par
+    \vspace{6pt}
+    {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} #2\par}
+    \vspace{5pt}
+    {\sffamily\large\color{white!88} #3\par}
+    \vspace{9pt}
+    {\color{white!55}\rule{\linewidth}{0.4pt}}\par
+    \vspace{6pt}
+    {\sffamily\footnotesize\color{white!82} #4\par}
+  \end{tcolorbox}%
+}
+
+\newcommand{\housefig}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{#1}%
+    \caption{#2}
+  \end{figure}%
+}
+
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\titlebanner
+  {Deep Neural Networks \textperiodcentered\ Module 9 Companion}
+  {Transformers \& LLM Architectures}
+  {From Self-Attention Mechanics to Encoder, Decoder, and BERT}
+  {Session 13 (02nd August 2026) \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every numerical walkthrough worked in full}
+
+\smallskip
+\noindent{\small\color{mutedtext}%
+Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}
+\smallskip
+
+\noindent\textbf{How to use this companion.}
+This companion breaks down every concept in Transformer models. We build the math step by step. We work out every slide example in full detail, including all matrix multiplications, scaling factors, softmax probabilities, and layer normalizations.
+
+\section{First taste: computing self-attention by hand}
+\secsub{Attention lets every token look at every other token and pick what matters.}
+
+Before writing formal equations, let us see how two words talk to each other.
+Suppose word 1 has vector $x_1 = [1, 0]$ and word 2 has vector $x_2 = [0, 1]$.
+We want word 1 to update its meaning based on word 2.
+
+We compute the similarity score between them using the dot product:
+$s_{11} = x_1 \cdot x_1 = 1$, and $s_{12} = x_1 \cdot x_2 = 0$.
+Next, we turn these scores into probabilities using softmax.
+The weight for word 1 attending to itself is $e^1 / (e^1 + e^0) \approx 2.718 / 3.718 \approx 0.73$.
+The weight for word 1 attending to word 2 is $e^0 / (e^1 + e^0) \approx 1 / 3.718 \approx 0.27$.
+
+Finally, word 1 updates its vector by blending:
+$z_1 = 0.73 \times [1, 0] + 0.27 \times [0, 1] = [0.73, 0.27]$.
+Word 1 now carries a piece of word 2's signal. That is self-attention in miniature.
+
+\begin{intuition}
+Self-attention acts like a dynamic spotlight. Each word asks every word in the sentence: "How relevant are you to me?" It then blends their information based on the answers.
+\end{intuition}
+
+\section{Positional Embeddings: injecting word order}
+\secsub{Self-attention is order-blind, so we must add position signals explicitly.}
+
+Matrix operations in attention do not care about sequence order.
+If you shuffle the words in a sentence, standard attention gives the exact same set of output vectors.
+To fix this, we add a \vocab{positional encoding} vector $PE_{(pos)}$ to each input token embedding $E_{(pos)}$.
+
+\begin{everyday}
+Imagine a choir where singers stand in a line. Without numbered name tags, you hear all voices at once, but cannot tell who stands first or last. Adding position numbers gives order to the sound.
+\end{everyday}
+
+\subsection{Sinusoidal positional encoding formulas}
+Vaswani et al. proposed using sine and cosine functions of different frequencies:
+\begin{align}
+  PE_{(pos, 2i)} &= \sin\left(\frac{pos}{10000^{2i / d_{model}}}\right) \\
+  PE_{(pos, 2i+1)} &= \cos\left(\frac{pos}{10000^{2i / d_{model}}}\right)
+\end{align}
+where $pos$ is the position in the sequence ($0, 1, 2, \dots$) and $i$ is the dimension index.
+
+Why sine and cosine?
+\begin{steps}
+  \item \textbf{Bounded values.} Sine and cosine always stay between $-1$ and $+1$. Raw position integers would grow too large and overwhelm token embeddings.
+  \item \textbf{Relative position as a linear shift.} For any offset $k$, $PE_{(pos+k)}$ can be expressed as a linear combination of $PE_{(pos)}$ using trig identity formulas.
+  \item \textbf{Generalization.} The deterministic formula works for sequence lengths longer than those seen during training.
+\end{steps}
+
+\housefig{figures/pe_curves.png}{Positional encoding curves across positions 0 to 19 for a toy 4-dimensional embedding.}
+
+\section{Layer Normalization versus Batch Normalization}
+\secsub{LayerNorm normalizes across feature dimensions per token, making it ideal for variable sequence lengths.}
+
+In Convolutional Networks, \vocab{Batch Normalization} computes the mean and variance across the batch dimension for each channel.
+However, in Natural Language Processing, sequence lengths vary from sentence to sentence.
+Batch statistics become unstable when batch sizes change or sequence lengths differ.
+
+\vocab{Layer Normalization} computes the mean $\mu$ and variance $\sigma^2$ across all feature dimensions for \emph{a single token independent of other items in the batch}.
+
+\begin{align}
+  \mu_i &= \frac{1}{d} \sum_{j=1}^d x_{i, j} \\
+  \sigma_i^2 &= \frac{1}{d} \sum_{j=1}^d (x_{i, j} - \mu_i)^2 \\
+  \hat{x}_{i, j} &= \frac{x_{i, j} - \mu_i}{\sqrt{\sigma_i^2 + \epsilon}} \cdot \gamma_j + \beta_j
+\end{align}
+
+\begin{watchout}
+Do not confuse LayerNorm with BatchNorm. BatchNorm normalizes vertically across sentences in a batch. LayerNorm normalizes horizontally across features within one token.
+\end{watchout}
+
+\section{The Core Attention Mechanism: Queries, Keys, Values}
+\secsub{Projections map token embeddings into Query, Key, and Value spaces.}
+
+Each token embedding $x_i \in \mathbb{R}^{d_{model}}$ is multiplied by three learned weight matrices:
+\begin{equation}
+  Q = X W^Q, \quad K = X W^K, \quad V = X W^V
+\end{equation}
+where $W^Q \in \mathbb{R}^{d_{model} \times d_k}$, $W^K \in \mathbb{R}^{d_{model} \times d_k}$, and $W^V \in \mathbb{R}^{d_{model} \times d_v}$.
+
+\subsection{Scaled Dot-Product Attention formula}
+\begin{equation}
+  \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V
+\end{equation}
+
+Why scale by $\sqrt{d_k}$?
+For large values of $d_k$, dot products grow large in magnitude. Large values push the softmax function into regions with extremely tiny gradients. Dividing by $\sqrt{d_k}$ keeps variance equal to 1 and stabilizes gradient flow.
+
+\housefig{figures/attention_heatmap.png}{Self-attention weight heatmap showing how tokens distribute attention across a sequence.}
+
+\section{Multi-Head Attention and Full Transformer Blocks}
+\secsub{Multi-head attention allows the model to attend to information from different representation subspaces.}
+
+Instead of computing attention once with $d_{model}$-dimensional vectors, \vocab{Multi-Head Attention} splits projections into $h$ smaller heads of size $d_k = d_{model} / h$.
+
+\begin{align}
+  \text{head}_i &= \text{Attention}(Q W_i^Q, K W_i^K, V W_i^V) \\
+  \text{MultiHead}(Q, K, V) &= \text{Concat}(\text{head}_1, \dots, \text{head}_h) W^O
+\end{align}
+
+\subsection{Feed-Forward Network and Residual Connections}
+Each attention sub-layer is wrapped with a residual connection and Layer Normalization:
+\begin{equation}
+  x_{out} = \text{LayerNorm}(x + \text{SubLayer}(x))
+\end{equation}
+Then, a position-wise Feed-Forward Network (FFN) applies two linear transformations with a ReLU activation in between:
+\begin{equation}
+  \text{FFN}(x) = \max(0, x W_1 + b_1) W_2 + b_2
+\end{equation}
+
+\section{Full Slide Numerical Walkthroughs}
+\secsub{Every numerical example from the lecture slides worked out step by step.}
+
+\begin{worked}{Encoder-Only 2 Tokens (Slide 33--38)}
+We have 2 tokens: $x_1 = [1, 0, 1, 0]$ ("I") and $x_2 = [0, 2, 0, 2]$ ("am"). $d_{model} = 4, d_k = d_v = 3$.
+Weight matrices:
+$$ W^Q = \begin{bmatrix} 1 & 0 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{bmatrix}, \quad
+W^K = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 1 \end{bmatrix}, \quad
+W^V = \begin{bmatrix} 0 & 1 & 1 \\ 1 & 0 & 0 \\ 1 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} $$
+
+\begin{steps}
+  \item \textbf{Project into Q, K, V.}
+        $Q_1 = x_1 W^Q = [1,0,1,0] W^Q = [2, 0, 2]$.
+        $Q_2 = x_2 W^Q = [0,2,0,2] W^Q = [0, 4, 0]$.
+        $K_1 = x_1 W^K = [1, 1, 0]$, $K_2 = x_2 W^K = [2, 2, 2]$.
+        $V_1 = x_1 W^V = [1, 2, 1]$, $V_2 = x_2 W^V = [2, 0, 2]$.
+  \item \textbf{Raw attention scores $Q K^T$.}
+        $s_{11} = Q_1 \cdot K_1 = 2(1) + 0(1) + 2(0) = 2$.
+        $s_{12} = Q_1 \cdot K_2 = 2(2) + 0(2) + 2(2) = 8$.
+        $s_{21} = Q_2 \cdot K_1 = 0(1) + 4(1) + 0(0) = 4$.
+        $s_{22} = Q_2 \cdot K_2 = 0(2) + 4(2) + 0(2) = 8$.
+  \item \textbf{Scale by $\sqrt{d_k} = \sqrt{3} \approx 1.732$.}
+        Scaled row 1: $[2/1.732, 8/1.732] = [1.155, 4.619]$.
+        Scaled row 2: $[4/1.732, 8/1.732] = [2.309, 4.619]$.
+  \item \textbf{Row-wise Softmax.}
+        Row 1 softmax: $e^{1.155} \approx 3.174, e^{4.619} \approx 101.39$. Weights $= [0.030, 0.970]$.
+        Row 2 softmax: $e^{2.309} \approx 10.06, e^{4.619} \approx 101.39$. Weights $= [0.090, 0.910]$.
+  \item \textbf{Weighted sum of Values $Z = \text{softmax} \cdot V$.}
+        $Z_1 = 0.030(V_1) + 0.970(V_2) = 0.030[1, 2, 1] + 0.970[2, 0, 2] = [1.970, 0.060, 1.970]$.
+        $Z_2 = 0.090(V_1) + 0.910(V_2) = 0.090[1, 2, 1] + 0.910[2, 0, 2] = [1.910, 0.180, 1.910]$.
+  \item \textbf{Residual Add \& LayerNorm.}
+        Add input back (projecting $Z_1$ back or taking residual directly): $x_1 + Z_1 = [1, 0, 1, 0] + [1.970, 0.060, 1.970, 0] = [2.970, 0.060, 2.970, 0.000]$.
+        Compute mean $\mu = 1.500$, var $\sigma^2 \approx 2.161, \sigma \approx 1.470$.
+        LayerNorm output for $x_1$: $[1.000, -0.980, 1.000, -1.020]$.
+\end{steps}
+\end{worked}
+
+\begin{worked}{Decoder-Only Causal Masking (Slide 55--62)}
+We have 3 tokens: $x_1 = [1, 0, 1]$, $x_2 = [0, 1, 1]$, $x_3 = [2, 0, 1]$.
+Raw scores $Q K^T$:
+$$ S = \begin{bmatrix} 2.0 & 4.0 & 1.0 \\ 1.0 & 5.0 & 2.0 \\ 3.0 & 2.0 & 6.0 \end{bmatrix} $$
+
+\begin{steps}
+  \item \textbf{Apply Causal Mask.}
+        Future tokens are masked by setting upper triangular positions to $-\infty$:
+        $$ S_{masked} = \begin{bmatrix} 2.0 & -\infty & -\infty \\ 1.0 & 5.0 & -\infty \\ 3.0 & 2.0 & 6.0 \end{bmatrix} $$
+  \item \textbf{Scale and Softmax.}
+        Scale by $\sqrt{3} \approx 1.732$.
+        Row 1: $[2.0/1.732, -\infty, -\infty] = [1.155, -\infty, -\infty]$. Softmax gives $[1.00, 0.00, 0.00]$.
+        Row 2: $[1.0/1.732, 5.0/1.732, -\infty] = [0.577, 2.887, -\infty]$. Softmax gives $[0.09, 0.91, 0.00]$.
+        Row 3: $[3.0/1.732, 2.0/1.732, 6.0/1.732] = [1.732, 1.155, 3.464]$. Softmax gives $[0.13, 0.07, 0.80]$.
+  \item \textbf{Predict Next Token.}
+        The output vector at position 3 feeds into $W_{out}$ to project to vocabulary logits, picking the highest probability next word.
+\end{steps}
+\end{worked}
+
+\begin{worked}{Encoder-Decoder Cross-Attention Alignment (Slide 72--83)}
+Task: Translate English "My name is Ravi" into French "Mon nom est Ravi".
+
+\begin{steps}
+  \item \textbf{Encoder Processing.}
+        English embeddings are combined with positional encodings, passed through self-attention and FFN to produce encoder output representations $H_{enc} \in \mathbb{R}^{4 \times 4}$.
+  \item \textbf{Decoder Masked Self-Attention.}
+        Decoder reads shifted target tokens ("<sos>", "Mon", "nom", "est") with causal masking.
+  \item \textbf{Cross-Attention Alignment.}
+        Queries come from French decoder states $Q_{dec} = H_{dec} W^Q$.
+        Keys and Values come from English encoder output $K_{enc} = H_{enc} W^K, V_{enc} = H_{enc} W^V$.
+        Softmax alignment weights show focus: "Mon" attends $0.409$ to "My", "nom" attends $0.447$ to "My" and $0.206$ to "name".
+\end{steps}
+\end{worked}
+
+\housefig{figures/cross_attention.png}{Cross-attention alignment weights connecting French target queries to English source keys.}
+
+\section{BERT and Pre-Trained Model Taxonomy}
+\secsub{Transformers fall into three main architectural families based on attention masking.}
+
+\begin{description}
+  \item[\vocab{Encoder-Only (Auto-Encoding):}] Uses bidirectional attention (no mask). Learns deep representations by predicting masked tokens (Masked Language Modeling). Examples: BERT, RoBERTa, ALBERT, ELECTRA.
+  \item[\vocab{Decoder-Only (Auto-Regressive):}] Uses causal masking. Generates text left-to-right token by token. Examples: GPT-3, GPT-4, LLaMA, Mistral.
+  \item[\vocab{Encoder-Decoder (Seq2Seq):}] Combines bidirectional encoder with causal decoder via cross-attention. Ideal for translation and summarization. Examples: T5, BART.
+\end{description}
+
+\subsection{BERT Variants and Model Distillation}
+BERT Base uses 12 layers, 12 attention heads, and 110M parameters.
+BERT Large uses 24 layers, 16 attention heads, and 340M parameters.
+Smaller variants like \vocab{DistilBERT} and \vocab{TinyBERT} use knowledge distillation to compress the model while retaining over 95\% of baseline performance at up to 9x faster inference speeds.
+
+\section*{Self-Test \& Summary}
+\addcontentsline{toc}{section}{Self-Test \& Summary}
+
+\subsection*{Self-Test Questions}
+\begin{enumerate}
+  \item Why do we divide dot-product attention scores by $\sqrt{d_k}$?
+        \flipanswer{To prevent large dot products from inflating softmax inputs, which would cause vanishing gradients.}
+  \item What is the main difference between LayerNorm and BatchNorm?
+        \flipanswer{BatchNorm computes statistics across the batch dimension per channel. LayerNorm computes statistics across feature dimensions per token.}
+  \item Why does a decoder need a causal mask?
+        \flipanswer{To prevent tokens from attending to future position tokens during autoregressive generation.}
+\end{enumerate}
+
+\section*{Glossary \& Symbols}
+\begin{description}[leftmargin=8.5em,style=nextline,font=\normalfont\bfseries\color{navy}]
+  \item[Self-Attention] A mechanism allowing tokens in a sequence to dynamically weigh and blend representations of each other.
+  \item[Positional Encoding] Sinusoidal or learned signals added to token embeddings to inject sequence order information.
+  \item[Layer Normalization] Feature normalization computed independently across hidden dimensions for each token.
+  \item[Cross-Attention] Attention layer where queries come from the decoder and keys/values come from the encoder.
+\end{description}
+
+\medskip
+\noindent\textbf{Symbols at a glance.}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\ \midrule
+$d_{model}$ & Hidden dimension size of token embeddings \\
+$d_k, d_v$ & Key/Query and Value projection dimension size \\
+$Q, K, V$ & Query, Key, and Value matrices \\
+$PE_{(pos, i)}$ & Positional encoding value at sequence position $pos$ and dimension $i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

@@ -1,0 +1,317 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\newcommand{\CourseShort}{DNN}
+\newcommand{\SessionNo}{14}
+\newcommand{\LectureTitle}{Optimizers in Deep Learning}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyrule!55}\leaders\hrule height \headrulewidth\hfill}}
+
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{navy}}
+  {\thesection}
+  {0.8em}
+  {}
+  [{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}
+  {\sffamily\large\bfseries\color{navy!92}}
+  {\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+
+\newcommand{\secsub}[1]{%
+  \noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+
+\newcommand{\flipanswer}[1]{\rotatebox[origin=c]{180}{\parbox{0.92\linewidth}{\small #1}}}
+
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\bitslogochip}{}
+
+\newcommand{\titlebanner}[4]{%
+  \begin{tcolorbox}[
+    enhanced, breakable=false,
+    colback=navy, colframe=navy,
+    boxrule=0pt, arc=3pt, outer arc=3pt,
+    left=16pt, right=16pt, top=16pt, bottom=16pt,
+    before skip=2pt, after skip=14pt,
+    width=\linewidth ]
+    \noindent
+    \begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.26\linewidth}\raggedleft\bitslogochip\end{minipage}\par
+    \vspace{9pt}
+    {\sffamily\footnotesize\bfseries\color{white!85}%
+      \MakeUppercase{#1}}\par
+    \vspace{6pt}
+    {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} #2\par}
+    \vspace{5pt}
+    {\sffamily\large\color{white!88} #3\par}
+    \vspace{9pt}
+    {\color{white!55}\rule{\linewidth}{0.4pt}}\par
+    \vspace{6pt}
+    {\sffamily\footnotesize\color{white!82} #4\par}
+  \end{tcolorbox}%
+}
+
+\newcommand{\housefig}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{#1}%
+    \caption{#2}
+  \end{figure}%
+}
+
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\titlebanner
+  {Deep Neural Networks \textperiodcentered\ Module 10 Companion}
+  {Optimizers in Deep Learning}
+  {From Gradient Descent to Momentum, NAG, Adagrad, RMSProp, and Adam}
+  {Session 14 (09th August 2026) \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every numerical table worked in full}
+
+\smallskip
+\noindent{\small\color{mutedtext}%
+Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}
+\smallskip
+
+\section{Introduction to Optimization Algorithms}
+\secsub{Optimization algorithms adjust neural network parameters to minimize the loss function.}
+
+Training a deep neural network means finding parameter weights $w$ that minimize a loss function $f(w)$.
+Gradient Descent uses the gradient vector $g_t = \nabla f(w_t)$ to take steps in the direction of steepest descent.
+
+\section{Detailed Optimizer Formulations \& Worked Examples}
+\secsub{All six classic optimization algorithms applied to the benchmark function $f(x) = x^2$ with $x_0 = 4.0, \eta = 0.1$.}
+
+We evaluate each optimizer for 3 iterations on $f(x) = x^2$, where the exact gradient is $g_t = \nabla f(x_t) = 2 x_t$.
+
+\begin{worked}{Gradient Descent (GD)}
+Update rule: $x_{t+1} = x_t - \eta g_t$.
+\begin{steps}
+  \item \textbf{Step $t=0$:} $x_0 = 4.000$, $g_0 = 2(4.0) = 8.000$.
+        $x_1 = 4.000 - 0.1(8.000) = 3.200$.
+  \item \textbf{Step $t=1$:} $x_1 = 3.200$, $g_1 = 2(3.2) = 6.400$.
+        $x_2 = 3.200 - 0.1(6.400) = 2.560$.
+  \item \textbf{Step $t=2$:} $x_2 = 2.560$, $g_2 = 2(2.56) = 5.120$.
+        $x_3 = 2.560 - 0.1(5.120) = 2.048$.
+\end{steps}
+\end{worked}
+
+\begin{worked}{SGD with Momentum ($\beta = 0.9, v_0 = 0$)}
+Update rules: $v_t = \beta v_{t-1} + \eta g_t$, $x_{t+1} = x_t - v_t$.
+\begin{steps}
+  \item \textbf{Step $t=0$:} $x_0 = 4.000, g_0 = 8.000$.
+        $v_0 = 0.9(0) + 0.1(8.0) = 0.800$.
+        $x_1 = 4.000 - 0.800 = 3.200$.
+  \item \textbf{Step $t=1$:} $x_1 = 3.200, g_1 = 6.400$.
+        $v_1 = 0.9(0.800) + 0.1(6.400) = 0.720 + 0.640 = 1.360$.
+        $x_2 = 3.200 - 1.360 = 1.840$.
+  \item \textbf{Step $t=2$:} $x_2 = 1.840, g_2 = 3.680$.
+        $v_2 = 0.9(1.360) + 0.1(3.680) = 1.224 + 0.368 = 1.592$.
+        $x_3 = 1.840 - 1.592 = 0.248$.
+\end{steps}
+\end{worked}
+
+\begin{worked}{Nesterov Accelerated Gradient (NAG, $\beta = 0.9$)}
+Look-ahead point: $u_t = x_t - \beta v_{t-1}$, $g_t = \nabla f(u_t) = 2 u_t$.
+$v_t = \beta v_{t-1} + \eta g_t$, $x_{t+1} = x_t - v_t$.
+\begin{steps}
+  \item \textbf{Step $t=0$:} $v_{-1} = 0 \implies u_0 = 4.000, g_0 = 8.000, v_0 = 0.800 \implies x_1 = 3.200$.
+  \item \textbf{Step $t=1$:} $u_1 = 3.200 - 0.9(0.800) = 2.480$.
+        $g_1 = 2(2.480) = 4.960$.
+        $v_1 = 0.9(0.800) + 0.1(4.960) = 0.720 + 0.496 = 1.216$.
+        $x_2 = 3.200 - 1.216 = 1.984$.
+  \item \textbf{Step $t=2$:} $u_2 = 1.984 - 0.9(1.216) = 0.890$.
+        $g_2 = 2(0.890) = 1.780$.
+        $v_2 = 0.9(1.216) + 0.1(1.780) = 1.0944 + 0.1780 = 1.272$.
+        $x_3 = 1.984 - 1.272 = 0.712$.
+\end{steps}
+\end{worked}
+
+\begin{worked}{Adagrad ($s_0 = 0, \epsilon = 10^{-8}$)}
+Accumulated squared gradient: $s_t = s_{t-1} + g_t^2$.
+Update rule: $x_{t+1} = x_t - \frac{\eta}{\sqrt{s_t + \epsilon}} g_t$.
+\begin{steps}
+  \item \textbf{Step $t=0$:} $x_0 = 4.000, g_0 = 8.000$.
+        $s_0 = 0 + 64.00 = 64.00$.
+        Step size $= 0.1 / \sqrt{64} = 0.01250$.
+        $x_1 = 4.000 - 0.01250(8.000) = 3.900$.
+  \item \textbf{Step $t=1$:} $x_1 = 3.900, g_1 = 7.800$.
+        $s_1 = 64.00 + (7.8)^2 = 64.00 + 60.84 = 124.84$.
+        Step size $= 0.1 / \sqrt{124.84} \approx 0.00895$.
+        $x_2 = 3.900 - 0.00895(7.800) \approx 3.830$.
+  \item \textbf{Step $t=2$:} $x_2 = 3.830, g_2 = 7.660$.
+        $s_2 = 124.84 + (7.66)^2 = 124.84 + 58.68 = 183.52$.
+        Step size $= 0.1 / \sqrt{183.52} \approx 0.00738$.
+        $x_3 = 3.830 - 0.00738(7.660) \approx 3.774$.
+\end{steps}
+\end{worked}
+
+\begin{worked}{RMSProp ($\beta = 0.9, r_0 = 0$)}
+Exponentially decaying average: $r_t = \beta r_{t-1} + (1-\beta) g_t^2$.
+Update rule: $x_{t+1} = x_t - \frac{\eta}{\sqrt{r_t + \epsilon}} g_t$.
+\begin{steps}
+  \item \textbf{Step $t=0$:} $x_0 = 4.000, g_0 = 8.000$.
+        $r_0 = 0.9(0) + 0.1(64.00) = 6.400$.
+        Step size $= 0.1 / \sqrt{6.400} \approx 0.03953$.
+        $x_1 = 4.000 - 0.03953(8.000) \approx 3.684$.
+  \item \textbf{Step $t=1$:} $x_1 = 3.684, g_1 = 7.368$.
+        $r_1 = 0.9(6.400) + 0.1(54.288) = 5.760 + 5.429 = 11.189$.
+        Step size $= 0.1 / \sqrt{11.189} \approx 0.02990$.
+        $x_2 = 3.684 - 0.02990(7.368) \approx 3.464$.
+  \item \textbf{Step $t=2$:} $x_2 = 3.464, g_2 = 6.928$.
+        $r_2 = 0.9(11.189) + 0.1(47.997) = 10.070 + 4.800 = 14.870$.
+        Step size $= 0.1 / \sqrt{14.870} \approx 0.02594$.
+        $x_3 = 3.464 - 0.02594(6.928) \approx 3.284$.
+\end{steps}
+\end{worked}
+
+\begin{worked}{Adam ($\beta_1 = 0.9, \beta_2 = 0.999$)}
+First moment: $m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$. Bias correction: $m_t' = m_t / (1 - \beta_1^t)$.
+Second moment: $v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2$. Bias correction: $v_t' = v_t / (1 - \beta_2^t)$.
+Update rule: $x_{t+1} = x_t - \frac{\eta}{\sqrt{v_t'} + \epsilon} m_t'$.
+\begin{steps}
+  \item \textbf{Step $t=0$ ($t=1$ in formula index):}
+        $g_0 = 8.000 \implies m_1 = 0.800, v_1 = 0.064$.
+        Bias corrected: $m_1' = 0.800 / 0.1 = 8.000$, $v_1' = 0.064 / 0.001 = 64.000$.
+        $x_1 = 4.000 - 0.1(8.000 / \sqrt{64.000}) = 4.000 - 0.100 = 3.900$.
+  \item \textbf{Step $t=1$ ($t=2$):}
+        $x_1 = 3.200 \implies g_1 = 7.800$, $m_2' \approx 7.895$, $v_2' \approx 62.42$.
+        $x_2 = 3.800$.
+  \item \textbf{Step $t=2$ ($t=3$):}
+        $x_2 = 3.800 \implies g_2 = 7.600$, $m_3' \approx 7.786$, $v_3' \approx 60.87$.
+        $x_3 = 3.700$.
+\end{steps}
+\end{worked}
+
+\housefig{figures/optimizer_trajectories.png}{3-step parameter trajectories across all 6 optimizers on the loss function $f(x)=x^2$.}
+
+\section{Optimizer Comparison & Practical Guidelines}
+\secsub{How to choose the right optimizer for deep learning tasks.}
+
+\begin{center}\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Optimizer} & \textbf{Adapts LR?} & \textbf{Uses Momentum?} & \textbf{Typical Use Case} \\ \midrule
+GD / SGD & No & No & Simple convex problems, teaching baseline \\
+Momentum & No & Yes & Escaping local minima and ravines \\
+NAG & No & Yes (look-ahead) & Faster, more stable convergence \\
+Adagrad & Yes (per-param) & No & Sparse features (NLP, embeddings) \\
+RMSProp & Yes (EMA) & No & Non-stationary objectives, RNNs \\
+Adam & Yes (EMA) & Yes & Default choice for most deep learning models \\
+\bottomrule
+\end{tabular}%
+}
+\end{center}
+
+\begin{keytake}
+Start with Adam ($\eta \approx 10^{-3} \dots 3 \times 10^{-4}$). For vision tasks requiring maximum generalization, SGD with momentum and learning rate decay often achieves slightly better test set performance.
+\end{keytake}
+
+\section*{Self-Test \& Summary}
+\addcontentsline{toc}{section}{Self-Test \& Summary}
+
+\subsection*{Self-Test Questions}
+\begin{enumerate}
+  \item Why does Adagrad stop learning in deep networks?
+        \flipanswer{Because $s_t$ accumulates squared gradients monotonically without decay, driving step sizes to zero.}
+  \item How does RMSProp fix Adagrad's stopping problem?
+        \flipanswer{By replacing total sum of squares with an exponentially decaying moving average.}
+  \item What is NAG's look-ahead mechanism?
+        \flipanswer{It evaluates the gradient at $x_t - \beta v_{t-1}$ rather than $x_t$, anticipating where momentum will carry the parameters.}
+\end{enumerate}
+
+\end{document}

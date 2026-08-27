@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Regularization of Deep Models</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --heading: #f0f6fc;
+      --accent: #58a6ff;
+      --accent-hover: #1f6feb;
+      --success: #2ea043;
+      --warning: #d29922;
+      --danger: #f85149;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      overflow-x: auto;
+      overflow-wrap: break-word;
+    }
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 280px;
+      background: #010409;
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    .brand { font-weight: bold; color: #fff; font-size: 1.1rem; margin-bottom: 5px; }
+    .subbrand { color: #8b949e; font-size: 0.85rem; margin-bottom: 25px; }
+    .nav-list { list-style: none; padding: 0; margin: 0; }
+    .nav-list li { margin-bottom: 8px; }
+    .nav-list a { color: #8b949e; text-decoration: none; font-size: 0.9rem; display: block; padding: 6px 10px; border-radius: 6px; }
+    .nav-list a:hover, .nav-list a.active { color: var(--accent); background: #161b22; }
+    .main { margin-left: 280px; padding: 40px; max-width: 900px; width: 100%; box-sizing: border-box; }
+    .hero { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 40px; }
+    .hero h1 { color: var(--heading); margin: 0 0 10px 0; font-size: 2.2rem; }
+    .hero p { color: #8b949e; margin: 0; }
+    .chapter { margin-bottom: 60px; scroll-margin-top: 40px; }
+    h2 { color: var(--heading); border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 1.5rem; }
+    .lab-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .controls { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+    canvas { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; width: 100%; height: 280px; }
+    .quiz-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 15px 0; }
+    .quiz-options button { display: block; width: 100%; text-align: left; background: #21262d; color: var(--text); border: 1px solid var(--border); padding: 10px 15px; border-radius: 6px; margin: 8px 0; cursor: pointer; }
+    .quiz-options button:hover { border-color: var(--accent); }
+    .quiz-feedback { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="brand">WILP, BITS Pilani</div>
+    <div class="subbrand">DNN · Session 15</div>
+    <ul class="nav-list">
+      <li><a href="#ch1">1. Overfitting & Capacity</a></li>
+      <li><a href="#ch2">2. L1 vs L2 Geometry Lab</a></li>
+      <li><a href="#ch3">3. Dropout Simulator</a></li>
+      <li><a href="#ch4">4. Early Stopping & Augmentation</a></li>
+      <li><a href="#quiz">5. Knowledge Check Quiz</a></li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="hero">
+      <h1>Regularization of Deep Models</h1>
+      <p>Session 15 Interactive Lecture · Work Integrated Learning Programmes, BITS Pilani</p>
+    </div>
+
+    <!-- Chapter 1 -->
+    <div id="ch1" class="chapter">
+      <h2>1. Overfitting & Capacity</h2>
+      <p>Regularization consists of techniques designed to reduce generalization error on unseen test data without inflating training loss.</p>
+    </div>
+
+    <!-- Chapter 2 -->
+    <div id="ch2" class="chapter">
+      <h2>2. L1 vs L2 Geometry Lab</h2>
+      <p>Toggle between L1 (Diamond / Lasso) and L2 (Circle / Weight Decay) constraint regions to observe how loss contours touch the penalty boundary.</p>
+
+      <div class="lab-box">
+        <div class="controls">
+          <label>Penalty Type:
+            <select id="regType" onchange="drawReg()">
+              <option value="l1">L1 Regularization (Lasso)</option>
+              <option value="l2">L2 Regularization (Weight Decay)</option>
+            </select>
+          </label>
+        </div>
+        <canvas id="regCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 3 -->
+    <div id="ch3" class="chapter">
+      <h2>3. Dropout Simulator</h2>
+      <p>Adjust the dropout probability $p$ to see hidden units randomly deactivated during a forward pass.</p>
+
+      <div class="lab-box">
+        <div class="controls">
+          <label>Dropout Probability p: <input type="range" id="pVal" min="0" max="0.8" value="0.5" step="0.1" oninput="drawDropout()"></label>
+          <span id="pDisp">0.50</span>
+          <button onclick="drawDropout()" style="background:var(--accent); border:none; color:#fff; padding:6px 12px; border-radius:4px; cursor:pointer;">Resample Dropout</button>
+        </div>
+        <canvas id="dropCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 4 -->
+    <div id="ch4" class="chapter">
+      <h2>4. Early Stopping & Data Augmentation</h2>
+      <p>Early stopping halts training when validation loss stops decreasing for a specified patience parameter. Data augmentation applies domain transformations to artificially expand training diversity.</p>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz" class="chapter">
+      <h2>5. Knowledge Check Quiz</h2>
+      <div class="quiz-card">
+        <p><strong>Q1: Why does L1 regularization encourage sparse model weights?</strong></p>
+        <div class="quiz-options">
+          <button onclick="checkQuiz(this, false)">Because it squares all gradient updates</button>
+          <button onclick="checkQuiz(this, true)">Because its diamond constraint region has sharp corners along coordinate axes</button>
+          <button onclick="checkQuiz(this, false)">Because it doubles learning rates for zero-valued weights</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function drawReg() {
+  const type = document.getElementById('regType').value;
+  const canvas = document.getElementById('regCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = 80;
+
+  // Draw axes
+  ctx.strokeStyle = '#30363d';
+  ctx.beginPath();
+  ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+  ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+  ctx.stroke();
+
+  // Draw constraint
+  ctx.strokeStyle = type === 'l1' ? '#58a6ff' : '#2ea043';
+  ctx.fillStyle = type === 'l1' ? 'rgba(88, 166, 255, 0.2)' : 'rgba(46, 160, 67, 0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  if (type === 'l1') {
+    ctx.moveTo(cx + r, cy);
+    ctx.lineTo(cx, cy - r);
+    ctx.lineTo(cx - r, cy);
+    ctx.lineTo(cx, cy + r);
+    ctx.closePath();
+  } else {
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  ctx.stroke();
+
+  // Draw loss ellipse
+  ctx.strokeStyle = '#bc8cff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(cx + 60, cy - 60, 70, 35, Math.PI / 4, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = '#f0f6fc';
+  ctx.font = '14px sans-serif';
+  ctx.fillText(type === 'l1' ? "L1 Diamond (Corner Hit -> Sparse w1=0)" : "L2 Smooth Circle (Tangency Shrinkage)", 20, 30);
+}
+
+function drawDropout() {
+  const p = parseFloat(document.getElementById('pVal').value);
+  document.getElementById('pDisp').innerText = p.toFixed(2);
+  const canvas = document.getElementById('dropCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const units = 8;
+  for (let i = 0; i < units; i++) {
+    const dropped = Math.random() < p;
+    const x = 50 + i * (canvas.width - 100) / (units - 1);
+    const y = canvas.height / 2;
+
+    ctx.fillStyle = dropped ? '#f85149' : '#2ea043';
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '12px sans-serif';
+    ctx.fillText(dropped ? "OFF" : "ON", x - 12, y + 4);
+  }
+}
+
+function checkQuiz(btn, isCorrect) {
+  const card = btn.closest('.quiz-card');
+  const feedback = card.querySelector('.quiz-feedback');
+  if (isCorrect) {
+    feedback.innerText = "Correct! The sharp corners of L1 along axes drive parameters exactly to zero.";
+    feedback.style.color = "var(--success)";
+  } else {
+    feedback.innerText = "Incorrect. Try again!";
+    feedback.style.color = "var(--danger)";
+  }
+}
+
+window.onload = function() {
+  drawReg();
+  drawDropout();
+};
+</script>
+</body>
+</html>
