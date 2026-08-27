@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Session 10: Recurrent Neural Networks, BPTT, LSTM &amp; GRU</title>
+
+  <!-- MathJax for rendering math equations -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-orange: #fb923c;
+      --accent-purple: #c084fc;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Sidebar Navigation */
+    #sidebar {
+      width: 280px;
+      background-color: #0b0f19;
+      border-right: 1px solid var(--border-color);
+      padding: 24px 16px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      overflow-y: auto;
+    }
+    .brand {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+    .course-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-list { list-style: none; }
+    .nav-item { margin-bottom: 8px; }
+    .nav-link {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--panel-bg);
+      color: var(--accent-blue);
+    }
+
+    /* Main Content */
+    #content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 40px 60px;
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-blue);
+      padding: 32px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+    }
+    .hero-banner h1 { font-size: 2.2rem; margin-bottom: 8px; color: var(--text-main); }
+    .hero-banner p { color: var(--text-muted); font-size: 1.05rem; }
+
+    section { margin-bottom: 50px; scroll-margin-top: 30px; }
+    h2 {
+      font-size: 1.6rem;
+      color: var(--accent-blue);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    p { margin-bottom: 16px; font-size: 1rem; color: #cbd5e1; }
+
+    /* Interactive Lab Box */
+    .lab-box {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .lab-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-group label { font-size: 0.85rem; color: var(--text-muted); }
+    input[type=range] { width: 160px; }
+    canvas {
+      background-color: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 100%;
+      height: 240px;
+      display: block;
+    }
+
+    /* Callouts & Tables */
+    .callout {
+      background-color: rgba(56, 189, 248, 0.1);
+      border-left: 4px solid var(--accent-blue);
+      padding: 16px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .callout-title { font-weight: 700; color: var(--accent-blue); margin-bottom: 6px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th { background-color: var(--panel-bg); color: var(--accent-blue); }
+
+    .step-list { margin-left: 20px; margin-bottom: 20px; }
+    .step-list li { margin-bottom: 8px; }
+
+    /* Button styling */
+    .btn {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background-color: #7dd3fc; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="brand">WILP, BITS Pilani</div>
+    <div class="course-title">Deep Neural Networks</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#sec1" class="nav-link active">1. Why Sequence Models?</a></li>
+      <li class="nav-item"><a href="#sec2" class="nav-link">2. Vanilla RNN Architecture</a></li>
+      <li class="nav-item"><a href="#sec3" class="nav-link">3. BPTT &amp; Vanishing Gradients</a></li>
+      <li class="nav-item"><a href="#sec4" class="nav-link">4. Long Short-Term Memory (LSTM)</a></li>
+      <li class="nav-item"><a href="#sec5" class="nav-link">5. Gated Recurrent Units (GRU)</a></li>
+      <li class="nav-item"><a href="#sec6" class="nav-link">6. Worked Examples &amp; Quiz</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div id="content">
+    <div class="hero-banner">
+      <h1>Session 10: Recurrent Neural Networks &amp; Gated Memory</h1>
+      <p>Mastering sequential dependencies, Backpropagation Through Time (BPTT), LSTM Cell State highways, and GRU gating mechanisms.</p>
+    </div>
+
+    <!-- Section 1 -->
+    <section id="sec1">
+      <h2>1. Why Sequence Models?</h2>
+      <p>Standard feedforward neural networks assume every sample is independent. However, real-world data like sentences, stock prices, audio, and videos depend on order.</p>
+
+      <div class="callout">
+        <div class="callout-title">Everyday Analogy: Conveyor Belt Inspector</div>
+        <p>If an inspector treats every item independently, they miss contextual cues. If item 7 is slightly damaged, item 8 is very likely defective! A sequence model keeps memory of item 7 while inspecting item 8.</p>
+      </div>
+
+      <div class="lab-box">
+        <div class="lab-title">Interactive Lab 1: Sequence Context Simulator</div>
+        <p>Adjust the sequence length and watch how context memory affects prediction accuracy.</p>
+        <div class="controls">
+          <div class="control-group">
+            <label for="seqLen">Sequence Length (Steps): <span id="seqLenVal">5</span></label>
+            <input type="range" id="seqLen" min="1" max="10" value="5" oninput="updateLab1()">
+          </div>
+        </div>
+        <canvas id="canvas1"></canvas>
+      </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section id="sec2">
+      <h2>2. Vanilla RNN Architecture</h2>
+      <p>Recurrent Neural Networks pass a hidden state vector $h_t$ across time. At each step $t$, the network reuses the exact same weight matrices $W_{hx}, W_{hh}, W_{yh}$.</p>
+      <p>The mathematical formulation for the forward pass is:</p>
+      $$h_t = \tanh(W_{hx} x_t + W_{hh} h_{t-1} + b_h)$$
+      $$\hat{y}_t = \text{softmax}(W_{yh} h_t + b_y)$$
+
+      <div class="lab-box">
+        <div class="lab-title">Interactive Lab 2: Unrolled Graph &amp; Parameter Sharing</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="hiddenUnits">Hidden State Dimension ($m$): <span id="huVal">3</span></label>
+            <input type="range" id="hiddenUnits" min="1" max="8" value="3" oninput="updateLab2()">
+          </div>
+        </div>
+        <canvas id="canvas2"></canvas>
+      </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section id="sec3">
+      <h2>3. BPTT &amp; Vanishing Gradients</h2>
+      <p>Backpropagation Through Time (BPTT) unrolls the graph backwards across timesteps. Multiplying activation derivatives and weight matrices repeatedly causes exponential decay.</p>
+
+      $$\frac{\partial L_T}{\partial h_k} = \frac{\partial L_T}{\partial h_T} \prod_{j=k+1}^{T} \frac{\partial h_j}{\partial h_{j-1}}$$
+
+      <div class="lab-box">
+        <div class="lab-title">Interactive Lab 3: Vanishing Gradient Decay Visualizer</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="gradNorm">Gradient Factor per Step: <span id="gnVal">0.80</span></label>
+            <input type="range" id="gradNorm" min="0.1" max="0.99" step="0.01" value="0.80" oninput="updateLab3()">
+          </div>
+        </div>
+        <canvas id="canvas3"></canvas>
+      </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section id="sec4">
+      <h2>4. Long Short-Term Memory (LSTM)</h2>
+      <p>LSTMs prevent vanishing gradients by using an additive Cell State highway $C_t$ controlled by three multiplicative gates:</p>
+      <ul class="step-list">
+        <li><strong>Forget Gate:</strong> $f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f)$</li>
+        <li><strong>Input Gate:</strong> $i_t = \sigma(W_i x_t + U_i h_{t-1} + b_i)$</li>
+        <li><strong>Candidate State:</strong> $\tilde{C}_t = \tanh(W_c x_t + U_c h_{t-1} + b_c)$</li>
+        <li><strong>Cell State Update:</strong> $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$</li>
+        <li><strong>Output Gate:</strong> $o_t = \sigma(W_o x_t + U_o h_{t-1} + b_o)$</li>
+        <li><strong>Hidden State:</strong> $h_t = o_t \odot \tanh(C_t)$</li>
+      </ul>
+    </section>
+
+    <!-- Section 5 -->
+    <section id="sec5">
+      <h2>5. Gated Recurrent Units (GRU)</h2>
+      <p>GRUs simplify LSTM by combining cell and hidden states into a single vector $h_t$ using two gates: Reset ($r_t$) and Update ($z_t$).</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>GRU</th>
+            <th>LSTM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Gates</td>
+            <td>2 (Reset, Update)</td>
+            <td>3 (Forget, Input, Output)</td>
+          </tr>
+          <tr>
+            <td>State Vectors</td>
+            <td>1 ($h_t$)</td>
+            <td>2 ($C_t, h_t$)</td>
+          </tr>
+          <tr>
+            <td>Parameter Count</td>
+            <td>$3 \times (m \cdot d + m^2 + m)$</td>
+            <td>$4 \times (m \cdot d + m^2 + m)$</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 6 -->
+    <section id="sec6">
+      <h2>6. Worked Numerical Example &amp; Final Quiz</h2>
+      <div class="callout">
+        <div class="callout-title">Fully Solved GRU Numerical</div>
+        <p><strong>Given:</strong> $x_t = 1.0, h_{t-1} = 0.5$, Reset params ($W_r=0.2, U_r=0.5, b_r=0.0$), Update params ($W_z=0.8, U_z=-0.1, b_z=0.1$), Candidate params ($W_h=0.5, U_h=0.9, b_h=-0.2$).</p>
+        <ul class="step-list">
+          <li>Reset Gate: $r_t = \sigma(0.2(1) + 0.5(0.5) + 0) = \sigma(0.45) \approx 0.6107$</li>
+          <li>Update Gate: $z_t = \sigma(0.8(1) - 0.1(0.5) + 0.1) = \sigma(0.85) \approx 0.7006$</li>
+          <li>Gated Memory: $r_t \odot h_{t-1} = 0.6107 \times 0.5 = 0.3054$</li>
+          <li>Candidate: $\tilde{h}_t = \tanh(0.5(1) + 0.9(0.3054) - 0.2) = \tanh(0.5748) \approx 0.5188$</li>
+          <li>Final Output: $h_t = (1 - 0.7006)(0.5) + 0.7006(0.5188) = 0.1497 + 0.3635 = 0.5132$</li>
+        </ul>
+      </div>
+
+      <button class="btn" onclick="alert('Correct! GRU has 3 gating matrices while LSTM has 4.')">Check Quiz Knowledge</button>
+    </section>
+  </div>
+
+  <script>
+    function updateLab1() {
+      const val = document.getElementById('seqLen').value;
+      document.getElementById('seqLenVal').innerText = val;
+      const canvas = document.getElementById('canvas1');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('Sequence Context across ' + val + ' timesteps', 20, 30);
+
+      const stepWidth = (canvas.width - 60) / val;
+      for (let i = 0; i < val; i++) {
+        let x = 30 + i * stepWidth;
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + stepWidth/2, 120, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.textAlign = 'center';
+        ctx.fillText('x' + (i+1), x + stepWidth/2, 125);
+
+        if (i < val - 1) {
+          ctx.strokeStyle = '#fb923c';
+          ctx.beginPath();
+          ctx.moveTo(x + stepWidth/2 + 20, 120);
+          ctx.lineTo(x + stepWidth + stepWidth/2 - 20, 120);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function updateLab2() {
+      const val = document.getElementById('hiddenUnits').value;
+      document.getElementById('huVal').innerText = val;
+      const canvas = document.getElementById('canvas2');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#4ade80';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('Hidden Dimension m = ' + val + ' (Parameters = ' + (val*val + val*2 + val) + ')', 20, 30);
+    }
+
+    function updateLab3() {
+      const val = parseFloat(document.getElementById('gradNorm').value);
+      document.getElementById('gnVal').innerText = val.toFixed(2);
+      const canvas = document.getElementById('canvas3');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#fb923c';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      for (let t = 1; t <= 10; t++) {
+        let mag = Math.pow(val, t);
+        let x = 40 + (t - 1) * (canvas.width - 80) / 9;
+        let y = canvas.height - 30 - mag * (canvas.height - 60);
+        if (t === 1) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    window.onload = function() {
+      updateLab1();
+      updateLab2();
+      updateLab3();
+    };
+  </script>
+</body>
+</html>

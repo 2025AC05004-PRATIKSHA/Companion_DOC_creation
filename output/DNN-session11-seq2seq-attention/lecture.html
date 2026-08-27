@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Session 11: Seq2Seq &amp; Attention Mechanisms</title>
+
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-orange: #fb923c;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    #sidebar {
+      width: 280px;
+      background-color: #0b0f19;
+      border-right: 1px solid var(--border-color);
+      padding: 24px 16px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      overflow-y: auto;
+    }
+    .brand {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+    .course-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-list { list-style: none; }
+    .nav-item { margin-bottom: 8px; }
+    .nav-link {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--panel-bg);
+      color: var(--accent-blue);
+    }
+
+    #content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 40px 60px;
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-blue);
+      padding: 32px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+    }
+    .hero-banner h1 { font-size: 2.2rem; margin-bottom: 8px; color: var(--text-main); }
+    .hero-banner p { color: var(--text-muted); font-size: 1.05rem; }
+
+    section { margin-bottom: 50px; scroll-margin-top: 30px; }
+    h2 {
+      font-size: 1.6rem;
+      color: var(--accent-blue);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    p { margin-bottom: 16px; font-size: 1rem; color: #cbd5e1; }
+
+    .lab-box {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .lab-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+    }
+    .controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-group label { font-size: 0.85rem; color: var(--text-muted); }
+    input[type=range] { width: 160px; }
+    canvas {
+      background-color: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 100%;
+      height: 240px;
+      display: block;
+    }
+
+    .callout {
+      background-color: rgba(56, 189, 248, 0.1);
+      border-left: 4px solid var(--accent-blue);
+      padding: 16px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .callout-title { font-weight: 700; color: var(--accent-blue); margin-bottom: 6px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th { background-color: var(--panel-bg); color: var(--accent-blue); }
+
+    .step-list { margin-left: 20px; margin-bottom: 20px; }
+    .step-list li { margin-bottom: 8px; }
+
+    .btn {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <div class="brand">WILP, BITS Pilani</div>
+    <div class="course-title">Deep Neural Networks</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#sec1" class="nav-link active">1. Seq2Seq Bottleneck</a></li>
+      <li class="nav-item"><a href="#sec2" class="nav-link">2. The Attention Mechanism</a></li>
+      <li class="nav-item"><a href="#sec3" class="nav-link">3. Attention Math &amp; Scores</a></li>
+      <li class="nav-item"><a href="#sec4" class="nav-link">4. Worked Numerical &amp; Lab</a></li>
+    </ul>
+  </div>
+
+  <div id="content">
+    <div class="hero-banner">
+      <h1>Session 11: Seq2Seq &amp; Attention Mechanisms</h1>
+      <p>Mastering Encoder-Decoder bottlenecks, soft sequence alignment, and dynamic context calculation.</p>
+    </div>
+
+    <section id="sec1">
+      <h2>1. The Seq2Seq Bottleneck Problem</h2>
+      <p>Traditional sequence-to-sequence models squeeze an entire input sentence into one fixed context vector $c$. Long sentences suffer from severe information loss.</p>
+    </section>
+
+    <section id="sec2">
+      <h2>2. The Attention Mechanism</h2>
+      <p>Attention creates a dynamic context vector $c_i$ for each decoder step $i$ by taking a weighted sum over all encoder hidden states $h_j$:</p>
+      $$c_i = \sum_{j=1}^{T} \alpha_{ij} h_j$$
+
+      <div class="lab-box">
+        <div class="lab-title">Interactive Lab 1: Dynamic Context Vector Visualizer</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="attFocus">Attention Focus Token: <span id="afVal">Token 3</span></label>
+            <input type="range" id="attFocus" min="1" max="5" value="3" oninput="updateLab1()">
+          </div>
+        </div>
+        <canvas id="canvas1"></canvas>
+      </div>
+    </section>
+
+    <section id="sec3">
+      <h2>3. Attention Math &amp; Scores</h2>
+      <p>Alignment scores $e_{ij}$ evaluate how well decoder state $s_{i-1}$ matches encoder state $h_j$. Softmax turns raw scores into probability weights $\alpha_{ij}$.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Attention Variant</th>
+            <th>Alignment Score Equation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bahdanau (Additive)</td>
+            <td>$e_{ij} = v_a^T \tanh(W_a s_{i-1} + U_a h_j)$</td>
+          </tr>
+          <tr>
+            <td>Luong (Multiplicative)</td>
+            <td>$e_{ij} = s_{i-1}^T W_a h_j$</td>
+          </tr>
+          <tr>
+            <td>Dot Product</td>
+            <td>$e_{ij} = s_{i-1}^T h_j$</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sec4">
+      <h2>4. Worked Numerical &amp; Self-Test</h2>
+      <div class="callout">
+        <div class="callout-title">Fully Worked Attention Example</div>
+        <p>Given encoder states $h_1 = [1,0]^T, h_2 = [0,2]^T, h_3 = [1,1]^T$ and decoder state $s = [2,1]^T$:</p>
+        <ul class="step-list">
+          <li>Dot Scores: $e_1 = 2.0, e_2 = 2.0, e_3 = 3.0$</li>
+          <li>Softmax Weights: $\alpha_1 \approx 0.2119, \alpha_2 \approx 0.2119, \alpha_3 \approx 0.5761$</li>
+          <li>Context Vector: $c = 0.2119 h_1 + 0.2119 h_2 + 0.5761 h_3 = [0.7880, 0.9999]^T$</li>
+        </ul>
+      </div>
+
+      <button class="btn" onclick="alert('Attention weights always sum up to 1.0 due to Softmax!')">Check Attention Property</button>
+    </section>
+  </div>
+
+  <script>
+    function updateLab1() {
+      const val = parseInt(document.getElementById('attFocus').value);
+      document.getElementById('afVal').innerText = 'Token ' + val;
+      const canvas = document.getElementById('canvas1');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('Encoder Hidden States & Attention Distribution', 20, 30);
+
+      const numTokens = 5;
+      const stepWidth = (canvas.width - 60) / numTokens;
+
+      for (let i = 1; i <= numTokens; i++) {
+        let x = 30 + (i - 1) * stepWidth;
+        let isFocused = (i === val);
+        let barHeight = isFocused ? 120 : 40;
+
+        ctx.fillStyle = isFocused ? '#fb923c' : '#2b5c8f';
+        ctx.fillRect(x + 10, canvas.height - 40 - barHeight, stepWidth - 20, barHeight);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.textAlign = 'center';
+        ctx.fillText('h' + i, x + stepWidth/2, canvas.height - 15);
+      }
+    }
+
+    window.onload = function() {
+      updateLab1();
+    };
+  </script>
+</body>
+</html>
