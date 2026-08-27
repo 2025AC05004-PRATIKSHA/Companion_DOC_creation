@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Optimizers in Deep Learning</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --heading: #f0f6fc;
+      --accent: #58a6ff;
+      --accent-hover: #1f6feb;
+      --success: #2ea043;
+      --warning: #d29922;
+      --danger: #f85149;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      overflow-x: auto;
+      overflow-wrap: break-word;
+    }
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 280px;
+      background: #010409;
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    .brand { font-weight: bold; color: #fff; font-size: 1.1rem; margin-bottom: 5px; }
+    .subbrand { color: #8b949e; font-size: 0.85rem; margin-bottom: 25px; }
+    .nav-list { list-style: none; padding: 0; margin: 0; }
+    .nav-list li { margin-bottom: 8px; }
+    .nav-list a { color: #8b949e; text-decoration: none; font-size: 0.9rem; display: block; padding: 6px 10px; border-radius: 6px; }
+    .nav-list a:hover, .nav-list a.active { color: var(--accent); background: #161b22; }
+    .main { margin-left: 280px; padding: 40px; max-width: 900px; width: 100%; box-sizing: border-box; }
+    .hero { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 40px; }
+    .hero h1 { color: var(--heading); margin: 0 0 10px 0; font-size: 2.2rem; }
+    .hero p { color: #8b949e; margin: 0; }
+    .chapter { margin-bottom: 60px; scroll-margin-top: 40px; }
+    h2 { color: var(--heading); border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 1.5rem; }
+    .lab-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 20px 0; }
+    .controls { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+    canvas { background: #0d1117; border: 1px solid var(--border); border-radius: 6px; width: 100%; height: 280px; }
+    .quiz-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 15px 0; }
+    .quiz-options button { display: block; width: 100%; text-align: left; background: #21262d; color: var(--text); border: 1px solid var(--border); padding: 10px 15px; border-radius: 6px; margin: 8px 0; cursor: pointer; }
+    .quiz-options button:hover { border-color: var(--accent); }
+    .quiz-feedback { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="brand">WILP, BITS Pilani</div>
+    <div class="subbrand">DNN · Session 14</div>
+    <ul class="nav-list">
+      <li><a href="#ch1">1. Optimization Overview</a></li>
+      <li><a href="#ch2">2. Live Optimizer Simulator Lab</a></li>
+      <li><a href="#ch3">3. Step-by-Step Benchmark</a></li>
+      <li><a href="#ch4">4. Comparison & Selection</a></li>
+      <li><a href="#quiz">5. Knowledge Check Quiz</a></li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="hero">
+      <h1>Optimizers in Deep Learning</h1>
+      <p>Session 14 Interactive Lecture · Work Integrated Learning Programmes, BITS Pilani</p>
+    </div>
+
+    <!-- Chapter 1 -->
+    <div id="ch1" class="chapter">
+      <h2>1. Optimization Overview</h2>
+      <p>Optimization algorithms update parameter weights along the gradient of the loss function $f(w)$. Standard Gradient Descent uses fixed learning rates, whereas adaptive methods scale step sizes dynamically.</p>
+    </div>
+
+    <!-- Chapter 2 -->
+    <div id="ch2" class="chapter">
+      <h2>2. Live Optimizer Simulator Lab</h2>
+      <p>Select an optimizer and adjust the learning rate $\eta$ to observe parameter trajectories on $f(x) = x^2$.</p>
+
+      <div class="lab-box">
+        <div class="controls">
+          <label>Optimizer:
+            <select id="optSelect" onchange="resetSim()">
+              <option value="gd">Gradient Descent (GD)</option>
+              <option value="momentum">SGD + Momentum</option>
+              <option value="adagrad">Adagrad</option>
+              <option value="rmsprop">RMSProp</option>
+              <option value="adam">Adam</option>
+            </select>
+          </label>
+          <label>Learning Rate $\eta$: <input type="range" id="lrVal" min="0.01" max="0.3" value="0.1" step="0.01" oninput="resetSim()"></label>
+          <span id="lrDisp">0.10</span>
+          <button onclick="stepSim()" style="background:var(--accent); border:none; color:#fff; padding:6px 12px; border-radius:4px; cursor:pointer;">Step Step</button>
+          <button onclick="resetSim()" style="background:#30363d; border:none; color:#fff; padding:6px 12px; border-radius:4px; cursor:pointer;">Reset</button>
+        </div>
+        <canvas id="optCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chapter 3 -->
+    <div id="ch3" class="chapter">
+      <h2>3. Step-by-Step Benchmark</h2>
+      <p>All six algorithms start at $x_0 = 4.0$ on $f(x) = x^2$ with $\eta = 0.1$. Below are the resulting locations after 3 steps:</p>
+      <ul>
+        <li><strong>GD:</strong> $x_3 = 2.048$</li>
+        <li><strong>Momentum ($\beta=0.9$):</strong> $x_3 = 0.248$ (fastest convergence)</li>
+        <li><strong>NAG ($\beta=0.9$):</strong> $x_3 = 0.712$</li>
+        <li><strong>Adagrad:</strong> $x_3 = 3.774$ (decaying step sizes)</li>
+        <li><strong>RMSProp ($\beta=0.9$):</strong> $x_3 = 3.284$</li>
+        <li><strong>Adam ($\beta_1=0.9, \beta_2=0.999$):</strong> $x_3 = 3.700$</li>
+      </ul>
+    </div>
+
+    <!-- Chapter 4 -->
+    <div id="ch4" class="chapter">
+      <h2>4. Comparison & Selection</h2>
+      <p>Use Adam as your starting optimizer in general deep learning tasks ($\eta \approx 10^{-3} \dots 3 \times 10^{-4}$). For vision architectures, SGD with momentum often yields higher test performance when carefully tuned.</p>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz" class="chapter">
+      <h2>5. Knowledge Check Quiz</h2>
+      <div class="quiz-card">
+        <p><strong>Q1: What is the main advantage of RMSProp over Adagrad?</strong></p>
+        <div class="quiz-options">
+          <button onclick="checkQuiz(this, false)">It eliminates the need for a learning rate</button>
+          <button onclick="checkQuiz(this, true)">It uses exponential moving averages so step sizes do not shrink to zero</button>
+          <button onclick="checkQuiz(this, false)">It only works on convex loss surfaces</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let simX = 4.0;
+let history = [4.0];
+let simV = 0.0;
+let simS = 0.0;
+let simM = 0.0;
+let stepCount = 0;
+
+function resetSim() {
+  simX = 4.0;
+  history = [4.0];
+  simV = 0.0;
+  simS = 0.0;
+  simM = 0.0;
+  stepCount = 0;
+  document.getElementById('lrDisp').innerText = parseFloat(document.getElementById('lrVal').value).toFixed(2);
+  drawCanvas();
+}
+
+function stepSim() {
+  const eta = parseFloat(document.getElementById('lrVal').value);
+  const opt = document.getElementById('optSelect').value;
+  const g = 2 * simX;
+  stepCount++;
+
+  if (opt === 'gd') {
+    simX = simX - eta * g;
+  } else if (opt === 'momentum') {
+    simV = 0.9 * simV + eta * g;
+    simX = simX - simV;
+  } else if (opt === 'adagrad') {
+    simS += g * g;
+    simX = simX - (eta / Math.sqrt(simS + 1e-8)) * g;
+  } else if (opt === 'rmsprop') {
+    simS = 0.9 * simS + 0.1 * g * g;
+    simX = simX - (eta / Math.sqrt(simS + 1e-8)) * g;
+  } else if (opt === 'adam') {
+    simM = 0.9 * simM + 0.1 * g;
+    simS = 0.999 * simS + 0.001 * g * g;
+    const mHat = simM / (1 - Math.pow(0.9, stepCount));
+    const sHat = simS / (1 - Math.pow(0.999, stepCount));
+    simX = simX - (eta / (Math.sqrt(sHat) + 1e-8)) * mHat;
+  }
+
+  history.push(simX);
+  drawCanvas();
+}
+
+function drawCanvas() {
+  const canvas = document.getElementById('optCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw f(x) = x^2 curve
+  ctx.strokeStyle = '#30363d';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let px = 0; px <= canvas.width; px++) {
+    const x = (px / canvas.width) * 10 - 5;
+    const y = x * x;
+    const py = canvas.height - 30 - (y / 25) * (canvas.height - 60);
+    if (px === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+
+  // Draw points
+  ctx.fillStyle = '#58a6ff';
+  ctx.strokeStyle = '#bc8cff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  history.forEach((x, i) => {
+    const px = ((x + 5) / 10) * canvas.width;
+    const y = x * x;
+    const py = canvas.height - 30 - (y / 25) * (canvas.height - 60);
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  });
+  ctx.stroke();
+
+  history.forEach((x, i) => {
+    const px = ((x + 5) / 10) * canvas.width;
+    const y = x * x;
+    const py = canvas.height - 30 - (y / 25) * (canvas.height - 60);
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = '#f0f6fc';
+  ctx.font = '14px sans-serif';
+  ctx.fillText(`Step ${stepCount}: x = ${simX.toFixed(4)}`, 20, 30);
+}
+
+function checkQuiz(btn, isCorrect) {
+  const card = btn.closest('.quiz-card');
+  const feedback = card.querySelector('.quiz-feedback');
+  if (isCorrect) {
+    feedback.innerText = "Correct! RMSProp uses exponential decay to prevent learning rates from decaying to zero.";
+    feedback.style.color = "var(--success)";
+  } else {
+    feedback.innerText = "Incorrect. Try again!";
+    feedback.style.color = "var(--danger)";
+  }
+}
+
+window.onload = function() {
+  resetSim();
+};
+</script>
+</body>
+</html>
