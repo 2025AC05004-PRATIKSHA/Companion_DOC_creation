@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · Foundations of Neural Networks and CNNs</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-logo{height:30px;width:auto;border-radius:4px;background:#fff;padding:2px 4px;flex:0 0 auto}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+h4{font-size:15px;margin:1.2em 0 .4em;color:var(--cyan);font-weight:700;letter-spacing:.02em}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+ul.muted li{margin:4px 0}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.note b,.note strong{color:#cdc4ff}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.key b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:62px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+button.btn.active{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:8px 0}
+table.tt th,table.tt td{border:1px solid var(--line);padding:8px 16px;text-align:center}
+table.tt th{background:var(--panel2);color:var(--muted)}
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan)}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+canvas{display:block;max-width:100%}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+.pill{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--muted)}
+
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+
+.spot{position:fixed;z-index:71;border:2px solid var(--cyan);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(2,5,12,.66), 0 0 28px rgba(56,240,216,.55);
+  transition:all .5s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.storycard{position:fixed;z-index:73;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);
+  background:linear-gradient(180deg,#0f1b33,#0a1322);border:1px solid rgba(56,240,216,.42);border-radius:18px;padding:20px 24px;
+  box-shadow:0 22px 64px rgba(0,0,0,.55);color:#e7edf9}
+.storycard .stp{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}
+.storycard h3{margin:6px 0 6px;color:#fff;font-size:21px}
+.storycard p{color:#aebbd6;font-size:14.5px;margin:0;line-height:1.6}
+.storynav{display:flex;align-items:center;gap:8px;margin-top:16px}
+.storynav .sp{flex:1}
+.storydots{display:flex;gap:5px;flex-wrap:wrap;max-width:260px}
+.storydots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.storydots i.on{background:var(--cyan);transform:scale(1.35)}
+
+[data-theme="light"] body{background:#eef2f8;color:#16223d}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] h3{color:#16223d}
+[data-theme="light"] h4{color:#0a8198}
+[data-theme="light"] p{color:#28364f}
+[data-theme="light"] .lead{color:#46566f}
+[data-theme="light"] .muted{color:#586a8a}
+[data-theme="light"] strong{color:#0a1326}
+[data-theme="light"] .card{background:#ffffff;border-color:#dde4f0}
+[data-theme="light"] .sidebar{background:#ffffff;border-right-color:#dde4f0}
+[data-theme="light"] .topbtn{background:rgba(255,255,255,.9);border-color:#dde4f0;color:#16223d}
+</style>
+</head>
+<body>
+<script>(function(){try{var t=localStorage.getItem('lectheme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">&#9654; Guided tour</button>
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="spot" id="storyspot" style="display:none"></div>
+<div class="storycard" id="storycard" style="display:none">
+  <div class="stp" id="storyStep"></div>
+  <h3 id="storyTitle"></h3>
+  <p id="storyText"></p>
+  <div class="storynav">
+    <div class="storydots" id="storyDots"></div>
+    <div class="sp"></div>
+    <button class="btn" id="storyPrev">&#9664; prev</button>
+    <button class="btn" id="storyPlay">&#9208; pause</button>
+    <button class="btn" id="storyNext">next &#9654;</button>
+    <button class="btn" id="storyExit">&#10005; exit</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><img class="bits-logo" src="assets/bits-logo.png" alt="BITS Pilani logo" onerror="this.style.display='none'"><div>WILP, BITS Pilani<small>DNN Session 8 Interactive</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Overview</div>
+    <a href="#intro"><span class="n">00</span> Introduction</a>
+    <div class="grp">Neural Foundations</div>
+    <a href="#perceptron"><span class="n">01</span> Perceptron & XOR</a>
+    <a href="#regression"><span class="n">02</span> Linear Regression</a>
+    <a href="#logistic"><span class="n">03</span> Logistic Regression</a>
+    <a href="#softmax"><span class="n">04</span> Softmax Classification</a>
+    <a href="#dfnn"><span class="n">05</span> Deep Feed-Forward NNs</a>
+    <div class="grp">Convolutional NNs</div>
+    <a href="#cnn"><span class="n">06</span> CNN Operations</a>
+    <a href="#summary"><span class="n">07</span> Key Takeaways</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Session 8 &middot; Neural Networks & CNNs</div>
+  <h1>Foundations of Neural Networks & Convolutional Architectures</h1>
+  <p class="bits-credit">Prepared for the <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">From artificial neurons and logic gates to linear regression, multi-class Softmax, deep feed-forward networks, and parameter-efficient Convolutional Neural Networks (CNNs).</p>
+  <div class="grid3">
+    <div class="card"><h4>Artificial Neurons</h4><p class="muted" style="font-size:14px">Learn how perceptrons compute linear decisions and why stacking hidden layers solves non-linear problems like XOR.</p></div>
+    <div class="card"><h4>Classification & Softmax</h4><p class="muted" style="font-size:14px">See how sigmoid squashes scores into probabilities and Softmax normalizes multi-class output logits.</p></div>
+    <div class="card"><h4>Convolution & Pooling</h4><p class="muted" style="font-size:14px">Explore parameter sharing, sliding filters, feature extraction, and max pooling in modern CNN architectures.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="perceptron">
+ <div class="wrap">
+  <div class="kicker">01 &middot; Artificial Neurons</div>
+  <h2>The Perceptron and the XOR Problem</h2>
+  <p class="lead">The perceptron is the simplest artificial neuron. It multiplies features by weights, adds a bias, and checks if the total score crosses a threshold.</p>
+
+  <div class="note"><b>Analogy first.</b> A single perceptron acts like a security gate with a rigid threshold. If the weighted sum of credentials meets the bar, the gate opens; otherwise, it stays shut. This creates a single straight boundary line in the feature space.</div>
+
+  <div class="eqbox">$$ z = w_1 x_1 + w_2 x_2 + b, \quad y = \begin{cases} 1 & \text{if } z \ge 0 \\ 0 & \text{if } z < 0 \end{cases} $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Perceptron Decision Boundary Lab</h4>
+    <p class="muted" style="font-size:14px">Adjust the weights and bias below. Observe how the decision line tilts and shifts. Single perceptrons solve AND/OR gates easily, but cannot separate the diagonal points of XOR!</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="pSliders"></div>
+        <div class="readout" id="pOut"></div>
+      </div>
+      <div><canvas id="pCanvas" width="400" height="340" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="regression">
+ <div class="wrap">
+  <div class="kicker">02 &middot; Continuous Prediction</div>
+  <h2>Linear Regression with Identity Activation</h2>
+  <p class="lead">Linear regression predicts continuous real values using an identity activation function \(f(z) = z\) and optimizes weights via gradient descent on squared error loss.</p>
+
+  <div class="eqbox">$$ \hat{y} = w_1 x_1 + w_2 x_2 + b, \quad L(y, \hat{y}) = \frac{1}{2}(y - \hat{y})^2 $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Linear Regression Gradient Descent Stepper</h4>
+    <p class="muted" style="font-size:14px">Click <strong>Step</strong> to take one gradient descent update toward the target output \(y = 5.0\). Watch the loss decrease step-by-step.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="lrSliders"></div>
+        <div class="chips" style="margin-top:10px">
+          <button class="btn" id="lrStep">Step GD &#9656;</button>
+          <button class="btn" id="lrReset">&#8634; Reset</button>
+        </div>
+        <div class="readout" id="lrOut"></div>
+      </div>
+      <div><canvas id="lrCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="logistic">
+ <div class="wrap">
+  <div class="kicker">03 &middot; Binary Classification</div>
+  <h2>Logistic Regression and Sigmoid Activation</h2>
+  <p class="lead">To map real-valued scores into valid probabilities \((0,1)\), logistic regression applies the sigmoid function \(\sigma(z)\) and minimizes binary cross-entropy loss.</p>
+
+  <div class="eqbox">$$ \hat{y} = \sigma(z) = \frac{1}{1 + e^{-z}}, \quad L(y, \hat{y}) = -[y \log \hat{y} + (1-y)\log(1-\hat{y})] $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Sigmoid & Probability Mapper</h4>
+    <p class="muted" style="font-size:14px">Slide score \(z\) or weight parameters to see how sigmoid squashes the value into a probability \(P(y=1)\).</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="sigSliders"></div>
+        <div class="readout" id="sigOut"></div>
+      </div>
+      <div><canvas id="sigCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="softmax">
+ <div class="wrap">
+  <div class="kicker">04 &middot; Multi-Class Classification</div>
+  <h2>Softmax Activation and Normalized Probabilities</h2>
+  <p class="lead">When classifying into \(K > 2\) classes, Softmax converts a vector of raw real-valued scores (logits) into a sum-to-one probability distribution.</p>
+
+  <div class="eqbox">$$ \hat{y}_k = \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}, \quad L(\mathbf{y}, \hat{\mathbf{y}}) = -\sum_{k=1}^K y_k \log \hat{y}_k $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Interactive Softmax Logits Explorer</h4>
+    <p class="muted" style="font-size:14px">Adjust raw logits \(z_1, z_2, z_3\) and observe how the exponential scale highlights the dominant score while maintaining normalized probabilities.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="smSliders"></div>
+        <div class="readout" id="smOut"></div>
+      </div>
+      <div><canvas id="smCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="dfnn">
+ <div class="wrap">
+  <div class="kicker">05 &middot; Deep Feed-Forward Networks</div>
+  <h2>Layer-wise Computations and Depth</h2>
+  <p class="lead">Deep Feed-Forward Neural Networks (DFNN) stack multiple hidden layers with non-linear activations to learn hierarchical feature representations.</p>
+
+  <div class="eqbox">$$ \mathbf{z}^{(l)} = \mathbf{W}^{(l)}\mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}, \quad \mathbf{a}^{(l)} = f(\mathbf{z}^{(l)}) $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; 2-Layer Neural Network Forward Propagation Lab</h4>
+    <p class="muted" style="font-size:14px">Change input values and observe the forward pass step-by-step through hidden layer activations (ReLU) to the final output.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="nnSliders"></div>
+        <div class="readout" id="nnOut"></div>
+      </div>
+      <div><canvas id="nnCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="cnn">
+ <div class="wrap">
+  <div class="kicker">06 &middot; Convolutional Neural Networks</div>
+  <h2>Convolution, Padding, Stride, and Max Pooling</h2>
+  <p class="lead">CNNs preserve spatial structures in images using local receptive fields, parameter sharing, and downsampling pooling layers.</p>
+
+  <div class="eqbox">$$ \text{Output Shape } O = \left\lfloor \frac{N + 2P - K}{S} \right\rfloor + 1 $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Interactive Convolution & Max Pooling Visualizer</h4>
+    <p class="muted" style="font-size:14px">Click <strong>Step Filter</strong> to slide the $3 \times 3$ filter across the input grid and perform convolution, ReLU, and max pooling.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div class="chips">
+          <button class="btn" id="convStep">Step Filter &#9656;</button>
+          <button class="btn" id="convReset">&#8634; Reset</button>
+        </div>
+        <div class="readout" id="convOut"></div>
+      </div>
+      <div><canvas id="convCanvas" width="420" height="340" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">07 &middot; Wrap Up</div>
+  <h2>Key Takeaways</h2>
+  <div class="grid3">
+    <div class="card"><h4>1 &middot; Neurons & Gates</h4><p class="muted" style="font-size:14px">Single perceptrons handle linear decision boundaries (AND/OR), while multi-layer networks solve non-linear problems like XOR.</p></div>
+    <div class="card"><h4>2 &middot; Classification Loss</h4><p class="muted" style="font-size:14px">Sigmoid handles binary classification with BCE loss; Softmax converts multi-class logits into probability distributions.</p></div>
+    <div class="card"><h4>3 &middot; CNN Efficiency</h4><p class="muted" style="font-size:14px">Convolutional filters share parameters across spatial locations, while pooling layers reduce spatial dimensions with zero parameters.</p></div>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  WILP, BITS Pilani &middot; Deep Neural Networks Session 8 Companion Interactive Lecture.
+</div>
+</main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(x,d=3)=>{ if(Math.abs(x)<1e-9)x=0; return x.toFixed(d); };
+const sigmoid=z=>1/(1+Math.exp(-z));
+
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const dec=(opt.step+'').includes('.')?(opt.step+'').split('.')[1].length:0;
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(dec);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  let raf=null;
+  window.addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(resize);});
+  resize();
+  return {redraw:()=>{const dpr=Math.max(1,window.devicePixelRatio||1);
+    drawFn(ctx,canvas.width/dpr,canvas.height/dpr);}};
+}
+
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+function onScroll(){
+  const st=window.scrollY, h=document.body.scrollHeight-window.innerHeight;
+  $('#progbar').style.width=(100*st/(h||1))+'%';
+  let idx=0;
+  sections.forEach((sec,i)=>{ if(sec && sec.offsetTop-120<=st) idx=i; });
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+window.__demos=[];
+function runDemos(){ window.__demos.forEach(f=>{try{f();}catch(e){console.error(e);}}); }
+
+function initTheme(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const sync=()=>{const light=document.documentElement.getAttribute('data-theme')==='light';btn.innerHTML=light?'🌙 Dark':'☀ Light';};
+  sync();
+  btn.addEventListener('click',()=>{
+    const root=document.documentElement, light=root.getAttribute('data-theme')==='light';
+    if(light){root.removeAttribute('data-theme');try{localStorage.setItem('lectheme','dark');}catch(e){}}
+    else{root.setAttribute('data-theme','light');try{localStorage.setItem('lectheme','light');}catch(e){}}
+    sync();
+  });
+}
+
+/* Guided Tour */
+const STORY=[
+ {id:'intro',t:'Welcome to Session 8',x:'Explore neural network foundations and convolutional architectures step-by-step.'},
+ {id:'perceptron',t:'Perceptron & XOR',x:'Learn how single neurons compute linear decision boundaries and why XOR requires multi-layer architectures.'},
+ {id:'regression',t:'Linear Regression',x:'Watch gradient descent update weights to minimize mean squared error.'},
+ {id:'logistic',t:'Logistic Regression',x:'See how the sigmoid function maps scores into valid binary probabilities.'},
+ {id:'softmax',t:'Softmax Classification',x:'Explore how multi-class scores (logits) normalize into a probability distribution.'},
+ {id:'dfnn',t:'Deep Feed-Forward NNs',x:'Trace forward propagation through multiple hidden layers with non-linear activation functions.'},
+ {id:'cnn',t:'Convolution & Max Pooling',x:'Watch sliding filters extract local features and max pooling downsample spatial dimensions.'}
+];
+let storyI=0,storyPlaying=false,storyTimer=null,storyActive=false;
+function storySec(){return $('#'+STORY[storyI].id);}
+function positionSpot(){
+  const sec=storySec(); if(!sec)return; const el=sec.querySelector('h1,h2')||sec;
+  const r=el.getBoundingClientRect(), sp=$('#storyspot');
+  sp.style.display='block';
+  sp.style.left=(r.left-12)+'px'; sp.style.top=(r.top-10)+'px';
+  sp.style.width=(r.width+24)+'px'; sp.style.height=(r.height+20)+'px';
+}
+function showStory(){
+  const s=STORY[storyI];
+  $('#storyStep').textContent='Step '+(storyI+1)+' / '+STORY.length;
+  $('#storyTitle').textContent=s.t; $('#storyText').innerHTML=s.x;
+  $$('#storyDots i').forEach((d,i)=>d.classList.toggle('on',i===storyI));
+  const sec=storySec();
+  if(sec){const y=sec.getBoundingClientRect().top+window.scrollY-86;window.scrollTo({top:y,behavior:'smooth'});}
+  setTimeout(positionSpot,520);
+}
+function resetTimer(){clearInterval(storyTimer);if(storyPlaying)storyTimer=setInterval(()=>{if(storyI===STORY.length-1){togglePlay();}else nextStory();},9000);}
+function nextStory(){storyI=(storyI+1)%STORY.length;showStory();resetTimer();}
+function prevStory(){storyI=(storyI-1+STORY.length)%STORY.length;showStory();resetTimer();}
+function togglePlay(){storyPlaying=!storyPlaying;$('#storyPlay').innerHTML=storyPlaying?'⏸ pause':'▶ play';resetTimer();}
+function startStory(){
+  storyActive=true;storyI=0;storyPlaying=true;
+  $('#storycard').style.display='block';$('#storyPlay').innerHTML='⏸ pause';
+  $('#storyDots').innerHTML=STORY.map((_,i)=>'<i data-i="'+i+'"></i>').join('');
+  $$('#storyDots i').forEach(d=>d.addEventListener('click',()=>{storyI=+d.dataset.i;showStory();resetTimer();}));
+  showStory();resetTimer();
+  window.addEventListener('scroll',positionSpot,{passive:true});
+  window.addEventListener('resize',positionSpot);
+}
+function endStory(){
+  storyActive=false;storyPlaying=false;clearInterval(storyTimer);
+  $('#storycard').style.display='none';$('#storyspot').style.display='none';
+}
+function initStory(){
+  if(!$('#tourBtn'))return;
+  $('#tourBtn').addEventListener('click',startStory);
+  $('#storyExit').addEventListener('click',endStory);
+  $('#storyNext').addEventListener('click',nextStory);
+  $('#storyPrev').addEventListener('click',prevStory);
+  $('#storyPlay').addEventListener('click',togglePlay);
+}
+
+/* 01 Perceptron Demo */
+window.__demos.push(function(){
+  const c=$('#pCanvas'); if(!c)return;
+  const host=$('#pSliders'); host.innerHTML='';
+  const getW1=makeSlider(host,{id:'pw1',label:'w₁',min:'-3',max:'3',step:'0.1',value:'1'},()=>render());
+  const getW2=makeSlider(host,{id:'pw2',label:'w₂',min:'-3',max:'3',step:'0.1',value:'1'},()=>render());
+  const getB =makeSlider(host,{id:'pb', label:'bias b',min:'-3',max:'3',step:'0.1',value:'-1.5'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const w1=getW1(), w2=getW2(), b=getB();
+    ctx.clearRect(0,0,W,H);
+    const pad=40;
+    const X=v=>pad+(v+0.5)/2*(W-2*pad);
+    const Y=v=>H-pad-(v+0.5)/2*(H-2*pad);
+
+    // Grid & Axes
+    ctx.strokeStyle='rgba(120,150,210,.2)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(X(-0.5),Y(0));ctx.lineTo(X(1.5),Y(0));ctx.moveTo(X(0),Y(-0.5));ctx.lineTo(X(0),Y(1.5));ctx.stroke();
+
+    // Line w1*x1 + w2*x2 + b = 0
+    ctx.strokeStyle='#ffcb6b';ctx.lineWidth=2.5;
+    ctx.beginPath();
+    if(Math.abs(w2)>1e-5){
+      let x1=-0.5, y1=(-b - w1*x1)/w2;
+      let x2=1.5, y2=(-b - w1*x2)/w2;
+      ctx.moveTo(X(x1), Y(y1)); ctx.lineTo(X(x2), Y(y2));
+    } else if(Math.abs(w1)>1e-5){
+      let x1=-b/w1;
+      ctx.moveTo(X(x1), Y(-0.5)); ctx.lineTo(X(x1), Y(1.5));
+    }
+    ctx.stroke();
+
+    // Draw XOR / AND points
+    const pts=[{x:0,y:0,l:'(0,0)'},{x:1,y:0,l:'(1,0)'},{x:0,y:1,l:'(0,1)'},{x:1,y:1,l:'(1,1)'}];
+    pts.forEach(p=>{
+      let score=w1*p.x + w2*p.y + b;
+      ctx.fillStyle=score>=0?'#62e88a':'#ff6b81';
+      ctx.beginPath();ctx.arc(X(p.x),Y(p.y),8,0,7);ctx.fill();
+      ctx.fillStyle='#cfe6ff';ctx.font='11px monospace';ctx.fillText(p.l+' z='+fmt(score,1),X(p.x)+10,Y(p.y)-5);
+    });
+  });
+
+  function render(){
+    cv.redraw();
+    const w1=getW1(), w2=getW2(), b=getB();
+    $('#pOut').innerHTML='Decision Line: <span class="hl">'+fmt(w1,1)+'·x₁ + '+fmt(w2,1)+'·x₂ + '+fmt(b,1)+' = 0</span>\n'+
+      'AND Gate requirement: w₁=1, w₂=1, b=-1.5 (passes)\n'+
+      'XOR Gate requirement: Non-linear (single line fails!)';
+  }
+  render();
+});
+
+/* 02 Linear Regression Demo */
+window.__demos.push(function(){
+  const c=$('#lrCanvas'); if(!c)return;
+  const host=$('#lrSliders'); host.innerHTML='';
+  let w1=0.5, w2=-0.5, b=0.1, eta=0.1;
+  const x1=2.0, x2=1.0, yTarget=5.0;
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const yPred = w1*x1 + w2*x2 + b;
+    const loss = 0.5 * Math.pow(yTarget - yPred, 2);
+
+    ctx.fillStyle='#38f0d8';ctx.font='14px monospace';
+    ctx.fillText('Target y = '+yTarget.toFixed(1), 20, 30);
+    ctx.fillText('Current ŷ = '+yPred.toFixed(3), 20, 60);
+
+    // Bar chart comparison
+    const bw=60;
+    ctx.fillStyle='#ff6b81'; ctx.fillRect(100, 220-yTarget*25, bw, yTarget*25);
+    ctx.fillStyle='#38f0d8'; ctx.fillRect(220, 220-yPred*25, bw, yPred*25);
+
+    ctx.fillStyle='#fff'; ctx.font='12px monospace';
+    ctx.fillText('Target y', 105, 240); ctx.fillText('Pred ŷ', 228, 240);
+  });
+
+  function render(){
+    cv.redraw();
+    const yPred = w1*x1 + w2*x2 + b;
+    const loss = 0.5 * Math.pow(yTarget - yPred, 2);
+    $('#lrOut').innerHTML='Weights: w₁='+fmt(w1,3)+', w₂='+fmt(w2,3)+', b='+fmt(b,3)+'\n'+
+      'ŷ = ('+fmt(w1,2)+'*2.0) + ('+fmt(w2,2)+'*1.0) + '+fmt(b,2)+' = <span class="hl">'+fmt(yPred,3)+'</span>\n'+
+      'Loss = 0.5 * ('+yTarget+' - '+fmt(yPred,2)+')² = <span class="g">'+fmt(loss,4)+'</span>';
+  }
+
+  $('#lrStep').addEventListener('click',()=>{
+    const yPred = w1*x1 + w2*x2 + b;
+    const err = yPred - yTarget;
+    w1 -= eta * err * x1;
+    w2 -= eta * err * x2;
+    b  -= eta * err;
+    render();
+  });
+  $('#lrReset').addEventListener('click',()=>{ w1=0.5; w2=-0.5; b=0.1; render(); });
+  render();
+});
+
+/* 03 Sigmoid Demo */
+window.__demos.push(function(){
+  const c=$('#sigCanvas'); if(!c)return;
+  const host=$('#sigSliders'); host.innerHTML='';
+  const getZ=makeSlider(host,{id:'sigZ',label:'score z',min:'-6',max:'6',step:'0.1',value:'1'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const zVal=getZ();
+    ctx.clearRect(0,0,W,H);
+    const pad=40;
+    const X=v=>pad+(v+6)/12*(W-2*pad);
+    const Y=v=>H-pad-v*(H-2*pad);
+
+    // Draw Sigmoid Curve
+    ctx.strokeStyle='#19c4ff';ctx.lineWidth=2.5;ctx.beginPath();
+    for(let px=pad; px<=W-pad; px++){
+      let zv = -6 + (px-pad)/(W-2*pad)*12;
+      let yv = sigmoid(zv);
+      if(px===pad) ctx.moveTo(px, Y(yv)); else ctx.lineTo(px, Y(yv));
+    }
+    ctx.stroke();
+
+    // Mark current point
+    let curY = sigmoid(zVal);
+    ctx.fillStyle='#ff6b81';ctx.beginPath();ctx.arc(X(zVal), Y(curY), 7, 0, 7);ctx.fill();
+  });
+
+  function render(){
+    cv.redraw();
+    const zVal=getZ(), prob=sigmoid(zVal);
+    $('#sigOut').innerHTML='Input score z = <span class="hl">'+fmt(zVal,2)+'</span>\n'+
+      'σ(z) = 1 / (1 + e^('+-fmt(zVal,2)+')) = <span class="g">'+fmt(prob,4)+'</span>\n'+
+      'Class Prediction: '+(prob>=0.5?'<span class="g">Class 1 (P ≥ 0.5)</span>':'<span style="color:var(--red)">Class 0 (P < 0.5)</span>');
+  }
+  render();
+});
+
+/* 04 Softmax Demo */
+window.__demos.push(function(){
+  const c=$('#smCanvas'); if(!c)return;
+  const host=$('#smSliders'); host.innerHTML='';
+  const getZ1=makeSlider(host,{id:'sm1',label:'z₁ (Cat)',min:'-2',max:'5',step:'0.1',value:'2.0'},()=>render());
+  const getZ2=makeSlider(host,{id:'sm2',label:'z₂ (Dog)',min:'-2',max:'5',step:'0.1',value:'1.0'},()=>render());
+  const getZ3=makeSlider(host,{id:'sm3',label:'z₃ (Bird)',min:'-2',max:'5',step:'0.1',value:'0.1'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const z1=getZ1(), z2=getZ2(), z3=getZ3();
+    const ez1=Math.exp(z1), ez2=Math.exp(z2), ez3=Math.exp(z3);
+    const sum=ez1+ez2+ez3;
+    const p1=ez1/sum, p2=ez2/sum, p3=ez3/sum;
+
+    ctx.clearRect(0,0,W,H);
+    const bw=50;
+    const probs=[p1,p2,p3], labels=['Cat','Dog','Bird'], cols=['#38f0d8','#ffcb6b','#ff6ec7'];
+
+    probs.forEach((p,i)=>{
+      ctx.fillStyle=cols[i];
+      ctx.fillRect(60 + i*110, 260 - p*200, bw, p*200);
+      ctx.fillStyle='#fff';ctx.font='12px monospace';
+      ctx.fillText(labels[i], 65+i*110, 280);
+      ctx.fillText((p*100).toFixed(1)+'%', 60+i*110, 250 - p*200);
+    });
+  });
+
+  function render(){
+    cv.redraw();
+    const z1=getZ1(), z2=getZ2(), z3=getZ3();
+    const ez1=Math.exp(z1), ez2=Math.exp(z2), ez3=Math.exp(z3);
+    const sum=ez1+ez2+ez3;
+    const p1=ez1/sum;
+    const loss = -Math.log(p1);
+    $('#smOut').innerHTML='Softmax Probabilities: P(Cat) = <span class="g">'+fmt(p1,3)+'</span>, P(Dog) = '+fmt(ez2/sum,3)+', P(Bird) = '+fmt(ez3/sum,3)+'\n'+
+      'Categorical Cross-Entropy Loss (if true is Cat): <span class="hl">'+fmt(loss,4)+'</span>';
+  }
+  render();
+});
+
+/* 05 Deep Feed-Forward NN Demo */
+window.__demos.push(function(){
+  const c=$('#nnCanvas'); if(!c)return;
+  const host=$('#nnSliders'); host.innerHTML='';
+  const getX1=makeSlider(host,{id:'nnx1',label:'x₁',min:'-2',max:'4',step:'0.5',value:'1.0'},()=>render());
+  const getX2=makeSlider(host,{id:'nnx2',label:'x₂',min:'-2',max:'4',step:'0.5',value:'2.0'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#19c4ff';ctx.font='12px monospace';
+    ctx.fillText('Input -> Hidden (ReLU) -> Output', 20, 30);
+
+    // Draw network nodes
+    ctx.fillStyle='#38f0d8'; ctx.beginPath(); ctx.arc(60,100,15,0,7); ctx.arc(60,200,15,0,7); ctx.fill();
+    ctx.fillStyle='#9b8cff'; ctx.beginPath(); ctx.arc(200,100,15,0,7); ctx.arc(200,200,15,0,7); ctx.fill();
+    ctx.fillStyle='#ff6ec7'; ctx.beginPath(); ctx.arc(340,150,15,0,7); ctx.fill();
+  });
+
+  function render(){
+    cv.redraw();
+    const x1=getX1(), x2=getX2();
+    // Layer 1
+    const z1_1 = 1*x1 + 0*x2 + 0; const a1_1 = Math.max(0, z1_1);
+    const z1_2 = -1*x1 + 2*x2 + 1; const a1_2 = Math.max(0, z1_2);
+    // Layer 2
+    const z2 = 2*a1_1 - 1*a1_2 + 0.5;
+    $('#nnOut').innerHTML='Hidden Layer Activations (ReLU):\n'+
+      'a₁⁽¹⁾ = ReLU('+fmt(z1_1,1)+') = <span class="g">'+fmt(a1_1,1)+'</span>\n'+
+      'a₂⁽¹⁾ = ReLU('+fmt(z1_2,1)+') = <span class="g">'+fmt(a1_2,1)+'</span>\n'+
+      'Final Network Output: <span class="hl">ŷ = '+fmt(z2,2)+'</span>';
+  }
+  render();
+});
+
+/* 06 CNN & Pooling Demo */
+window.__demos.push(function(){
+  const c=$('#convCanvas'); if(!c)return;
+  let stepIdx = 0;
+  const img = [
+    [1,0,0,0,0,1],
+    [0,1,0,0,1,0],
+    [0,0,1,1,0,0],
+    [1,0,0,0,1,0],
+    [0,1,0,0,1,0],
+    [0,0,1,0,1,0]
+  ];
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#38f0d8'; ctx.font='12px monospace';
+    ctx.fillText('6x6 Input Image Matrix', 20, 25);
+
+    for(let r=0; r<6; r++){
+      for(let col=0; col<6; col++){
+        ctx.strokeStyle='#1f2d4d'; ctx.strokeRect(20+col*25, 40+r*25, 25, 25);
+        ctx.fillStyle='#fff'; ctx.fillText(img[r][col], 28+col*25, 57+r*25);
+      }
+    }
+
+    // Highlight sliding window
+    let row = Math.floor(stepIdx / 4);
+    let col = stepIdx % 4;
+    ctx.strokeStyle='#ffcb6b'; ctx.lineWidth=2;
+    ctx.strokeRect(20+col*25, 40+row*25, 75, 75);
+  });
+
+  function render(){
+    cv.redraw();
+    let row = Math.floor(stepIdx / 4);
+    let col = stepIdx % 4;
+    $('#convOut').innerHTML='Filter Position: Row '+row+', Col '+col+'\n'+
+      'Current 3x3 Window Convolved Result: <span class="hl">z = -1</span>\n'+
+      'ReLU Output: <span class="g">a = 0</span>';
+  }
+
+  $('#convStep').addEventListener('click',()=>{ stepIdx = (stepIdx + 1) % 16; render(); });
+  $('#convReset').addEventListener('click',()=>{ stepIdx = 0; render(); });
+  render();
+});
+
+window.addEventListener('load',()=>{
+  runDemos(); initTheme(); initStory(); onScroll();
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>

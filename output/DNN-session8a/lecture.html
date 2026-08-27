@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · CNN Architectures, Dilated Convolutions & Design Frameworks</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-logo{height:30px;width:auto;border-radius:4px;background:#fff;padding:2px 4px;flex:0 0 auto}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+h4{font-size:15px;margin:1.2em 0 .4em;color:var(--cyan);font-weight:700;letter-spacing:.02em}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+ul.muted li{margin:4px 0}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.note b,.note strong{color:#cdc4ff}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.key b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:62px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+button.btn.active{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:8px 0}
+table.tt th,table.tt td{border:1px solid var(--line);padding:8px 16px;text-align:center}
+table.tt th{background:var(--panel2);color:var(--muted)}
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan)}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+canvas{display:block;max-width:100%}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+
+.spot{position:fixed;z-index:71;border:2px solid var(--cyan);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(2,5,12,.66), 0 0 28px rgba(56,240,216,.55);
+  transition:all .5s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.storycard{position:fixed;z-index:73;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);
+  background:linear-gradient(180deg,#0f1b33,#0a1322);border:1px solid rgba(56,240,216,.42);border-radius:18px;padding:20px 24px;
+  box-shadow:0 22px 64px rgba(0,0,0,.55);color:#e7edf9}
+.storycard .stp{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}
+.storycard h3{margin:6px 0 6px;color:#fff;font-size:21px}
+.storycard p{color:#aebbd6;font-size:14.5px;margin:0;line-height:1.6}
+.storynav{display:flex;align-items:center;gap:8px;margin-top:16px}
+.storynav .sp{flex:1}
+.storydots{display:flex;gap:5px;flex-wrap:wrap;max-width:260px}
+.storydots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.storydots i.on{background:var(--cyan);transform:scale(1.35)}
+
+[data-theme="light"] body{background:#eef2f8;color:#16223d}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] h3{color:#16223d}
+[data-theme="light"] h4{color:#0a8198}
+[data-theme="light"] p{color:#28364f}
+[data-theme="light"] .lead{color:#46566f}
+[data-theme="light"] .muted{color:#586a8a}
+[data-theme="light"] strong{color:#0a1326}
+[data-theme="light"] .card{background:#ffffff;border-color:#dde4f0}
+[data-theme="light"] .sidebar{background:#ffffff;border-right-color:#dde4f0}
+[data-theme="light"] .topbtn{background:rgba(255,255,255,.9);border-color:#dde4f0;color:#16223d}
+</style>
+</head>
+<body>
+<script>(function(){try{var t=localStorage.getItem('lectheme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">&#9654; Guided tour</button>
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="spot" id="storyspot" style="display:none"></div>
+<div class="storycard" id="storycard" style="display:none">
+  <div class="stp" id="storyStep"></div>
+  <h3 id="storyTitle"></h3>
+  <p id="storyText"></p>
+  <div class="storynav">
+    <div class="storydots" id="storyDots"></div>
+    <div class="sp"></div>
+    <button class="btn" id="storyPrev">&#9664; prev</button>
+    <button class="btn" id="storyPlay">&#9208; pause</button>
+    <button class="btn" id="storyNext">next &#9654;</button>
+    <button class="btn" id="storyExit">&#10005; exit</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><img class="bits-logo" src="assets/bits-logo.png" alt="BITS Pilani logo" onerror="this.style.display='none'"><div>WILP, BITS Pilani<small>DNN Session 8A Interactive</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Overview</div>
+    <a href="#intro"><span class="n">00</span> Introduction</a>
+    <div class="grp">Advanced Operations</div>
+    <a href="#dilated"><span class="n">01</span> Dilated Convolutions</a>
+    <a href="#dimension"><span class="n">02</span> Output Shape Calculator</a>
+    <a href="#bottleneck"><span class="n">03</span> Bottleneck ResNet Blocks</a>
+    <a href="#params"><span class="n">04</span> Parameter Calculator</a>
+    <div class="grp">Wrap Up</div>
+    <a href="#summary"><span class="n">05</span> Key Takeaways</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Session 8A &middot; Advanced CNNs & Architecture Design</div>
+  <h1>CNN Architectures, Dilated Convolutions & Design Frameworks</h1>
+  <p class="bits-credit">Prepared for the <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">Deep dive into dilated convolutions, receptive field expansion, multi-channel parameter counting, bottleneck blocks, and modern design frameworks (ResNet, Inception, EfficientNet).</p>
+  <div class="grid3">
+    <div class="card"><h4>Dilated Convolutions</h4><p class="muted" style="font-size:14px">Expand receptive field exponentially without losing spatial resolution or adding parameters.</p></div>
+    <div class="card"><h4>Bottleneck Design</h4><p class="muted" style="font-size:14px">Use 1x1 convolutions to reduce channel dimensionality and achieve 8x parameter efficiency.</p></div>
+    <div class="card"><h4>Residual Connections</h4><p class="muted" style="font-size:14px">Enable identity gradient flow to train stable networks with over 100 layers.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="dilated">
+ <div class="wrap">
+  <div class="kicker">01 &middot; Receptive Field Expansion</div>
+  <h2>Dilated (Atrous) Convolutions</h2>
+  <p class="lead">Dilated convolutions insert spaces (rate \(r\)) between kernel elements to expand receptive field size without adding parameters.</p>
+
+  <div class="eqbox">$$ \text{Effective Kernel Size } K' = K + (K-1)(r-1) $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Dilated Kernel Rate Visualizer</h4>
+    <p class="muted" style="font-size:14px">Slide dilation rate \(r\) to see how a $3 \times 3$ kernel expands its spatial reach over a $7 \times 7$ feature map.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="dSliders"></div>
+        <div class="readout" id="dOut"></div>
+      </div>
+      <div><canvas id="dCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="dimension">
+ <div class="wrap">
+  <div class="kicker">02 &middot; Spatial Dimension Calculations</div>
+  <h2>Interactive Output Dimension Calculator</h2>
+  <p class="lead">Solve spatial dimension problems for convolution and pooling operations step-by-step.</p>
+
+  <div class="eqbox">$$ O = \left\lfloor \frac{N + 2P - K}{S} \right\rfloor + 1 $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Slide 29 Problem Solver</h4>
+    <p class="muted" style="font-size:14px">Adjust input size \(N\), kernel size \(K\), padding \(P\), and stride \(S\) to compute exact output feature map shape.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="dimSliders"></div>
+        <div class="readout" id="dimOut"></div>
+      </div>
+      <div><canvas id="dimCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="bottleneck">
+ <div class="wrap">
+  <div class="kicker">03 &middot; Architectural Efficiency</div>
+  <h2>Bottleneck Blocks (ResNet)</h2>
+  <p class="lead">Bottleneck blocks use $1 \times 1$ convolutions to squeeze channel dimensions before expensive $3 \times 3$ convolutions, achieving massive parameter reductions.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Bottleneck Parameter Comparison Lab</h4>
+    <p class="muted" style="font-size:14px">Compare parameters between a standard 256-channel $3 \times 3$ convolution and a 3-layer Bottleneck Block.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="bSliders"></div>
+        <div class="readout" id="bOut"></div>
+      </div>
+      <div><canvas id="bCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="params">
+ <div class="wrap">
+  <div class="kicker">04 &middot; Parameter Counting</div>
+  <h2>Complete CNN Parameter Calculator</h2>
+  <p class="lead">Calculate parameters across Convolutional, Pooling, and Dense layers.</p>
+
+  <div class="eqbox">$$ \text{Params}_{\text{Conv}} = (K \times K \times C_{\text{in}} + 1) \times C_{\text{out}}, \quad \text{Params}_{\text{Pool}} = 0 $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Conv Layer Parameter Explorer</h4>
+    <p class="muted" style="font-size:14px">Adjust kernel size \(K\), input channels \(C_{\text{in}}\), and filter count \(C_{\text{out}}\) to inspect exact parameter counts.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="pSliders"></div>
+        <div class="readout" id="pOut"></div>
+      </div>
+      <div><canvas id="pCanvas" width="400" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">05 &middot; Wrap Up</div>
+  <h2>Key Takeaways</h2>
+  <div class="grid3">
+    <div class="card"><h4>1 &middot; Dilated Convolutions</h4><p class="muted" style="font-size:14px">Expand receptive field exponentially without downsampling spatial resolution or adding parameters.</p></div>
+    <div class="card"><h4>2 &middot; Bottleneck Efficiency</h4><p class="muted" style="font-size:14px">$1 \times 1$ convolutions reduce channel depth before $3 \times 3$ convs, achieving $8.5 \times$ parameter savings.</p></div>
+    <div class="card"><h4>3 &middot; Skip Connections</h4><p class="muted" style="font-size:14px">Residual identity shortcuts enable stable gradient propagation across 100+ layer networks.</p></div>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  WILP, BITS Pilani &middot; Deep Neural Networks Session 8A Companion Interactive Lecture.
+</div>
+</main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(x,d=3)=>{ if(Math.abs(x)<1e-9)x=0; return x.toFixed(d); };
+
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const dec=(opt.step+'').includes('.')?(opt.step+'').split('.')[1].length:0;
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(dec);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  let raf=null;
+  window.addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(resize);});
+  resize();
+  return {redraw:()=>{const dpr=Math.max(1,window.devicePixelRatio||1);
+    drawFn(ctx,canvas.width/dpr,canvas.height/dpr);}};
+}
+
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+function onScroll(){
+  const st=window.scrollY, h=document.body.scrollHeight-window.innerHeight;
+  $('#progbar').style.width=(100*st/(h||1))+'%';
+  let idx=0;
+  sections.forEach((sec,i)=>{ if(sec && sec.offsetTop-120<=st) idx=i; });
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+window.__demos=[];
+function runDemos(){ window.__demos.forEach(f=>{try{f();}catch(e){console.error(e);}}); }
+
+function initTheme(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const sync=()=>{const light=document.documentElement.getAttribute('data-theme')==='light';btn.innerHTML=light?'🌙 Dark':'☀ Light';};
+  sync();
+  btn.addEventListener('click',()=>{
+    const root=document.documentElement, light=root.getAttribute('data-theme')==='light';
+    if(light){root.removeAttribute('data-theme');try{localStorage.setItem('lectheme','dark');}catch(e){}}
+    else{root.setAttribute('data-theme','light');try{localStorage.setItem('lectheme','light');}catch(e){}}
+    sync();
+  });
+}
+
+/* Guided Tour */
+const STORY=[
+ {id:'intro',t:'Welcome to Session 8A',x:'Explore advanced CNN operations, parameter calculations, and modern ResNet design patterns.'},
+ {id:'dilated',t:'Dilated Convolutions',x:'See how dilated rate r expands receptive field without parameter overhead.'},
+ {id:'dimension',t:'Output Dimension Calculator',x:'Compute exact output shapes for convolutions and max pooling.'},
+ {id:'bottleneck',t:'Bottleneck ResNet Blocks',x:'Compare parameter efficiency between standard convs and bottleneck blocks.'},
+ {id:'params',t:'Parameter Counting',x:'Calculate exact weights for conv, pooling, and dense layers.'}
+];
+let storyI=0,storyPlaying=false,storyTimer=null,storyActive=false;
+function storySec(){return $('#'+STORY[storyI].id);}
+function positionSpot(){
+  const sec=storySec(); if(!sec)return; const el=sec.querySelector('h1,h2')||sec;
+  const r=el.getBoundingClientRect(), sp=$('#storyspot');
+  sp.style.display='block';
+  sp.style.left=(r.left-12)+'px'; sp.style.top=(r.top-10)+'px';
+  sp.style.width=(r.width+24)+'px'; sp.style.height=(r.height+20)+'px';
+}
+function showStory(){
+  const s=STORY[storyI];
+  $('#storyStep').textContent='Step '+(storyI+1)+' / '+STORY.length;
+  $('#storyTitle').textContent=s.t; $('#storyText').innerHTML=s.x;
+  $$('#storyDots i').forEach((d,i)=>d.classList.toggle('on',i===storyI));
+  const sec=storySec();
+  if(sec){const y=sec.getBoundingClientRect().top+window.scrollY-86;window.scrollTo({top:y,behavior:'smooth'});}
+  setTimeout(positionSpot,520);
+}
+function resetTimer(){clearInterval(storyTimer);if(storyPlaying)storyTimer=setInterval(()=>{if(storyI===STORY.length-1){togglePlay();}else nextStory();},9000);}
+function nextStory(){storyI=(storyI+1)%STORY.length;showStory();resetTimer();}
+function prevStory(){storyI=(storyI-1+STORY.length)%STORY.length;showStory();resetTimer();}
+function togglePlay(){storyPlaying=!storyPlaying;$('#storyPlay').innerHTML=storyPlaying?'⏸ pause':'▶ play';resetTimer();}
+function startStory(){
+  storyActive=true;storyI=0;storyPlaying=true;
+  $('#storycard').style.display='block';$('#storyPlay').innerHTML='⏸ pause';
+  $('#storyDots').innerHTML=STORY.map((_,i)=>'<i data-i="'+i+'"></i>').join('');
+  $$('#storyDots i').forEach(d=>d.addEventListener('click',()=>{storyI=+d.dataset.i;showStory();resetTimer();}));
+  showStory();resetTimer();
+  window.addEventListener('scroll',positionSpot,{passive:true});
+  window.addEventListener('resize',positionSpot);
+}
+function endStory(){
+  storyActive=false;storyPlaying=false;clearInterval(storyTimer);
+  $('#storycard').style.display='none';$('#storyspot').style.display='none';
+}
+function initStory(){
+  if(!$('#tourBtn'))return;
+  $('#tourBtn').addEventListener('click',startStory);
+  $('#storyExit').addEventListener('click',endStory);
+  $('#storyNext').addEventListener('click',nextStory);
+  $('#storyPrev').addEventListener('click',prevStory);
+  $('#storyPlay').addEventListener('click',togglePlay);
+}
+
+/* 01 Dilated Conv Demo */
+window.__demos.push(function(){
+  const c=$('#dCanvas'); if(!c)return;
+  const host=$('#dSliders'); host.innerHTML='';
+  const getR=makeSlider(host,{id:'drate',label:'rate r',min:'1',max:'3',step:'1',value:'1'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const r=getR();
+    ctx.clearRect(0,0,W,H);
+    const sz=30, ox=70, oy=40;
+
+    for(let row=0; row<7; row++){
+      for(let col=0; col<7; col++){
+        let isKernel = (row % r === 0 && col % r === 0 && row/r < 3 && col/r < 3);
+        ctx.fillStyle = isKernel ? '#38f0d8' : '#0e1729';
+        ctx.fillRect(ox + col*sz, oy + row*sz, sz-2, sz-2);
+        ctx.strokeStyle = '#1f2d4d'; ctx.strokeRect(ox + col*sz, oy + row*sz, sz-2, sz-2);
+      }
+    }
+  });
+
+  function render(){
+    cv.redraw();
+    const r=getR();
+    const effK = 3 + (3-1)*(r-1);
+    $('#dOut').innerHTML='Dilation Rate r = <span class="hl">'+r+'</span>\n'+
+      'Effective Spatial Field Size: <span class="g">'+effK+'x'+effK+'</span>\n'+
+      'Trainable Parameters: Exactly 9 (Unchanged!)';
+  }
+  render();
+});
+
+/* 02 Dimension Calculator Demo */
+window.__demos.push(function(){
+  const c=$('#dimCanvas'); if(!c)return;
+  const host=$('#dimSliders'); host.innerHTML='';
+  const getN=makeSlider(host,{id:'dimN',label:'Input N',min:'4',max:'64',step:'1',value:'8'},()=>render());
+  const getK=makeSlider(host,{id:'dimK',label:'Kernel K',min:'1',max:'7',step:'1',value:'3'},()=>render());
+  const getP=makeSlider(host,{id:'dimP',label:'Padding P',min:'0',max:'4',step:'1',value:'0'},()=>render());
+  const getS=makeSlider(host,{id:'dimS',label:'Stride S',min:'1',max:'4',step:'1',value:'1'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#38f0d8'; ctx.font='14px monospace';
+    ctx.fillText('Spatial Dimension Formula:', 20, 40);
+    ctx.fillText('O = floor((N + 2P - K) / S) + 1', 20, 70);
+  });
+
+  function render(){
+    cv.redraw();
+    const N=getN(), K=getK(), P=getP(), S=getS();
+    const O=Math.floor((N + 2*P - K)/S) + 1;
+    $('#dimOut').innerHTML='Formula: floor(('+N+' + 2*'+P+' - '+K+') / '+S+') + 1\n'+
+      'Output Dimension: <span class="g">'+O+' x '+O+'</span>';
+  }
+  render();
+});
+
+/* 03 Bottleneck ResNet Demo */
+window.__demos.push(function(){
+  const c=$('#bCanvas'); if(!c)return;
+  const host=$('#bSliders'); host.innerHTML='';
+  const getCin=makeSlider(host,{id:'bcin',label:'Channels C',min:'64',max:'512',step:'64',value:'256'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const C=getCin();
+    const stdParams = 3*3*C*C;
+    const btnParams = (1*1*C*64) + (3*3*64*64) + (1*1*64*C);
+
+    const bw=70;
+    ctx.fillStyle='#ff6b81'; ctx.fillRect(80, 260 - (stdParams/10000), bw, (stdParams/10000));
+    ctx.fillStyle='#62e88a'; ctx.fillRect(220, 260 - (btnParams/10000), bw, (btnParams/10000));
+
+    ctx.fillStyle='#fff'; ctx.font='11px monospace';
+    ctx.fillText('Standard', 80, 280); ctx.fillText('Bottleneck', 220, 280);
+  });
+
+  function render(){
+    cv.redraw();
+    const C=getCin();
+    const stdParams = 3*3*C*C;
+    const btnParams = (1*1*C*64) + (3*3*64*64) + (1*1*64*C);
+    const ratio = (stdParams/btnParams).toFixed(1);
+    $('#bOut').innerHTML='Standard 3x3 Conv Params: <span class="hl">'+stdParams.toLocaleString()+'</span>\n'+
+      'Bottleneck Block Params: <span class="g">'+btnParams.toLocaleString()+'</span>\n'+
+      'Efficiency Gain: <span class="g">'+ratio+'x fewer parameters!</span>';
+  }
+  render();
+});
+
+/* 04 Parameter Count Explorer Demo */
+window.__demos.push(function(){
+  const c=$('#pCanvas'); if(!c)return;
+  const host=$('#pSliders'); host.innerHTML='';
+  const getK=makeSlider(host,{id:'pK',label:'Kernel K',min:'1',max:'7',step:'2',value:'3'},()=>render());
+  const getCin=makeSlider(host,{id:'pCin',label:'Channels In',min:'1',max:'256',step:'1',value:'64'},()=>render());
+  const getCout=makeSlider(host,{id:'pCout',label:'Filters Out',min:'1',max:'256',step:'1',value:'128'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#38f0d8'; ctx.font='14px monospace';
+    ctx.fillText('Conv Layer Parameter Formula:', 20, 40);
+    ctx.fillText('Params = (K * K * Cin + 1) * Cout', 20, 70);
+  });
+
+  function render(){
+    cv.redraw();
+    const K=getK(), Cin=getCin(), Cout=getCout();
+    const params = (K*K*Cin + 1)*Cout;
+    $('#pOut').innerHTML='Calculation: ('+K+'*'+K+'*'+Cin+' + 1) * '+Cout+'\n'+
+      'Total Conv Parameters: <span class="g">'+params.toLocaleString()+'</span>\n'+
+      'Note: Spatial height & width do NOT affect parameter count!';
+  }
+  render();
+});
+
+window.addEventListener('load',()=>{
+  runDemos(); initTheme(); initStory(); onScroll();
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
