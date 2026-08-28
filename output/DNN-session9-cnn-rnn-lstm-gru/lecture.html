@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · DNN Session 9: CNN Architectures, Transfer Learning, RNNs, GRUs & LSTMs</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+/* layout */
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-logo{height:30px;width:auto;border-radius:4px;background:#fff;padding:2px 4px;flex:0 0 auto}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+h4{font-size:15px;margin:1.2em 0 .4em;color:var(--cyan);font-weight:700;letter-spacing:.02em}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+ul.muted li{margin:4px 0}
+
+/* cards & callouts */
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.note b,.note strong{color:#cdc4ff}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.key b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* controls */
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:62px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+button.btn.active{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+
+/* tables */
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:8px 0;width:100%}
+table.tt th,table.tt td{border:1px solid var(--line);padding:8px 16px;text-align:center}
+table.tt th{background:var(--panel2);color:var(--muted)}
+table.tt td.one{color:var(--green);font-weight:700}
+table.tt td.zero{color:var(--dim)}
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan)}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+canvas{display:block;max-width:100%}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+.pill{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--muted)}
+.hero-net{margin:34px 0 6px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== scroll-reveal ===== */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease, transform .65s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1 !important;transform:none !important;transition:none}}
+body{transition:background .35s ease,color .35s ease}
+
+/* ===== top controls ===== */
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+.topbtn.primary:hover{color:#06241f;filter:brightness(1.08)}
+[data-theme="light"] .topbtn{background:rgba(255,255,255,.9);border-color:#dde4f0;color:#16223d}
+[data-theme="light"] .topbtn:hover{color:#0a4a57}
+
+/* ===== guided story mode ===== */
+.spot{position:fixed;z-index:71;border:2px solid var(--cyan);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(2,5,12,.66), 0 0 28px rgba(56,240,216,.55);
+  transition:all .5s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.storycard{position:fixed;z-index:73;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);
+  background:linear-gradient(180deg,#0f1b33,#0a1322);border:1px solid rgba(56,240,216,.42);border-radius:18px;padding:20px 24px;
+  box-shadow:0 22px 64px rgba(0,0,0,.55);color:#e7edf9;animation:popcard .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes popcard{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.storycard .stp{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}
+.storycard h3{margin:6px 0 6px;color:#fff;font-size:21px}
+.storycard p{color:#aebbd6;font-size:14.5px;margin:0;line-height:1.6}
+.storynav{display:flex;align-items:center;gap:8px;margin-top:16px}
+.storynav .sp{flex:1}
+.storynav .btn{padding:7px 12px}
+.storydots{display:flex;gap:5px;flex-wrap:wrap;max-width:260px}
+.storydots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.storydots i.on{background:var(--cyan);transform:scale(1.35)}
+
+/* ===== LIGHT THEME ===== */
+[data-theme="light"] body{
+  background:
+    radial-gradient(1200px 600px at 82% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 8%, rgba(155,140,255,.13), transparent 55%),
+    #eef2f8;
+  color:#16223d;
+}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] h3{color:#16223d}
+[data-theme="light"] h4{color:#0a8198}
+[data-theme="light"] p{color:#28364f}
+[data-theme="light"] .lead{color:#46566f}
+[data-theme="light"] .muted{color:#586a8a}
+[data-theme="light"] strong{color:#0a1326}
+[data-theme="light"] .kicker{color:#0a8198}
+[data-theme="light"] .kicker::before{background:#0a8198}
+[data-theme="light"] a{color:#0a72b8}
+[data-theme="light"] section{border-bottom-color:#dde4f0}
+[data-theme="light"] section:nth-child(even){background:linear-gradient(180deg,rgba(13,23,48,.025),transparent)}
+[data-theme="light"] .card{background:linear-gradient(180deg,#ffffff,#f5f8fe);border-color:#dde4f0;box-shadow:0 1px 3px rgba(20,40,80,.05)}
+[data-theme="light"] .card h4{color:#0a8198}
+[data-theme="light"] .card .muted,[data-theme="light"] .card p{color:#43516e}
+[data-theme="light"] .note{background:rgba(124,108,255,.09);color:#3a3357}
+[data-theme="light"] .note b,[data-theme="light"] .note strong{color:#4b3bb0}
+[data-theme="light"] .key{background:rgba(214,158,46,.11)}
+[data-theme="light"] .key b{color:#946708}
+[data-theme="light"] .sidebar{background:linear-gradient(180deg,#ffffff,transparent);border-right-color:#dde4f0}
+[data-theme="light"] .brand{color:#0d1730}
+[data-theme="light"] .toc a{color:#46566f}
+[data-theme="light"] .toc a:hover{background:#eef2fb;color:#0d1730}
+[data-theme="light"] .toc a.active{background:linear-gradient(90deg,rgba(10,129,152,.14),transparent);color:#0a4a57;border-color:rgba(10,129,152,.4)}
+[data-theme="light"] .toc a.active .n{color:#0a8198}
+[data-theme="light"] .toc .grp{color:#8693b0}
+[data-theme="light"] table.tt th{background:#eef2f9;color:#46566f}
+[data-theme="light"] table.tt td{color:#16223d;border-color:#d8e0ee}
+[data-theme="light"] .foot{color:#7a89a8}
+[data-theme="light"] .tag{color:#43516e;border-color:#d2dcec}
+[data-theme="light"] .pill{color:#43516e;background:#eef2f9;border-color:#d8e0ee}
+[data-theme="light"] .legend{color:#586a8a}
+[data-theme="light"] .lab h4{color:#38f0d8}
+[data-theme="light"] .lab p,[data-theme="light"] .lab .muted{color:#93a4c8}
+[data-theme="light"] .lab strong,[data-theme="light"] .lab b{color:#fff}
+</style>
+</head>
+<body>
+<script>(function(){try{var t=localStorage.getItem('lectheme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">&#9654; Guided tour</button>
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="spot" id="storyspot" style="display:none"></div>
+<div class="storycard" id="storycard" style="display:none">
+  <div class="stp" id="storyStep"></div>
+  <h3 id="storyTitle"></h3>
+  <p id="storyText"></p>
+  <div class="storynav">
+    <div class="storydots" id="storyDots"></div>
+    <div class="sp"></div>
+    <button class="btn" id="storyPrev">&#9664; prev</button>
+    <button class="btn" id="storyPlay">&#9208; pause</button>
+    <button class="btn" id="storyNext">next &#9654;</button>
+    <button class="btn" id="storyExit">&#10005; exit</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><img class="bits-logo" src="assets/bits-logo.png" alt="BITS Pilani logo" onerror="this.style.display='none'"><div>WILP, BITS Pilani<small>DNN Session 9 &middot; Interactive Lecture</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Module 6: CNNs</div>
+    <a href="#intro"><span class="n">00</span> Overview</a>
+    <a href="#cnn-patterns"><span class="n">01</span> CNN Design Patterns</a>
+    <a href="#cnn-archs"><span class="n">02</span> Classic CNNs & Transfer Learning</a>
+    <div class="grp">Module 7: RNNs & Gates</div>
+    <a href="#seq-models"><span class="n">03</span> Sequence Modeling & Markov</a>
+    <a href="#vanilla-rnn"><span class="n">04</span> Vanilla RNN Forward Pass</a>
+    <a href="#bptt"><span class="n">05</span> BPTT & Vanishing Gradients</a>
+    <a href="#gru-section"><span class="n">06</span> Gated Recurrent Unit (GRU)</a>
+    <a href="#lstm-section"><span class="n">07</span> Long Short-Term Memory (LSTM)</a>
+    <div class="grp">Wrap Up</div>
+    <a href="#summary"><span class="n">08</span> Synthesis & Quiz</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Session 9 &middot; CNNs, Transfer Learning, RNNs, GRU & LSTM</div>
+  <h1>Spatial Features &<br>Temporal Memory</h1>
+  <p class="bits-credit">Prepared for the <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">A complete, interactive deep dive into modern vision patterns (bottlenecks, residual skip connections, classic architectures, transfer learning) and sequence processing (autoregressive models, unrolled vanilla RNNs, BPTT vanishing gradients, GRUs, and LSTMs).</p>
+  <div class="hero-net">
+    <canvas id="heroCanvas" width="900" height="220" style="width:100%;height:auto"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--cyan2)"></i> Inputs x_t</span>
+      <span><i style="background:var(--violet)"></i> Recurrent Hidden Memory h_t</span>
+      <span><i style="background:var(--pink)"></i> Target Predictions y_t</span>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Module 6: CNN Patterns</h4><p class="muted" style="font-size:14px">Learn how spatial reduction, channel expansion, 1x1 bottlenecks, and residual skip connections enable 100+ layer vision networks.</p></div>
+    <div class="card"><h4>Module 7: Sequence Models</h4><p class="muted" style="font-size:14px">Explore why feedforward networks fail on sequence data, how latent state $h_t$ replaces fixed history windows, and how BPTT computes temporal gradients.</p></div>
+    <div class="card"><h4>Gated Units: GRU & LSTM</h4><p class="muted" style="font-size:14px">Master the math and internal mechanics of Reset, Update, Forget, Input, and Output gates that fix vanishing gradients forever.</p></div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 1: CNN DESIGN PATTERNS -->
+<section id="cnn-patterns">
+ <div class="wrap">
+  <div class="kicker">01 &middot; Module 6</div>
+  <h2>CNN Design Patterns & Bottlenecks</h2>
+  <p class="lead">Building deep convolutional networks requires systematic patterns rather than arbitrary layer arrangements: spatial reduction, channel expansion, residual shortcuts, and $1\times 1$ bottlenecks.</p>
+
+  <div class="note"><b>Everyday picture: Express Lanes & Compressed Pipes.</b> A bottleneck is like a narrow funnel that squashes a wide pipe of data down to a smaller stream before processing, saving huge energy. A skip connection is like an express highway running parallel to local roads: if local traffic gets jammed (vanishing gradients), signals take the express lane.</div>
+
+  <h3>Key Design Patterns</h3>
+  <ul class="muted">
+    <li><strong>Pattern 1: Spatial Reduction + Channel Expansion.</strong> As spatial resolution decreases ($32\times32 \to 14\times14 \to 5\times5$), feature channels increase ($3 \to 16 \to 64 \to 256$).</li>
+    <li><strong>Pattern 2: Repetitive Modular Blocks.</strong> Stack uniform building blocks (e.g., VGG $3\times3$ blocks or ResNet blocks) to scale depth easily.</li>
+    <li><strong>Pattern 3: Residual / Skip Connections.</strong> Learn $y = F(x) + x$. The identity shortcut $x$ allows gradients to flow backwards without decay.</li>
+    <li><strong>Pattern 4: Bottleneck Designs.</strong> Use $1\times1$ convs to compress channel depth before expensive $3\times3$ convs, then expand back ($8\times$ parameter reduction).</li>
+    <li><strong>Pattern 5: Multi-Scale Extraction.</strong> Inception modules process inputs at parallel filter scales ($1\times1, 3\times3, 5\times5$).</li>
+  </ul>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Lab 1: CNN Bottleneck & Residual Gradient Flow Visualizer</h4>
+    <p class="muted" style="font-size:14px">Toggle the residual skip connection and slide layer depth to see how skip connections prevent gradient decay in deep networks.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="cnnSliders"></div>
+        <div class="chips" style="margin-top:10px">
+          <button class="btn active" id="cnnToggleSkip">Skip Connection: ON</button>
+          <button class="btn" id="cnnReset">&#8634; Reset</button>
+        </div>
+        <div class="readout" id="cnnOut"></div>
+      </div>
+      <div><canvas id="cnnCanvas" width="440" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 2: CLASSIC CNNS & TRANSFER LEARNING -->
+<section id="cnn-archs">
+ <div class="wrap">
+  <div class="kicker">02 &middot; Module 6</div>
+  <h2>Classic CNN Architectures & Transfer Learning</h2>
+  <p class="lead">From AlexNet's breakout performance in 2012 to VGG-16 and GoogLeNet, architecture evolution has balanced parameter efficiency with representational depth.</p>
+
+  <table class="tt">
+    <thead>
+      <tr><th>Architecture</th><th>Depth</th><th>Parameters</th><th>Key Features</th><th>Classification Head</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>AlexNet</td><td>8 layers</td><td>~60 Million</td><td>ReLU, LRN, Dropout 0.5, Data Augmentation</td><td>3 FC Layers (4096-4096-1000)</td></tr>
+      <tr><td>VGG-16</td><td>16 layers</td><td>~138 Million</td><td>Stacked $3\times 3$ convs, $2\times 2$ max pooling</td><td>3 FC Layers (4096-4096-1000)</td></tr>
+      <tr><td>GoogLeNet</td><td>22 layers</td><td>~5 Million</td><td>Inception modules, $1\times 1$ bottlenecks</td><td>Global Average Pooling (GAP)</td></tr>
+      <tr><td>ResNet-50</td><td>50 layers</td><td>~25.6 Million</td><td>Residual blocks ($y = F(x) + x$), Bottlenecks</td><td>Global Average Pooling (GAP)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Transfer Learning Strategy Framework</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>High Domain Similarity</h4>
+      <p class="muted" style="font-size:14px"><strong>Small Dataset:</strong> Freeze CNN backbone, train linear top classifier.<br><strong>Large Dataset:</strong> Fine-tune all layers with a small learning rate.</p>
+    </div>
+    <div class="card">
+      <h4>Low Domain Similarity</h4>
+      <p class="muted" style="font-size:14px"><strong>Small Dataset:</strong> Freeze early low-level layers, train higher layers + head.<br><strong>Large Dataset:</strong> Train complete network from scratch or fine-tune fully.</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 3: SEQUENCE MODELING & MARKOV -->
+<section id="seq-models">
+ <div class="wrap">
+  <div class="kicker">03 &middot; Module 7</div>
+  <h2>Sequence Modeling: Autoregressive vs Latent Variable</h2>
+  <p class="lead">Standard feedforward networks fail on sequence data because inputs vary in length and lack temporal memory. Sequence models compress history into state variables.</p>
+
+  <div class="note"><b>Analogy first: Weather Forecasting.</b> An autoregressive model predicts tomorrow's weather strictly by looking at today's temperature ($T_{t+1} = \alpha T_t + \beta$). A latent variable model keeps a running memory summary $h_t$ of the entire week's trend.</div>
+
+  <div class="eqbox">
+    $$\text{Autoregressive (First-order Markov): } x_t = P(x_t \mid x_{t-1})$$
+    $$\text{Latent Variable Model (RNN): } h_t = g(h_{t-1}, x_t), \quad \hat{y}_t = f(h_t)$$
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Lab 2: Autoregressive vs Latent Variable Temperature Forecast</h4>
+    <p class="muted" style="font-size:14px">Adjust model weight $\alpha$ and bias $\beta$ to observe how autoregressive predictions compare to running latent state memory.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="seqSliders"></div>
+        <div class="chips" style="margin-top:10px">
+          <button class="btn" id="seqReset">&#8634; Reset Sequence</button>
+        </div>
+        <div class="readout" id="seqOut"></div>
+      </div>
+      <div><canvas id="seqCanvas" width="440" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 4: VANILLA RNN FORWARD PASS -->
+<section id="vanilla-rnn">
+ <div class="wrap">
+  <div class="kicker">04 &middot; Module 7</div>
+  <h2>Vanilla Recurrent Neural Network (RNN)</h2>
+  <p class="lead">An RNN updates its internal hidden state $h_t$ at each time step using parameter-shared matrices $W_{hh}, W_{hx}, W_{ho}$.</p>
+
+  <div class="eqbox">
+    $$h_t = \tanh(W_{hh} h_{t-1} + W_{hx} x_t + b_h), \quad o_t = W_{ho} h_t + b_o$$
+  </div>
+
+  <div class="key"><b>Parameter Counting Formula:</b> Total Params = $h \cdot d + h^2 + h + V \cdot h + V$. For $d=100, h=256, V=10,000$, Total = $25,600 + 65,536 + 256 + 2,560,000 + 10,000 = 2,661,392$ parameters (~2.66M).</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Lab 3: Unrolled Vanilla RNN Step-by-Step Forward Pass</h4>
+    <p class="muted" style="font-size:14px">Slide inputs $x_1$ and $x_2$ to compute exact matrix operations $z_1, h_1, o_1, z_2, h_2, o_2$ live.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="rnnSliders"></div>
+        <div class="readout" id="rnnOut"></div>
+      </div>
+      <div><canvas id="rnnCanvas" width="440" height="340" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 5: BPTT & VANISHING GRADIENTS -->
+<section id="bptt">
+ <div class="wrap">
+  <div class="kicker">05 &middot; Module 7</div>
+  <h2>BPTT & The Vanishing Gradient Problem</h2>
+  <p class="lead">Backpropagation Through Time unrolls the RNN graph. Multiplying by $W_{hh}^T \text{diag}(\phi')$ repeatedly across $T$ steps causes gradients to vanish or explode exponentially.</p>
+
+  <div class="note"><b>Gradient Decay Equation:</b> $\frac{\partial L_T}{\partial h_k} = \frac{\partial L_T}{\partial h_T} \prod_{j=k+1}^T \text{diag}(\phi'(z_j)) W_{hh}^T$. If $\lambda_{\max} \cdot |\phi'| = 0.4$, after 20 steps $(0.4)^{20} \approx 10^{-8}$.</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Lab 4: BPTT & Vanishing Gradient Simulator</h4>
+    <p class="muted" style="font-size:14px">Adjust weight eigenvalue $\lambda_{\max}$ and sequence length $T$ to watch gradients vanish ($<1$) or explode ($>1$).</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="bpttSliders"></div>
+        <div class="readout" id="bpttOut"></div>
+      </div>
+      <div><canvas id="bpttCanvas" width="440" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 6: GATED RECURRENT UNIT (GRU) -->
+<section id="gru-section">
+ <div class="wrap">
+  <div class="kicker">06 &middot; Module 7</div>
+  <h2>Gated Recurrent Unit (GRU)</h2>
+  <p class="lead">GRU solves vanishing gradients using Reset ($r_t$) and Update ($z_t$) gates to create additive linear gradient highways.</p>
+
+  <div class="eqbox">
+    $$r_t = \sigma(W_r x_t + U_r h_{t-1} + b_r), \quad z_t = \sigma(W_z x_t + U_z h_{t-1} + b_z)$$
+    $$\tilde{h}_t = \tanh(W_h x_t + U_h (r_t \odot h_{t-1}) + b_h)$$
+    $$h_t = z_t \odot h_{t-1} + (1 - z_t) \odot \tilde{h}_t$$
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Lab 5: GRU Gate Explorer & 5-Step Calculation</h4>
+    <p class="muted" style="font-size:14px">Slide input $x_1$ and previous hidden state $h_0$ to perform the complete 5-step GRU derivation in real-time.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="gruSliders"></div>
+        <div class="readout" id="gruOut"></div>
+      </div>
+      <div><canvas id="gruCanvas" width="440" height="340" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 7: LONG SHORT-TERM MEMORY (LSTM) -->
+<section id="lstm-section">
+ <div class="wrap">
+  <div class="kicker">07 &middot; Module 7</div>
+  <h2>Long Short-Term Memory (LSTM)</h2>
+  <p class="lead">LSTM separates long-term cell state memory $c_t$ from short-term hidden output $h_t$ using three dedicated gates: Forget ($f_t$), Input ($i_t$), and Output ($o_t$).</p>
+
+  <div class="eqbox">
+    $$f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f), \quad i_t = \sigma(W_i x_t + U_i h_{t-1} + b_i)$$
+    $$\tilde{c}_t = \tanh(W_c x_t + U_c h_{t-1} + b_c), \quad c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t$$
+    $$o_t = \sigma(W_o x_t + U_o h_{t-1} + b_o), \quad h_t = o_t \odot \tanh(c_t)$$
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Lab 6: LSTM Memory Cell & Gate Controller</h4>
+    <p class="muted" style="font-size:14px">Manually toggle Forget, Input, and Output gates to watch how information flows into cell state $c_t$ and hidden output $h_t$.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="lstmSliders"></div>
+        <div class="readout" id="lstmOut"></div>
+      </div>
+      <div><canvas id="lstmCanvas" width="440" height="340" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- SECTION 8: SUMMARY & QUIZ -->
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">08 &middot; Synthesis & Quiz</div>
+  <h2>Final Boss Quiz & Pocket Card</h2>
+  <p class="lead">Test your mastery of CNN patterns, Transfer Learning, RNN parameter counting, BPTT, GRU, and LSTM mechanics.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#127942; Final Boss Quiz</h4>
+    <div id="quizContainer"></div>
+  </div>
+
+  <div class="key" style="margin-top:30px">
+    <b>POCKET CARD: Session 9 Key Formulas & Takeaways</b>
+    <ul class="muted" style="margin-top:8px">
+      <li><strong>Bottleneck Convs:</strong> $1\times 1$ convs reduce channel depth before expensive $3\times 3$ ops (~8x parameter reduction).</li>
+      <li><strong>Residual Convs:</strong> $y = F(x) + x$ creates express identity highways for uninhibited gradient backpropagation.</li>
+      <li><strong>Vanilla RNN:</strong> $h_t = \tanh(W_{hh} h_{t-1} + W_{hx} x_t + b_h)$. Recurrent Params = $hd + h^2 + h$. Vanishes as $(W_{hh}^T \phi')^k$.</li>
+      <li><strong>GRU (2 Gates):</strong> Reset $r_t$, Update $z_t$, State $h_t = z_t \odot h_{t-1} + (1-z_t) \odot \tilde{h}_t$. Params = $3(hd + h^2 + h)$.</li>
+      <li><strong>LSTM (3 Gates):</strong> Forget $f_t$, Input $i_t$, Output $o_t$. Cell update $c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t$, Output $h_t = o_t \odot \tanh(c_t)$. Params = $4(hd + h^2 + h)$.</li>
+    </ul>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  WILP, BITS Pilani &middot; Deep Neural Networks AIML ZG511 &middot; Session 9 Interactive Companion Page.
+</div>
+</main>
+</div>
+
+<script>
+/* Shared Utilities */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(x,d=3)=>{ if(Math.abs(x)<1e-9)x=0; return x.toFixed(d); };
+const sigmoid=z=>1/(1+Math.exp(-z));
+
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const dec=(opt.step+'').includes('.')?(opt.step+'').split('.')[1].length:0;
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(dec);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  let raf=null;
+  window.addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(resize);});
+  resize();
+  return {redraw:()=>{const dpr=Math.max(1,window.devicePixelRatio||1);
+    drawFn(ctx,canvas.width/dpr,canvas.height/dpr);}};
+}
+
+/* Scroll progress & active nav */
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+function onScroll(){
+  const st=window.scrollY, h=document.body.scrollHeight-window.innerHeight;
+  $('#progbar').style.width=(100*st/(h||1))+'%';
+  let idx=0;
+  sections.forEach((sec,i)=>{ if(sec && sec.offsetTop-120<=st) idx=i; });
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+window.__demos=[];
+function runDemos(){ window.__demos.forEach(f=>{try{f();}catch(e){console.error(e);}}); }
+
+function initTheme(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const sync=()=>{const light=document.documentElement.getAttribute('data-theme')==='light';btn.innerHTML=light?'🌙 Dark':'☀ Light';};
+  sync();
+  btn.addEventListener('click',()=>{
+    const root=document.documentElement, light=root.getAttribute('data-theme')==='light';
+    if(light){root.removeAttribute('data-theme');try{localStorage.setItem('lectheme','dark');}catch(e){}}
+    else{root.setAttribute('data-theme','light');try{localStorage.setItem('lectheme','light');}catch(e){}}
+    sync();
+  });
+}
+
+function initReveal(){
+  if(!('IntersectionObserver' in window))return;
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),
+    {threshold:0.04,rootMargin:'0px 0px -4% 0px'});
+  $$('section .wrap > *').forEach(el=>{
+    if(el.classList.contains('lab')||el.querySelector('canvas')) return;
+    el.classList.add('reveal'); io.observe(el);
+  });
+}
+
+/* Guided Tour */
+const STORY=[
+ {id:'intro',t:'Welcome to Session 9',x:'Session 9 covers two major themes: Convolutional Neural Network design patterns & Transfer Learning, followed by Recurrent Neural Networks, BPTT, GRU, and LSTM memory cells.'},
+ {id:'cnn-patterns',t:'Lab 1: CNN Bottleneck & Skip Connections',x:'Compare standard vs bottleneck convolutions, and observe how residual identity connections $y = F(x) + x$ keep gradient flow alive in 100+ layer networks.'},
+ {id:'seq-models',t:'Lab 2: Autoregressive vs Latent Memory',x:'Autoregressive models rely on a fixed window of past inputs, while Recurrent Neural Networks compress sequence history into a continuous latent state $h_t$.'},
+ {id:'vanilla-rnn',t:'Lab 3: Unrolled Vanilla RNN Forward Pass',x:'Watch how input $x_t$ and previous hidden state $h_{t-1}$ are multiplied by shared parameter matrices $W_{hx}$ and $W_{hh}$ step-by-step.'},
+ {id:'bptt',t:'Lab 4: BPTT & Vanishing Gradients',x:'Backpropagation Through Time multiplies gradients by $W_{hh}^T \phi\'$ at each step. If weight eigenvalues are $<1$, gradients vanish exponentially.'},
+ {id:'gru-section',t:'Lab 5: Gated Recurrent Unit (GRU)',x:'GRU uses Reset gate $r_t$ and Update gate $z_t$ to control memory retention and create linear additive gradient highways.'},
+ {id:'lstm-section',t:'Lab 6: Long Short-Term Memory (LSTM)',x:'LSTM separates long-term Cell State $c_t$ from short-term Hidden State $h_t$ using Forget, Input, and Output gates.'},
+ {id:'summary',t:'Lab 7: Quiz & Pocket Card',x:'Complete the interactive quiz to test your parameter counting and gating intuition!'}
+];
+let storyI=0,storyPlaying=false,storyTimer=null,storyActive=false;
+function storySec(){return $('#'+STORY[storyI].id);}
+function positionSpot(){
+  const sec=storySec(); if(!sec)return; const el=sec.querySelector('h1,h2')||sec;
+  const r=el.getBoundingClientRect(), sp=$('#storyspot');
+  sp.style.display='block';
+  sp.style.left=(r.left-12)+'px'; sp.style.top=(r.top-10)+'px';
+  sp.style.width=(r.width+24)+'px'; sp.style.height=(r.height+20)+'px';
+}
+function showStory(){
+  const s=STORY[storyI];
+  $('#storyStep').textContent='Step '+(storyI+1)+' / '+STORY.length;
+  $('#storyTitle').textContent=s.t; $('#storyText').innerHTML=s.x;
+  $$('#storyDots i').forEach((d,i)=>d.classList.toggle('on',i===storyI));
+  const sec=storySec();
+  if(sec){const y=sec.getBoundingClientRect().top+window.scrollY-86;window.scrollTo({top:y,behavior:'smooth'});}
+  setTimeout(positionSpot,520);
+}
+function resetTimer(){clearInterval(storyTimer);if(storyPlaying)storyTimer=setInterval(()=>{if(storyI===STORY.length-1){togglePlay();}else nextStory();},9000);}
+function nextStory(){storyI=(storyI+1)%STORY.length;showStory();resetTimer();}
+function prevStory(){storyI=(storyI-1+STORY.length)%STORY.length;showStory();resetTimer();}
+function togglePlay(){storyPlaying=!storyPlaying;$('#storyPlay').innerHTML=storyPlaying?'⏸ pause':'▶ play';resetTimer();}
+function spotFollow(){if(storyActive)positionSpot();}
+function startStory(){
+  storyActive=true;storyI=0;storyPlaying=true;
+  $('#storycard').style.display='block';$('#storyPlay').innerHTML='⏸ pause';
+  $('#storyDots').innerHTML=STORY.map((_,i)=>'<i data-i="'+i+'"></i>').join('');
+  $$('#storyDots i').forEach(d=>d.addEventListener('click',()=>{storyI=+d.dataset.i;showStory();resetTimer();}));
+  showStory();resetTimer();
+  window.addEventListener('scroll',spotFollow,{passive:true});
+  window.addEventListener('resize',positionSpot);
+}
+function endStory(){
+  storyActive=false;storyPlaying=false;clearInterval(storyTimer);
+  $('#storycard').style.display='none';$('#storyspot').style.display='none';
+  window.removeEventListener('scroll',spotFollow);window.removeEventListener('resize',positionSpot);
+}
+function initStory(){
+  if(!$('#tourBtn'))return;
+  $('#tourBtn').addEventListener('click',startStory);
+  $('#storyExit').addEventListener('click',endStory);
+  $('#storyNext').addEventListener('click',nextStory);
+  $('#storyPrev').addEventListener('click',prevStory);
+  $('#storyPlay').addEventListener('click',togglePlay);
+  document.addEventListener('keydown',e=>{if(!storyActive)return;
+    if(e.key==='Escape')endStory();else if(e.key==='ArrowRight')nextStory();
+    else if(e.key==='ArrowLeft')prevStory();else if(e.key===' '){e.preventDefault();togglePlay();}});
+}
+
+/* ===== DEMOS & LABS ===== */
+
+/* Hero Animation */
+window.__demos.push(function(){
+  const c=$('#heroCanvas'); if(!c)return; const ctx=c.getContext('2d');
+  const W=c.width, H=c.height;
+  let t=0;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(31, 45, 77, 0.5)'; ctx.lineWidth=1;
+    for(let x=40; x<W; x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+
+    t += 0.03;
+    const nodes = 5;
+    const stepW = (W - 100) / (nodes - 1);
+
+    // Draw recurrent connections
+    for(let i=0; i<nodes; i++){
+      const x = 50 + i * stepW;
+      const y = H/2 + Math.sin(t + i)*15;
+
+      if(i < nodes - 1){
+        const nextX = 50 + (i+1) * stepW;
+        const nextY = H/2 + Math.sin(t + i + 1)*15;
+        ctx.strokeStyle = '#9b8cff'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(nextX, nextY); ctx.stroke();
+      }
+
+      // Input arrow
+      ctx.strokeStyle = '#19c4ff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, H - 30); ctx.lineTo(x, y + 20); ctx.stroke();
+
+      // Output arrow
+      ctx.strokeStyle = '#ff6ec7'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, y - 20); ctx.lineTo(x, 30); ctx.stroke();
+
+      // Node
+      ctx.fillStyle = '#0e1729'; ctx.strokeStyle = '#38f0d8'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#38f0d8'; ctx.font = '11px monospace'; ctx.textAlign='center';
+      ctx.fillText(`h_${i+1}`, x, y + 4);
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+});
+
+/* LAB 1: CNN Bottleneck & Residual Skip */
+window.__demos.push(function(){
+  const c=$('#cnnCanvas'); if(!c)return;
+  const host=$('#cnnSliders'); host.innerHTML='';
+  let skipOn = true;
+  const getDepth=makeSlider(host,{id:'cnnDepth',label:'Depth L',min:'5',max:'100',step:'5',value:'50'},()=>render());
+
+  const btn = $('#cnnToggleSkip');
+  btn.addEventListener('click', ()=>{ skipOn = !skipOn; btn.textContent = `Skip Connection: ${skipOn ? 'ON' : 'OFF'}`; btn.classList.toggle('active', skipOn); render(); });
+  $('#cnnReset').addEventListener('click', ()=>{ skipOn = true; btn.textContent = 'Skip Connection: ON'; btn.classList.add('active'); render(); });
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const depth = getDepth();
+    const pad = 40;
+
+    ctx.strokeStyle='rgba(147, 164, 200, 0.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad, H - pad); ctx.lineTo(W - pad, H - pad); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, H - pad); ctx.stroke();
+
+    ctx.fillStyle='#93a4c8'; ctx.font='11px monospace';
+    ctx.fillText('Layer Depth l', W - pad - 80, H - pad + 20);
+    ctx.fillText('Backprop Gradient Magnitude', pad - 10, pad - 12);
+
+    // Draw gradient curve
+    ctx.beginPath();
+    ctx.strokeStyle = skipOn ? '#62e88a' : '#ff6b81';
+    ctx.lineWidth = 3;
+
+    for(let px = pad; px <= W - pad; px++){
+      const l = ((px - pad) / (W - 2*pad)) * depth;
+      // Plain network gradient decays as 0.85^l; Residual network stays ~1.0
+      const grad = skipOn ? (1.0 - 0.15 * (l / depth)) : Math.pow(0.88, l);
+      const py = (H - pad) - grad * (H - 2*pad - 20);
+      if(px === pad) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  });
+
+  function render(){
+    cv.redraw();
+    const depth = getDepth();
+    const plainGrad = Math.pow(0.88, depth);
+    const resGrad = 1.0 - 0.15;
+    $('#cnnOut').innerHTML = `Network Depth: ${depth} layers\n` +
+      `Residual Skip Connections: <span class="${skipOn ? 'g' : 'hl'}">${skipOn ? 'ENABLED (y = F(x) + x)' : 'DISABLED (Plain Conv)'}</span>\n` +
+      `Gradient Signal at Layer 1: <span class="${skipOn ? 'g' : 'hl'}">${skipOn ? fmt(resGrad, 3) : fmt(plainGrad, 5)}</span>\n` +
+      (skipOn ? 'Gradient highway open! Deep model trains cleanly.' : 'Gradients vanishing! Early layers cannot update.');
+  }
+  render();
+});
+
+/* LAB 2: Autoregressive vs Latent Forecast */
+window.__demos.push(function(){
+  const c=$('#seqCanvas'); if(!c)return;
+  const host=$('#seqSliders'); host.innerHTML='';
+  const getAlpha=makeSlider(host,{id:'seqAlpha',label:'α (weight)',min:'0.1',max:'1.2',step:'0.05',value:'0.8'},()=>render());
+  const getBeta=makeSlider(host,{id:'seqBeta',label:'β (bias)',min:'0.0',max:'10.0',step:'0.5',value:'4.0'},()=>render());
+
+  const temps = [20, 22, 25, 24, 21];
+  $('#seqReset').addEventListener('click', ()=>{ render(); });
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pad = 40;
+    const X = i => pad + i * ((W - 2*pad) / 5);
+    const Y = v => H - pad - ((v - 10) / 25) * (H - 2*pad);
+
+    // Grid
+    ctx.strokeStyle='rgba(147,164,200,0.2)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(W-pad, H-pad); ctx.stroke();
+
+    // Plot historical points
+    ctx.strokeStyle='#19c4ff'; ctx.lineWidth=2; ctx.beginPath();
+    temps.forEach((t, i)=>{
+      const px = X(i), py = Y(t);
+      if(i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.stroke();
+
+    temps.forEach((t, i)=>{
+      ctx.fillStyle='#19c4ff'; ctx.beginPath(); ctx.arc(X(i), Y(t), 5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle='#93a4c8'; ctx.font='11px monospace'; ctx.fillText(`T${i+1}=${t}°`, X(i)-15, Y(t)-10);
+    });
+
+    // Autoregressive prediction T6
+    const alpha = getAlpha(), beta = getBeta();
+    const t6_ar = alpha * temps[4] + beta;
+
+    // Latent prediction T6 (uses smooth exponential average of sequence)
+    let h = 0;
+    temps.forEach(t => { h = 0.5 * h + 0.5 * t; });
+    const t6_latent = alpha * h + beta;
+
+    ctx.fillStyle='#ffcb6b'; ctx.beginPath(); ctx.arc(X(5), Y(t6_ar), 7, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ffcb6b'; ctx.font='11px monospace'; ctx.fillText(`AR T6=${fmt(t6_ar,1)}°`, X(5)-30, Y(t6_ar)-12);
+
+    ctx.fillStyle='#62e88a'; ctx.beginPath(); ctx.arc(X(5), Y(t6_latent), 7, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#62e88a'; ctx.font='11px monospace'; ctx.fillText(`RNN T6=${fmt(t6_latent,1)}°`, X(5)-35, Y(t6_latent)+20);
+  });
+
+  function render(){
+    cv.redraw();
+    const alpha = getAlpha(), beta = getBeta();
+    const t5 = temps[4];
+    const t6_ar = alpha * t5 + beta;
+    let h = 0;
+    temps.forEach(t => { h = 0.5 * h + 0.5 * t; });
+    const t6_latent = alpha * h + beta;
+
+    $('#seqOut').innerHTML = `Observed Sequence: [20°, 22°, 25°, 24°, 21°]\n` +
+      `Autoregressive (1st-Order): T6 = α·T5 + β = ${alpha}·21 + ${beta} = <span class="hl">${fmt(t6_ar,2)}°C</span>\n` +
+      `RNN Latent Memory (h5=${fmt(h,1)}): T6 = α·h5 + β = <span class="g">${fmt(t6_latent,2)}°C</span>\n` +
+      `Notice: Latent model accounts for whole sequence trend (20→25→21)!`;
+  }
+  render();
+});
+
+/* LAB 3: Vanilla RNN Forward Pass */
+window.__demos.push(function(){
+  const c=$('#rnnCanvas'); if(!c)return;
+  const host=$('#rnnSliders'); host.innerHTML='';
+  const getX1=makeSlider(host,{id:'rnnX1',label:'x1 (step 1)',min:'0.0',max:'2.0',step:'0.1',value:'1.0'},()=>render());
+  const getX2=makeSlider(host,{id:'rnnX2',label:'x2 (step 2)',min:'0.0',max:'2.0',step:'0.1',value:'0.8'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#93a4c8'; ctx.font='12px monospace';
+    ctx.fillText('Unrolled Forward Computation Graph', W/2 - 110, 25);
+
+    // Step 1
+    ctx.strokeStyle='#19c4ff'; ctx.strokeRect(60, 60, 140, 200);
+    ctx.fillStyle='#e7edf9'; ctx.fillText('Step t=1', 100, 85);
+    ctx.fillText(`x1 = [${getX1()}, 0.5]`, 75, 120);
+    ctx.fillText(`h1 = tanh(Whx x1)`, 75, 160);
+    ctx.fillText(`o1 = Who h1`, 75, 200);
+
+    // Arrow t=1 -> t=2
+    ctx.strokeStyle='#9b8cff'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(200, 160); ctx.lineTo(240, 160); ctx.stroke();
+    ctx.fillStyle='#9b8cff'; ctx.fillText('W_hh', 205, 150);
+
+    // Step 2
+    ctx.strokeStyle='#38f0d8'; ctx.strokeRect(240, 60, 140, 200);
+    ctx.fillStyle='#e7edf9'; ctx.fillText('Step t=2', 280, 85);
+    ctx.fillText(`x2 = [${getX2()}, 1.2]`, 255, 120);
+    ctx.fillText(`h2 = tanh(...)`, 255, 160);
+    ctx.fillText(`o2 = Who h2`, 255, 200);
+  });
+
+  function render(){
+    cv.redraw();
+    const x1_val = getX1(), x2_val = getX2();
+    // Simplified computation matching slide 55/56
+    const z1_0 = 0.5 * x1_val + 0.3 * 0.5 + 0.1;
+    const h1_0 = Math.tanh(z1_0);
+    const z2_0 = 0.3 * h1_0 + 0.5 * x2_val + 0.3 * 1.2 + 0.1;
+    const h2_0 = Math.tanh(z2_0);
+
+    $('#rnnOut').innerHTML = `Time Step t=1: x1 = [${x1_val}, 0.5]^T\n` +
+      `  z1[0] = 0.5(${x1_val}) + 0.3(0.5) + 0.1 = ${fmt(z1_0,3)} → h1[0] = <span class="hl">${fmt(h1_0,3)}</span>\n` +
+      `Time Step t=2: x2 = [${x2_val}, 1.2]^T\n` +
+      `  z2[0] = W_hh·h1 + W_hx·x2 + b = ${fmt(z2_0,3)} → h2[0] = <span class="g">${fmt(h2_0,3)}</span>`;
+  }
+  render();
+});
+
+/* LAB 4: BPTT Vanishing Gradients */
+window.__demos.push(function(){
+  const c=$('#bpttCanvas'); if(!c)return;
+  const host=$('#bpttSliders'); host.innerHTML='';
+  const getEig=makeSlider(host,{id:'bpttEig',label:'λ_max (W_hh)',min:'0.2',max:'1.5',step:'0.05',value:'0.8'},()=>render());
+  const getSteps=makeSlider(host,{id:'bpttSteps',label:'Steps T',min:'2',max:'30',step:'1',value:'15'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const eig = getEig(), T = getSteps();
+    const pad = 40;
+
+    ctx.strokeStyle='rgba(147,164,200,0.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(W-pad, H-pad); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, H-pad); ctx.stroke();
+
+    ctx.fillStyle='#93a4c8'; ctx.font='11px monospace';
+    ctx.fillText('Backwards Step k', W-pad-100, H-pad+20);
+    ctx.fillText('Gradient Magnitude (Log Scale)', pad-10, pad-12);
+
+    ctx.strokeStyle = eig > 1.0 ? '#ff6b81' : '#38f0d8'; ctx.lineWidth=3;
+    ctx.beginPath();
+    for(let k=1; k<=T; k++){
+      const grad = Math.pow(eig * 0.5, k);
+      const px = pad + (k / T) * (W - 2*pad);
+      const logGrad = Math.log10(Math.max(1e-10, Math.min(1e5, grad)));
+      const py = (H - pad) - ((logGrad + 8) / 12) * (H - 2*pad);
+      if(k===1) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  });
+
+  function render(){
+    cv.redraw();
+    const eig = getEig(), T = getSteps();
+    const finalGrad = Math.pow(eig * 0.5, T);
+    const stateStr = eig * 0.5 > 1.0 ? '<span style="color:var(--red)">EXPLODING GRADIENTS (>1)</span>' :
+                     finalGrad < 1e-4 ? '<span class="hl">VANISHED GRADIENT (<0.0001)</span>' : '<span class="g">STABLE GRADIENT FLOW</span>';
+
+    $('#bpttOut').innerHTML = `Sequence Length T: ${T} steps | Single Step Decay (λ·φ'): ${fmt(eig*0.5, 2)}\n` +
+      `Gradient Ratio at Step 1: (λ·φ')^T = <span class="g">${fmt(finalGrad, 8)}</span>\n` +
+      `Status: ${stateStr}`;
+  }
+  render();
+});
+
+/* LAB 5: GRU Gate Explorer */
+window.__demos.push(function(){
+  const c=$('#gruCanvas'); if(!c)return;
+  const host=$('#gruSliders'); host.innerHTML='';
+  const getX1=makeSlider(host,{id:'gruX1',label:'x1[0]',min:'0.0',max:'2.0',step:'0.1',value:'1.0'},()=>render());
+  const getH0=makeSlider(host,{id:'gruH0',label:'h0[0]',min:'0.0',max:'1.0',step:'0.05',value:'0.6'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#93a4c8'; ctx.font='12px monospace';
+    ctx.fillText('GRU Gate Computation Pipeline', W/2 - 100, 25);
+
+    // Draw gate boxes
+    ctx.strokeStyle='#ff6b81'; ctx.strokeRect(40, 60, 100, 60);
+    ctx.fillStyle='#ff6b81'; ctx.fillText('Reset r_t', 65, 95);
+
+    ctx.strokeStyle='#19c4ff'; ctx.strokeRect(170, 60, 100, 60);
+    ctx.fillStyle='#19c4ff'; ctx.fillText('Update z_t', 190, 95);
+
+    ctx.strokeStyle='#62e88a'; ctx.strokeRect(300, 60, 100, 60);
+    ctx.fillStyle='#62e88a'; ctx.fillText('Candidate h~_t', 310, 95);
+
+    ctx.strokeStyle='#ffcb6b'; ctx.strokeRect(170, 170, 230, 80);
+    ctx.fillStyle='#ffcb6b'; ctx.fillText('Final Update h_t', 230, 200);
+    ctx.fillText('h_t = z_t⊙h_{t-1} + (1-z_t)⊙h~_t', 180, 230);
+  });
+
+  function render(){
+    cv.redraw();
+    const x1 = getX1(), h0 = getH0();
+    // 5-step exact slides math
+    const r1 = sigmoid(0.3 * x1 + 0.2 * 0.5 + 0.5 * h0 + 0.1 * 0.4 + 0.1);
+    const z1 = sigmoid(0.2 * x1 + 0.5 * 0.5 + 0.1 * h0 + 0.4 * 0.4 + 0.2);
+    const h_reset = r1 * h0;
+    const h_tilde = Math.tanh(0.5 * x1 + 0.3 * 0.5 + 0.4 * h_reset + 0.1);
+    const h1 = z1 * h0 + (1 - z1) * h_tilde;
+
+    $('#gruOut').innerHTML = `Step 1 (Reset Gate r1): σ(...) = <span class="hl">${fmt(r1,4)}</span>\n` +
+      `Step 2 (Update Gate z1): σ(...) = <span class="hl">${fmt(z1,4)}</span>\n` +
+      `Step 3 (Reset Past Memory r1⊙h0): <span class="muted">${fmt(h_reset,4)}</span>\n` +
+      `Step 4 (Candidate h~1): tanh(...) = <span class="g">${fmt(h_tilde,4)}</span>\n` +
+      `Step 5 (Final State h1): z1⊙h0 + (1-z1)⊙h~1 = <span class="g">${fmt(h1,4)}</span>`;
+  }
+  render();
+});
+
+/* LAB 6: LSTM Memory Cell */
+window.__demos.push(function(){
+  const c=$('#lstmCanvas'); if(!c)return;
+  const host=$('#lstmSliders'); host.innerHTML='';
+  const getF=makeSlider(host,{id:'lstmF',label:'Forget f_t',min:'0.0',max:'1.0',step:'0.05',value:'0.8'},()=>render());
+  const getI=makeSlider(host,{id:'lstmI',label:'Input i_t',min:'0.0',max:'1.0',step:'0.05',value:'0.6'},()=>render());
+  const getO=makeSlider(host,{id:'lstmO',label:'Output o_t',min:'0.0',max:'1.0',step:'0.05',value:'0.9'},()=>render());
+
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#93a4c8'; ctx.font='12px monospace';
+    ctx.fillText('LSTM Cell State Highway (c_t)', W/2 - 100, 25);
+
+    // Highway line
+    ctx.strokeStyle='#62e88a'; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(40, 80); ctx.lineTo(W-40, 80); ctx.stroke();
+    ctx.fillStyle='#62e88a'; ctx.fillText('Cell State c_t Highway (No Gradient Decay if f_t=1)', 50, 65);
+
+    // Hidden state lower line
+    ctx.strokeStyle='#19c4ff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(40, 240); ctx.lineTo(W-40, 240); ctx.stroke();
+    ctx.fillStyle='#19c4ff'; ctx.fillText('Hidden Output h_t = o_t ⊙ tanh(c_t)', 50, 260);
+  });
+
+  function render(){
+    cv.redraw();
+    const f = getF(), i = getI(), o = getO();
+    const c_prev = 1.0;
+    const c_tilde = 0.75;
+    const c_t = f * c_prev + i * c_tilde;
+    const h_t = o * Math.tanh(c_t);
+
+    $('#lstmOut').innerHTML = `Previous Cell State c_{t-1}: 1.000 | Candidate c~_t: 0.750\n` +
+      `Cell State Update: c_t = (${f})·1.0 + (${i})·0.75 = <span class="g">${fmt(c_t,4)}</span>\n` +
+      `Hidden Output Update: h_t = (${o})·tanh(${fmt(c_t,3)}) = <span class="hl">${fmt(h_t,4)}</span>\n` +
+      (f === 1.0 && i === 0.0 ? '<span class="g">CONSTANT ERROR CAROUSEL ACTIVE! Gradient flows unchanged.</span>' : 'Gates actively filtering memory content.');
+  }
+  render();
+});
+
+/* LAB 7: Final Boss Quiz */
+window.__demos.push(function(){
+  const qc = $('#quizContainer'); if(!qc)return;
+  const questions = [
+    {
+      q: "1. How many parameters does a standard $1\\times 1$ conv bottleneck save compared to a standard $3\\times 3$ conv on 256 channels?",
+      opts: ["~2x reduction", "~4x reduction", "~8x reduction (590K to 70K)", "No parameter reduction"],
+      ans: 2,
+      exp: "A $1\\times 1$ bottleneck squashes 256 channels to 64, processes with $3\\times 3$, and expands back, cutting parameters from 590K to 70K (~8.47x)."
+    },
+    {
+      q: "2. Why does a Gated Recurrent Unit (GRU) solve the vanishing gradient problem?",
+      opts: ["It uses ReLU instead of tanh", "Its Update Gate $z_t$ creates a direct linear additive path $h_t = z_t h_{t-1} + (1-z_t)\\tilde{h}_t$", "It adds 4 full memory gates", "It processes sequences backwards only"],
+      ans: 1,
+      exp: "The Update Gate $z_t$ creates an additive linear shortcut that lets gradients bypass non-linearities without weight decay."
+    },
+    {
+      q: "3. Total recurrent parameters for a GRU with input $d=100$ and hidden $h=256$ is:",
+      opts: ["91,392", "274,176", "365,568", "2,661,392"],
+      ans: 1,
+      exp: "GRU has 3 gate components: $3 \\times (256 \\times 100 + 256^2 + 256) = 3 \\times (25600 + 65536 + 256) = 274,176$."
+    }
+  ];
+
+  let html = '';
+  questions.forEach((item, idx) => {
+    html += `<div style="margin-bottom:20px;background:#06101f;padding:16px;border-radius:10px;border:1px solid var(--line)">
+      <p style="font-weight:700;color:#fff;margin:0 0 10px">${item.q}</p>`;
+    item.opts.forEach((opt, oidx) => {
+      html += `<button class="btn quiz-opt" data-q="${idx}" data-o="${oidx}" style="display:block;width:100%;text-align:left;margin:6px 0">${opt}</button>`;
+    });
+    html += `<div id="quiz-ans-${idx}" style="display:none;margin-top:10px;font-size:13.5px;color:var(--cyan)"></div></div>`;
+  });
+  qc.innerHTML = html;
+
+  $$('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', function(){
+      const qidx = +this.dataset.q, oidx = +this.dataset.o;
+      const q = questions[qidx];
+      const ansDiv = $(`#quiz-ans-${qidx}`);
+      if(oidx === q.ans){
+        ansDiv.innerHTML = `<span class="g">✓ Correct!</span> ${q.exp}`;
+      } else {
+        ansDiv.innerHTML = `<span style="color:var(--red)">✗ Incorrect.</span> Try again!`;
+      }
+      ansDiv.style.display = 'block';
+    });
+  });
+});
+
+/* Boot */
+window.addEventListener('load',()=>{
+  runDemos(); initTheme(); initReveal(); initStory(); onScroll();
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
