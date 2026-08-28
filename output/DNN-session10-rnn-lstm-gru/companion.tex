@@ -1,0 +1,393 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---- Encoding & fonts -------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}              % protrusion/kerning -> fewer overfull boxes
+
+% ---- Geometry (~1in margins) ------------------------------------------------
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+
+% ---- Math -------------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+
+% ---- Graphics, tables, colour ----------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage{adjustbox}
+
+% ---- Callout boxes (breakable pill-tab tcolorboxes) -------------------------
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+
+% ---- Lists & spacing --------------------------------------------------------
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+
+% ---- Headers / footers ------------------------------------------------------
+\usepackage{fancyhdr}
+
+% ---- Section styling --------------------------------------------------------
+\usepackage{titlesec}
+
+% ---- Links (hidden) + URL line-breaking so long URLs never overflow ---------
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+% =============================================================================
+%  COLOURS — navy chrome + the FIVE taxonomy ramps
+% =============================================================================
+\definecolor{navy}{HTML}{21355E}        % banner + headings
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}     % body ink
+\definecolor{mutedtext}{HTML}{6B7280}   % header / meta grey
+
+% Intuition — blue
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+% Everyday — amber
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+% Worked — green
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+% Watch out — red
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+% Key takeaway — purple/violet
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+% Wait, what? — teal
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\newcommand{\CourseShort}{DNN Companion}
+\newcommand{\SessionNo}{10}
+\newcommand{\LectureTitle}{Recurrent Neural Networks, BPTT, LSTM \& GRU}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyrule!55}\leaders\hrule height \headrulewidth\hfill}}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\sffamily\color{navy}}
+  {\thesection}{0.8em}{}
+  [\vspace{2pt}\color{navyrule!40}\hrule height 0.6pt]
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\sffamily\color{navy}}
+  {\thesubsection}{0.6em}{}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\newcommand{\secsub}[1]{%
+  \vspace{-6pt}{\small\sffamily\color{mutedtext}\textbf{#1}}\par\vspace{8pt}%
+}
+
+% =============================================================================
+%  TCOLORBOX CALLOUT MACROS
+% =============================================================================
+\newtcolorbox{intuition}[1][Mathematical Intuition]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=intuFill, colframe=intuFrame,
+  overlay unbroken and first={
+    \draw[intuFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=intuFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\ding{168}\ \ #1};
+  }%
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=everyFill, colframe=everyFrame,
+  overlay unbroken and first={
+    \draw[everyFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=everyFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\glyphHand\ \ #1};
+  }%
+}
+
+\newtcolorbox{worked}[1][Worked Example]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=workFill, colframe=workFrame,
+  overlay unbroken and first={
+    \draw[workFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=workFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\glyphPencil\ \ #1};
+  }%
+}
+
+\newtcolorbox{watchout}[1][Watch Out!]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=watchFill, colframe=watchFrame,
+  overlay unbroken and first={
+    \draw[watchFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=watchFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\ding{55}\ \ #1};
+  }%
+}
+
+\newtcolorbox{keytake}[1][Key Takeaway]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=keyFill, colframe=keyFrame,
+  overlay unbroken and first={
+    \draw[keyFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=keyFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\ding{51}\ \ #1};
+  }%
+}
+
+\newtcolorbox{waitwhat}[1][Wait, What?]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=waitFill, colframe=waitFrame,
+  overlay unbroken and first={
+    \draw[waitFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=waitFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\small!?\ \ #1};
+  }%
+}
+
+\newcommand{\housefig}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\linewidth]{#1}
+    \caption{#2}
+  \end{figure}
+}
+
+\newcommand{\flipanswer}[1]{%
+  \begin{adjustbox}{angle=180}%
+    \begin{minipage}{\linewidth}%
+      \small\color{mutedtext}#1%
+    \end{minipage}%
+  \end{adjustbox}%
+}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[
+  enhanced,
+  colback=navy,
+  colframe=navy,
+  arc=0pt, outer arc=0pt,
+  left=16pt, right=16pt, top=14pt, bottom=14pt
+]
+  \color{white}
+  \begin{minipage}{0.72\linewidth}
+    {\fontfamily{phv}\selectfont
+      {\small\bfseries\scshape WILP, BITS Pilani \hfill Deep Neural Networks (AIML ZG511)}\par
+      \vspace{4pt}
+      {\LARGE\bfseries Session 10: Recurrent Neural Networks, BPTT, LSTM \& GRU \par}
+      \vspace{4pt}
+      {\small Sequence Modeling, Backpropagation Through Time, Vanishing Gradients, and Gated Memory Cells\par}
+    }
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.24\linewidth}
+    \centering
+    \color{white!80}\sffamily\scriptsize
+    \textbf{Module 7}\\[2pt]
+    Session 10 Reader\\[2pt]
+    Full Worked Solutions
+  \end{minipage}
+\end{tcolorbox}
+
+\vspace{10pt}
+
+% Section 1
+\section{Sequence Modeling: Why Feedforward Networks Fail}
+\secsub{Feedforward networks assume independent inputs. Sequence models handle ordered, variable-length inputs.}
+
+Standard feedforward networks require fixed vector inputs $x \in \mathbb{R}^d$ and process every sample independently. However, real-world signals like natural language, time-series temperatures, speech audio, and video frames depend heavily on sequential ordering and context.
+
+\begin{everyday}[The Assembly Line Memory]
+Imagine a conveyor belt worker inspecting parts. If every item is independent, a simple glance works. But if item 7 determines whether item 8 is defective, inspecting item 8 without knowing item 7 causes mistakes. Feedforward networks suffer from complete amnesia between steps.
+\end{everyday}
+
+\begin{worked}[Temperature Forecasting Numerical]
+Consider a simple autoregressive model predicting temperature $T_{t+1}$ based on past steps:
+$$T_{t+1} = 0.8 T_t + 0.1 T_{t-1} + 2.0$$
+Given historical temperatures $T_1 = 20^\circ\text{C}, T_2 = 22^\circ\text{C}, T_3 = 25^\circ\text{C}$:
+
+\begin{steps}
+\item Predict $T_4$ using past steps $T_3$ and $T_2$:
+$$T_4 = 0.8(25) + 0.1(22) + 2.0 = 20.0 + 2.2 + 2.0 = 24.2^\circ\text{C}$$
+\item Predict $T_5$ using $T_4 = 24.2$ and $T_3 = 25$:
+$$T_5 = 0.8(24.2) + 0.1(25) + 2.0 = 19.36 + 2.5 + 2.0 = 23.86^\circ\text{C}$$
+\end{steps}
+\end{worked}
+
+\housefig{figures/rnn_unroll.png}{Unrolling a Recurrent Neural Network across time steps $t-1, t, t+1$. The weight matrices $W_{hx}, W_{hh}, W_{yh}$ are shared across all timesteps.}
+
+% Section 2
+\section{Vanilla Recurrent Neural Networks (RNN) \& Forward Pass}
+\secsub{RNNs pass a hidden state vector across time steps using shared weight matrices.}
+
+At each timestep $t$, the recurrent neural network accepts input vector $x_t \in \mathbb{R}^d$ and previous hidden state $h_{t-1} \in \mathbb{R}^m$, updating its memory via:
+$$h_t = \tanh(W_{hx} x_t + W_{hh} h_{t-1} + b_h)$$
+$$\hat{y}_t = \text{softmax}(W_{yh} h_t + b_y)$$
+
+\begin{intuition}[Parameter Sharing Across Time]
+Because sequences can be long, an RNN uses the \textbf{exact same} weight matrices $W_{hx}, W_{hh}, W_{yh}$ at every single time step. This reduces parameter count drastically.
+\end{intuition}
+
+\begin{worked}[Vanilla RNN Numerical Forward Pass]
+Let input dimension $d = 2$, hidden state dimension $m = 2$, and output dimension $K = 1$. Given parameters:
+$$W_{hx} = \begin{bmatrix} 0.5 & 0.1 \\ -0.2 & 0.4 \end{bmatrix}, \quad W_{hh} = \begin{bmatrix} 0.8 & -0.1 \\ 0.3 & 0.5 \end{bmatrix}, \quad b_h = \begin{bmatrix} 0.1 \\ -0.1 \end{bmatrix}$$
+Initial hidden state $h_0 = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$, and input sequence $x_1 = \begin{bmatrix} 1 \\ 0.5 \end{bmatrix}, x_2 = \begin{bmatrix} -0.5 \\ 1 \end{bmatrix}$.
+
+\begin{steps}
+\item Compute pre-activation for timestep $t=1$:
+$$a_1 = W_{hx} x_1 + W_{hh} h_0 + b_h = \begin{bmatrix} 0.5(1) + 0.1(0.5) \\ -0.2(1) + 0.4(0.5) \end{bmatrix} + \begin{bmatrix} 0.1 \\ -0.1 \end{bmatrix} = \begin{bmatrix} 0.65 \\ -0.10 \end{bmatrix}$$
+\item Apply $\tanh$ activation for $h_1$:
+$$h_1 = \tanh(a_1) = \begin{bmatrix} \tanh(0.65) \\ \tanh(-0.10) \end{bmatrix} = \begin{bmatrix} 0.5716 \\ -0.0997 \end{bmatrix}$$
+\item Compute pre-activation for timestep $t=2$:
+\begin{align*}
+a_2 &= W_{hx} x_2 + W_{hh} h_1 + b_h \\
+&= \begin{bmatrix} -0.15 \\ 0.5 \end{bmatrix} + \begin{bmatrix} 0.4673 \\ 0.1216 \end{bmatrix} + \begin{bmatrix} 0.1 \\ -0.1 \end{bmatrix} = \begin{bmatrix} 0.4173 \\ 0.5216 \end{bmatrix}
+\end{align*}
+\item Apply $\tanh$ activation for $h_2$:
+$$h_2 = \tanh(a_2) = \begin{bmatrix} \tanh(0.4173) \\ \tanh(0.5216) \end{bmatrix} = \begin{bmatrix} 0.3945 \\ 0.4789 \end{bmatrix}$$
+\end{steps}
+\end{worked}
+
+\begin{worked}[Keras SimpleRNN Parameter Counting]
+Consider Keras code: \texttt{model.add(SimpleRNN(units=3, input\_shape=(4, 5)))}.
+Inputs have feature dimension $d = 5$, and hidden units $m = 3$.
+\begin{steps}
+\item Compute $W_{hx}$ parameters: $d \times m = 5 \times 3 = 15$.
+\item Compute $W_{hh}$ parameters: $m \times m = 3 \times 3 = 9$.
+\item Compute bias vector $b_h$ parameters: $m = 3$.
+\item Total RNN layer parameters = $15 + 9 + 3 = 27$.
+\end{steps}
+\end{worked}
+
+% Section 3
+\section{Backpropagation Through Time (BPTT) \& Vanishing Gradients}
+\secsub{BPTT unrolls the network across time. Repeated matrix multiplication causes gradient decay.}
+
+To calculate $\frac{\partial L}{\partial W_{hh}}$, the gradient must flow backwards through time from step $T$ down to step $1$:
+$$\frac{\partial L_T}{\partial h_k} = \frac{\partial L_T}{\partial h_T} \prod_{j=k+1}^{T} \frac{\partial h_j}{\partial h_{j-1}}$$
+where $\frac{\partial h_j}{\partial h_{j-1}} = \text{diag}(1 - \tanh^2(a_j)) W_{hh}^T$.
+
+\housefig{figures/vanishing_gradient.png}{Effective gradient magnitude decaying exponentially as it backpropagates through time steps $k$.}
+
+\begin{waitwhat}[The Vanishing Gradient Trap]
+Because $\tanh'(x) \le 1.0$ and weight matrices often have spectral radius $< 1.0$, multiplying these terms 50 times results in factors like $0.5^{50} \approx 8.88 \times 10^{-16}$. The network completely forgets long-term context!
+\end{waitwhat}
+
+% Section 4
+\section{Long Short-Term Memory (LSTM) Networks}
+\secsub{LSTMs maintain a Cell State highway controlled by three gating mechanisms.}
+
+An LSTM unit regulates information flow using three specialized gates:
+$$\text{Forget Gate: } f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f)$$
+$$\text{Input Gate: } i_t = \sigma(W_i x_t + U_i h_{t-1} + b_i)$$
+$$\text{Candidate State: } \tilde{C}_t = \tanh(W_c x_t + U_c h_{t-1} + b_c)$$
+$$\text{Updated Cell State: } C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
+$$\text{Output Gate: } o_t = \sigma(W_o x_t + U_o h_{t-1} + b_o)$$
+$$\text{Hidden State: } h_t = o_t \odot \tanh(C_t)$$
+
+\housefig{figures/lstm_cell.png}{LSTM Cell architecture showing the Cell State highway $C_t$ and the three gating mechanisms (Forget, Input, Output).}
+
+\begin{worked}[LSTM Parameter Counting Formula]
+For an input dimension $d$ and hidden dimension $m$, an LSTM cell contains 4 linear transformations (for $f, i, \tilde{C}, o$).
+$$\text{Total Parameters} = 4 \times (m \times d + m \times m + m)$$
+If input size $d=100$ and hidden size $m=200$:
+$$\text{Total Parameters} = 4 \times (200 \times 100 + 200 \times 200 + 200) = 240,800$$
+\end{worked}
+
+% Section 5
+\section{Gated Recurrent Units (GRU)}
+\secsub{GRUs merge cell and hidden states into one vector using Reset and Update gates.}
+
+The GRU equations eliminate the cell state highway and operate directly on hidden state $h_t$:
+$$\text{Reset Gate: } r_t = \sigma(W_r x_t + U_r h_{t-1} + b_r)$$
+$$\text{Update Gate: } z_t = \sigma(W_z x_t + U_z h_{t-1} + b_z)$$
+$$\text{Candidate Hidden State: } \tilde{h}_t = \tanh(W_h x_t + U_h (r_t \odot h_{t-1}) + b_h)$$
+$$\text{Final Hidden State: } h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
+
+\housefig{figures/gru_cell.png}{GRU Cell architecture showing Reset Gate $r_t$ and Update Gate $z_t$.}
+
+\begin{worked}[Full GRU Numerical Calculation]
+Let input $x_t = 1.0$, past state $h_{t-1} = 0.5$. Parameters:
+$$W_r = 0.2, U_r = 0.5, b_r = 0.0, \quad W_z = 0.8, U_z = -0.1, b_z = 0.1$$
+$$W_h = 0.5, U_h = 0.9, b_h = -0.2$$
+
+\begin{steps}
+\item Compute Reset Gate $r_t$:
+$$a_r = 0.2(1.0) + 0.5(0.5) + 0.0 = 0.45 \implies r_t = \sigma(0.45) \approx 0.6107$$
+\item Compute Update Gate $z_t$:
+$$a_z = 0.8(1.0) - 0.1(0.5) + 0.1 = 0.85 \implies z_t = \sigma(0.85) \approx 0.7006$$
+\item Compute Candidate Hidden State $\tilde{h}_t$:
+$$\text{Gated state } r_t \odot h_{t-1} = 0.6107 \times 0.5 = 0.30535$$
+$$a_h = 0.5(1.0) + 0.9(0.30535) - 0.2 = 0.5748 \implies \tilde{h}_t = \tanh(0.5748) \approx 0.5188$$
+\item Compute Final Hidden State $h_t$:
+$$h_t = (1 - 0.7006)(0.5) + 0.7006(0.5188) = 0.1497 + 0.3635 = 0.5132$$
+\end{steps}
+\end{worked}
+
+\begin{keytake}[LSTM vs GRU Comparison]
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Property} & \textbf{GRU} & \textbf{LSTM} \\
+\midrule
+Number of Gates & 2 (Reset, Update) & 3 (Forget, Input, Output) \\
+State Vectors & 1 (Hidden state $h_t$) & 2 (Cell state $C_t$, Hidden state $h_t$) \\
+Parameters & $3 \times (m \cdot d + m^2 + m)$ & $4 \times (m \cdot d + m^2 + m)$ \\
+Computational Efficiency & Faster & Slower (more parameter heavy) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{keytake}
+
+% Section 6
+\section{Self-Test \& Pocket Recap}
+\secsub{Test your understanding of sequence models, gating math, and parameter counting.}
+
+\subsection*{Self-Test Questions}
+1. \textbf{Question:} Why does an LSTM cell preserve gradients across long time steps better than a vanilla RNN?\\
+\flipanswer{\textbf{Answer:} The LSTM Cell State highway $C_t$ uses additive updates ($C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$) rather than matrix multiplication. When $f_t \approx 1$, the gradient flows backward unchanged with factor $1.0$, preventing exponential decay.}
+
+\vspace{10pt}
+
+2. \textbf{Question:} Calculate the total parameter count for a GRU layer with input dimension $d=10$ and hidden units $m=20$.\\
+\flipanswer{\textbf{Answer:} GRU has 3 gate transformations. Parameters = $3 \times (m \cdot d + m^2 + m) = 3 \times (20 \cdot 10 + 20^2 + 20) = 3 \times (200 + 400 + 20) = 3 \times 620 = 1860$.}
+
+\end{document}

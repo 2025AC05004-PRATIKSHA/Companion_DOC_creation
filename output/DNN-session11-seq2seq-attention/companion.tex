@@ -1,0 +1,315 @@
+\documentclass[a4paper,11pt]{article}
+
+% ---- Encoding & fonts -------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}              % protrusion/kerning -> fewer overfull boxes
+
+% ---- Geometry (~1in margins) ------------------------------------------------
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+
+% ---- Math -------------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+
+% ---- Graphics, tables, colour ----------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage{adjustbox}
+
+% ---- Callout boxes (breakable pill-tab tcolorboxes) -------------------------
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+
+% ---- Lists & spacing --------------------------------------------------------
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+
+% ---- Headers / footers ------------------------------------------------------
+\usepackage{fancyhdr}
+
+% ---- Section styling --------------------------------------------------------
+\usepackage{titlesec}
+
+% ---- Links (hidden) + URL line-breaking so long URLs never overflow ---------
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+% =============================================================================
+%  COLOURS — navy chrome + the FIVE taxonomy ramps
+% =============================================================================
+\definecolor{navy}{HTML}{21355E}        % banner + headings
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}     % body ink
+\definecolor{mutedtext}{HTML}{6B7280}   % header / meta grey
+
+% Intuition — blue
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+% Everyday — amber
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+% Worked — green
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+% Watch out — red
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+% Key takeaway — purple/violet
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+% Wait, what? — teal
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\newcommand{\CourseShort}{DNN Companion}
+\newcommand{\SessionNo}{11}
+\newcommand{\LectureTitle}{Seq2Seq Architectures \& Attention Mechanisms}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyrule!55}\leaders\hrule height \headrulewidth\hfill}}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\sffamily\color{navy}}
+  {\thesection}{0.8em}{}
+  [\vspace{2pt}\color{navyrule!40}\hrule height 0.6pt]
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\sffamily\color{navy}}
+  {\thesubsection}{0.6em}{}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\newcommand{\secsub}[1]{%
+  \vspace{-6pt}{\small\sffamily\color{mutedtext}\textbf{#1}}\par\vspace{8pt}%
+}
+
+% =============================================================================
+%  TCOLORBOX CALLOUT MACROS
+% =============================================================================
+\newtcolorbox{intuition}[1][Mathematical Intuition]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=intuFill, colframe=intuFrame,
+  overlay unbroken and first={
+    \draw[intuFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=intuFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\ding{168}\ \ #1};
+  }%
+}
+
+\newtcolorbox{everyday}[1][Everyday Picture]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=everyFill, colframe=everyFrame,
+  overlay unbroken and first={
+    \draw[everyFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=everyFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\glyphHand\ \ #1};
+  }%
+}
+
+\newtcolorbox{worked}[1][Worked Example]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=workFill, colframe=workFrame,
+  overlay unbroken and first={
+    \draw[workFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=workFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\glyphPencil\ \ #1};
+  }%
+}
+
+\newtcolorbox{watchout}[1][Watch Out!]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=watchFill, colframe=watchFrame,
+  overlay unbroken and first={
+    \draw[watchFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=watchFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\ding{55}\ \ #1};
+  }%
+}
+
+\newtcolorbox{keytake}[1][Key Takeaway]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=keyFill, colframe=keyFrame,
+  overlay unbroken and first={
+    \draw[keyFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=keyFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\ding{51}\ \ #1};
+  }%
+}
+
+\newtcolorbox{waitwhat}[1][Wait, What?]{%
+  enhanced, breakable, frame hidden, interior hidden,
+  toptitle=5pt, bottomtitle=5pt, top=14pt, bottom=10pt, left=12pt, right=12pt,
+  colback=waitFill, colframe=waitFrame,
+  overlay unbroken and first={
+    \draw[waitFrame, lw=1pt] (frame.south west) rectangle (frame.north east);
+    \node[anchor=west, fill=waitFrame, text=white, font=\sffamily\bfseries\small,
+          inner xsep=10pt, inner ysep=4pt, rounded corners=3pt]
+      at ([xshift=12pt, yshift=0pt]frame.north west) {\small!?\ \ #1};
+  }%
+}
+
+\newcommand{\housefig}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\linewidth]{#1}
+    \caption{#2}
+  \end{figure}
+}
+
+\newcommand{\flipanswer}[1]{%
+  \begin{adjustbox}{angle=180}%
+    \begin{minipage}{\linewidth}%
+      \small\color{mutedtext}#1%
+    \end{minipage}%
+  \end{adjustbox}%
+}
+
+\begin{document}
+
+% Banner Header
+\begin{tcolorbox}[
+  enhanced,
+  colback=navy,
+  colframe=navy,
+  arc=0pt, outer arc=0pt,
+  left=16pt, right=16pt, top=14pt, bottom=14pt
+]
+  \color{white}
+  \begin{minipage}{0.72\linewidth}
+    {\fontfamily{phv}\selectfont
+      {\small\bfseries\scshape WILP, BITS Pilani \hfill Deep Neural Networks (AIML ZG511)}\par
+      \vspace{4pt}
+      {\LARGE\bfseries Session 11: Seq2Seq Architectures \& Attention Mechanisms \par}
+      \vspace{4pt}
+      {\small Encoder-Decoder Bottlenecks, Additive vs Multiplicative Attention, and Soft Alignment\par}
+    }
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.24\linewidth}
+    \centering
+    \color{white!80}\sffamily\scriptsize
+    \textbf{Module 8}\\[2pt]
+    Session 11 Reader\\[2pt]
+    Full Worked Solutions
+  \end{minipage}
+\end{tcolorbox}
+
+\vspace{10pt}
+
+% Section 1
+\section{Sequence-to-Sequence (Seq2Seq) \& The Bottleneck Problem}
+\secsub{Seq2Seq networks encode a whole input sequence into a single vector, causing a major memory bottleneck.}
+
+Standard sequence-to-sequence (Seq2Seq) architectures consist of an Encoder RNN and a Decoder RNN. The Encoder reads input sequence $(x_1, x_2, \dots, x_T)$ and compresses it into a single context vector $c = h_T$. The Decoder generates target sequence $(y_1, y_2, \dots, y_{T'})$ from $c$.
+
+\housefig{figures/seq2seq_bottleneck.png}{The Seq2Seq Encoder-Decoder bottleneck problem. All input context is squeezed into a single fixed vector $c$.}
+
+\begin{everyday}[The Interpreter's Limit]
+Imagine listening to a 20-minute speech in French, taking no notes, and then translating the whole speech into English strictly from memory. Long sentences get forgotten!
+\end{everyday}
+
+% Section 2
+\section{The Attention Mechanism: Soft Alignment}
+\secsub{Attention lets the decoder look back at all encoder hidden states dynamically at every step.}
+
+Instead of forcing a single context vector $c$, Attention computes a unique context vector $c_i$ for each decoder step $i$ as a weighted sum:
+$$c_i = \sum_{j=1}^{T} \alpha_{ij} h_j$$
+where $\alpha_{ij}$ represents the alignment weight between decoder state $s_{i-1}$ and encoder state $h_j$.
+
+\housefig{figures/attention_heatmap.png}{Attention alignment matrix $\alpha_{ij}$ showing soft word alignments between source and target sentences.}
+
+% Section 3
+\section{Computing Attention Weights: Step-by-Step Math}
+\secsub{Alignment scores are converted to a probability distribution over encoder states using softmax.}
+
+\begin{intuition}[Alignment Score Formulations]
+1. \textbf{Bahdanau (Additive) Attention:}
+$$e_{ij} = v_a^T \tanh(W_a s_{i-1} + U_a h_j)$$
+2. \textbf{Luong (Multiplicative) Attention:}
+$$e_{ij} = s_{i-1}^T W_a h_j \quad \text{or simple dot product } e_{ij} = s_{i-1}^T h_j$$
+\end{intuition}
+
+\begin{worked}[Full Worked Attention Numerical]
+Suppose an encoder has $T=3$ hidden states:
+$$h_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \quad h_2 = \begin{bmatrix} 0 \\ 2 \end{bmatrix}, \quad h_3 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$$
+The decoder state is $s_{i-1} = \begin{bmatrix} 2 \\ 1 \end{bmatrix}$. We use Dot-Product Attention $e_{ij} = s_{i-1}^T h_j$.
+
+\begin{steps}
+\item Compute raw alignment scores $e_{ij}$:
+$$e_{i1} = \begin{bmatrix} 2 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} = 2.0, \quad e_{i2} = \begin{bmatrix} 2 & 1 \end{bmatrix} \begin{bmatrix} 0 \\ 2 \end{bmatrix} = 2.0$$
+$$e_{i3} = \begin{bmatrix} 2 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = 3.0$$
+
+\item Apply Softmax to compute attention weights $\alpha_{ij}$:
+$$\exp(e_{i1}) = 7.389, \quad \exp(e_{i2}) = 7.389, \quad \exp(e_{i3}) = 20.086$$
+$$\sum_{j=1}^{3} \exp(e_{ij}) = 7.389 + 7.389 + 20.086 = 34.864$$
+$$\alpha_{i1} = 0.2119, \quad \alpha_{i2} = 0.2119, \quad \alpha_{i3} = 0.5761$$
+
+\item Calculate dynamic context vector $c_i$:
+\begin{align*}
+c_i &= 0.2119 \begin{bmatrix} 1 \\ 0 \end{bmatrix} + 0.2119 \begin{bmatrix} 0 \\ 2 \end{bmatrix} + 0.5761 \begin{bmatrix} 1 \\ 1 \end{bmatrix} \\
+&= \begin{bmatrix} 0.2119 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0.4238 \end{bmatrix} + \begin{bmatrix} 0.5761 \\ 0.5761 \end{bmatrix} = \begin{bmatrix} 0.7880 \\ 0.9999 \end{bmatrix}
+\end{align*}
+\end{steps}
+\end{worked}
+
+\begin{keytake}[Additive vs Multiplicative Attention]
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Property} & \textbf{Bahdanau (Additive)} & \textbf{Luong (Multiplicative)} \\
+\midrule
+Score Formula & $v_a^T \tanh(W_a s + U_a h)$ & $s^T W_a h$ \\
+Parameters & Requires $W_a, U_a, v_a$ & Requires only $W_a$ (or 0 for dot) \\
+Complexity & Higher & Lower (optimized BLAS dot products) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{keytake}
+
+% Section 4
+\section{Self-Test \& Pocket Recap}
+\secsub{Test your knowledge on attention mechanisms and context computation.}
+
+\subsection*{Self-Test Questions}
+1. \textbf{Question:} Why does Luong attention scale better computationally than Bahdanau attention?\\
+\flipanswer{\textbf{Answer:} Luong attention uses matrix dot products ($s^T W_a h$) which map directly to highly optimized GPU matrix multiplication routines, whereas Bahdanau attention requires non-linear activation functions ($\tanh$).}
+
+\vspace{10pt}
+
+2. \textbf{Question:} If all alignment scores $e_{ij}$ are equal to $5.0$ for sequence length $T=4$, what are the attention weights?\\
+\flipanswer{\textbf{Answer:} Since all raw scores are equal, softmax produces a uniform distribution: $\alpha_{ij} = \frac{1}{4} = 0.25$ for all $j=1,2,3,4$.}
+
+\end{document}

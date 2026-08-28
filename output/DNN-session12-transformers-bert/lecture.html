@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Session 12: Transformers, Positional Encoding &amp; BERT</title>
+
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-orange: #fb923c;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    #sidebar {
+      width: 280px;
+      background-color: #0b0f19;
+      border-right: 1px solid var(--border-color);
+      padding: 24px 16px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      overflow-y: auto;
+    }
+    .brand {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+    .course-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-list { list-style: none; }
+    .nav-item { margin-bottom: 8px; }
+    .nav-link {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--panel-bg);
+      color: var(--accent-blue);
+    }
+
+    #content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 40px 60px;
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-blue);
+      padding: 32px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+    }
+    .hero-banner h1 { font-size: 2.2rem; margin-bottom: 8px; color: var(--text-main); }
+    .hero-banner p { color: var(--text-muted); font-size: 1.05rem; }
+
+    section { margin-bottom: 50px; scroll-margin-top: 30px; }
+    h2 {
+      font-size: 1.6rem;
+      color: var(--accent-blue);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    p { margin-bottom: 16px; font-size: 1rem; color: #cbd5e1; }
+
+    .lab-box {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .lab-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-bottom: 16px;
+    }
+    .controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-group label { font-size: 0.85rem; color: var(--text-muted); }
+    input[type=range] { width: 160px; }
+    canvas {
+      background-color: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      width: 100%;
+      height: 240px;
+      display: block;
+    }
+
+    .callout {
+      background-color: rgba(56, 189, 248, 0.1);
+      border-left: 4px solid var(--accent-blue);
+      padding: 16px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .callout-title { font-weight: 700; color: var(--accent-blue); margin-bottom: 6px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th { background-color: var(--panel-bg); color: var(--accent-blue); }
+
+    .step-list { margin-left: 20px; margin-bottom: 20px; }
+    .step-list li { margin-bottom: 8px; }
+
+    .btn {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <div class="brand">WILP, BITS Pilani</div>
+    <div class="course-title">Deep Neural Networks</div>
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#sec1" class="nav-link active">1. Scaled Dot-Product Attention</a></li>
+      <li class="nav-item"><a href="#sec2" class="nav-link">2. Sinusoidal Positional Encoding</a></li>
+      <li class="nav-item"><a href="#sec3" class="nav-link">3. Layer Normalization</a></li>
+      <li class="nav-item"><a href="#sec4" class="nav-link">4. BERT &amp; Pre-training</a></li>
+    </ul>
+  </div>
+
+  <div id="content">
+    <div class="hero-banner">
+      <h1>Session 12: Transformers, Positional Encoding &amp; BERT</h1>
+      <p>Mastering parallel sequence attention, sinusoidal position signals, layer normalization, and BERT pre-training.</p>
+    </div>
+
+    <section id="sec1">
+      <h2>1. Scaled Dot-Product Self-Attention</h2>
+      <p>Transformers replace recurrent loops with parallel self-attention:</p>
+      $$\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+    </section>
+
+    <section id="sec2">
+      <h2>2. Sinusoidal Positional Encoding</h2>
+      <p>Since self-attention is order-agnostic, sinusoidal waves add positional signals to word embeddings:</p>
+
+      <div class="lab-box">
+        <div class="lab-title">Interactive Lab 1: Positional Wave Visualizer</div>
+        <div class="controls">
+          <div class="control-group">
+            <label for="posDim">Dimension Index ($i$): <span id="pdVal">0</span></label>
+            <input type="range" id="posDim" min="0" max="10" value="0" oninput="updateLab1()">
+          </div>
+        </div>
+        <canvas id="canvas1"></canvas>
+      </div>
+    </section>
+
+    <section id="sec3">
+      <h2>3. Layer Normalization vs Batch Normalization</h2>
+      <p>Layer Normalization normalizes across feature dimensions for each individual sample, making it independent of batch size.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Batch Normalization</th>
+            <th>Layer Normalization</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Axis</td>
+            <td>Batch $N$</td>
+            <td>Features $D$</td>
+          </tr>
+          <tr>
+            <td>Sequence Support</td>
+            <td>Struggles with variable lengths</td>
+            <td>Ideal for NLP &amp; Transformers</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sec4">
+      <h2>4. BERT Pre-training &amp; Specialized Variants</h2>
+      <div class="callout">
+        <div class="callout-title">BERT Architectures</div>
+        <ul class="step-list">
+          <li><strong>BERT Base:</strong> 12 layers, 768 hidden units, 12 heads (110M params).</li>
+          <li><strong>BERT Large:</strong> 24 layers, 1024 hidden units, 16 heads (340M params).</li>
+          <li><strong>patentBERT / docBERT:</strong> Domain-specific fine-tuning for patents and documents.</li>
+          <li><strong>TinyBERT:</strong> Compressed student model distilled for fast edge inference.</li>
+        </ul>
+      </div>
+
+      <button class="btn" onclick="alert('BERT Base has 110M parameters across 12 encoder layers!')">Verify BERT Base Config</button>
+    </section>
+  </div>
+
+  <script>
+    function updateLab1() {
+      const dim = parseInt(document.getElementById('posDim').value);
+      document.getElementById('pdVal').innerText = dim;
+      const canvas = document.getElementById('canvas1');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      const freq = 1 / Math.pow(10000, (2 * dim) / 128);
+
+      for (let pos = 0; pos < canvas.width; pos++) {
+        let val = Math.sin(pos * freq * 0.1);
+        let y = canvas.height/2 - val * (canvas.height/2 - 20);
+        if (pos === 0) ctx.moveTo(pos, y);
+        else ctx.lineTo(pos, y);
+      }
+      ctx.stroke();
+    }
+
+    window.onload = function() {
+      updateLab1();
+    };
+  </script>
+</body>
+</html>
