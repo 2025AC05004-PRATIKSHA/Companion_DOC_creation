@@ -1,0 +1,237 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newcommand{\CourseShort}{ML Companion}
+\newcommand{\SessionNo}{13}
+\newcommand{\LectureTitle}{Ensemble Learning}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\newcommand{\flipanswer}[1]{\par\noindent\textbf{Answer:} #1}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]
+  {\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}\par\vspace{9pt}
+  {\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{Machine Learning \textperiodcentered\ Companion Reader}}\par\vspace{6pt}
+  {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} Session 13: Ensemble Learning\par}
+  \vspace{5pt}
+  {\sffamily\large\color{white!88} Bagging, Random Forests, AdaBoost, and Gradient Boosting\par}
+  \vspace{9pt}
+  {\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}
+  {\sffamily\footnotesize\color{white!82} Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full\par}
+\end{tcolorbox}
+
+\section{Introduction to Ensemble Learning: Wisdom of the Crowd}
+\secsub{Combining multiple weak predictions creates a strong, accurate predictor with lower error.}
+
+Imagine asking a single person to estimate the number of jellybeans in a large jar. Their guess might be way off. But if you ask one hundred people and take the average of all their guesses, the crowd's estimate is almost always remarkably accurate.
+
+In machine learning, an \textbf{ensemble} works on this exact principle. Rather than relying on one complex model, we train a collection of simpler base models (often called \textbf{weak learners}) and combine their predictions.
+
+\begin{intuition}
+If individual models make errors that are independent of one another, averaging their predictions cancels out individual mistakes. A weak learner is any model that performs slightly better than random guessing (e.g., accuracy $> 50\%$ for binary classification).
+\end{intuition}
+
+\begin{everyday}
+Think of a medical diagnosis. Rather than trusting a single doctor's opinion, a patient consults five independent specialists. If three or four specialists agree on a treatment plan, the patient can feel much more confident in the decision.
+\end{everyday}
+
+\section{Bagging and Random Forests}
+\secsub{Bootstrap aggregation reduces model variance by training base trees on random sample subsets.}
+
+\subsection{Bootstrap Aggregation (Bagging)}
+Single decision trees are prone to high variance: slight changes in the training data can lead to completely different tree structures. \textbf{Bagging} fixes this by creating $B$ bootstrap samples from the original dataset (sampling with replacement). We train an unpruned decision tree on each bootstrap sample and average their output (for regression) or take a majority vote (for classification).
+
+\begin{equation}
+\hat{f}_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}^b(x)
+\end{equation}
+
+\housefig{figures/fig_bagging_variance.png}{Bagging reduces variance without increasing bias by averaging predictions from multiple bootstrap-trained decision trees.}
+
+\subsection{Random Forests: Feature Randomness}
+Random Forests extend bagging by adding \textbf{feature subsampling}. When splitting a node in a decision tree, instead of searching over all $p$ features, the algorithm considers only a random subset of $m$ features (typically $m = \sqrt{p}$ for classification and $m = p/3$ for regression). This decorrelates the trees, preventing a single dominant feature from dictating every split across all trees.
+
+\section{AdaBoost (Adaptive Boosting)}
+\secsub{AdaBoost sequentially trains base classifiers by increasing weights on previously misclassified points.}
+
+Unlike bagging, where models are trained independently in parallel, \textbf{boosting} builds models sequentially. Each new weak learner focuses on correcting the errors made by previous learners.
+
+\subsection{AdaBoost Algorithm Steps}
+Given a dataset of $N$ samples $(x_1, y_1), \dots, (x_N, y_N)$ with $y_i \in \{-1, +1\}$:
+\begin{enumerate}[leftmargin=*]
+    \item Initialize sample weights $w_i^{(1)} = \frac{1}{N}$ for all $i = 1, \dots, N$.
+    \item For round $t = 1, \dots, T$:
+    \begin{enumerate}[leftmargin=*]
+        \item Fit a base classifier $C_t(x)$ to the training data using weights $w^{(t)}$.
+        \item Compute the weighted error rate $\epsilon_t$:
+        \begin{equation}
+        \epsilon_t = \sum_{i=1}^{N} w_i^{(t)} I(y_i \neq C_t(x_i))
+        \end{equation}
+        \item Compute classifier weight $\alpha_t$:
+        \begin{equation}
+        \alpha_t = \frac{1}{2} \ln \left( \frac{1 - \epsilon_t}{\epsilon_t} \right)
+        \end{equation}
+        \item Update sample weights for round $t+1$:
+        \begin{equation}
+        w_i^{(t+1)} = \frac{w_i^{(t)} \exp\left(-\alpha_t y_i C_t(x_i)\right)}{Z_t}
+        \end{equation}
+        where $Z_t$ is a normalization factor ensuring $\sum_i w_i^{(t+1)} = 1$.
+    \end{enumerate}
+    \item Final prediction: $H(x) = \text{sign}\left(\sum_{t=1}^T \alpha_t C_t(x)\right)$.
+\end{enumerate}
+
+\housefig{figures/fig_adaboost_weights.png}{AdaBoost sample re-weighting increases the relative weight of misclassified samples in subsequent rounds.}
+
+\begin{worked}{AdaBoost 1D Slide Example}
+Let us solve the exact AdaBoost slide example step-by-step:
+
+Data points $x \in \{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0\}$ with labels $y = [1, 1, 1, -1, -1, -1, -1, 1, 1, 1]$.
+
+Initial weights $w_i = 0.1$.
+
+\begin{steps}
+\item \textbf{Round 1 Stump:} Split at $x \le 0.75$ predicts $C_1(x) = -1$ for left and $+1$ for right.
+\item \textbf{Predictions:} $[-1, -1, -1, -1, -1, -1, -1, 1, 1, 1]$.
+\item \textbf{Misclassifications:} $x \in \{0.1, 0.2, 0.3\}$ (true label $+1$, predicted $-1$).
+\item \textbf{Weighted Error:} $\epsilon_1 = 0.1 + 0.1 + 0.1 = 0.30$.
+\item \textbf{Alpha:} $\alpha_1 = \frac{1}{2} \ln \left(\frac{1 - 0.30}{0.30}\right) = \frac{1}{2} \ln(2.333) = 0.4236$ (scaled: $1.738$).
+\item \textbf{Updated Weights:} Misclassified samples get $w_i^{(2)} \propto 0.1 \cdot e^{\alpha_1}$, correctly classified get $w_i^{(2)} \propto 0.1 \cdot e^{-\alpha_1}$.
+\end{steps}
+\end{worked}
+
+\section{Gradient Boosting (GBM) and XGBoost}
+\secsub{Gradient boosting minimizes loss functions by fitting base learners directly to pseudo-residuals.}
+
+\subsection{Gradient Boosting Mechanics}
+Rather than updating data sample weights, \textbf{Gradient Boosting} fits each new base learner (typically a decision stump or small regression tree) directly to the \textbf{pseudo-residuals} (negative gradient of the loss function) of the current ensemble.
+
+For squared error loss $L(y, F(x)) = \frac{1}{2}(y - F(x))^2$, the pseudo-residual is simply the standard residual:
+\begin{equation}
+r_{i, m} = -\left[ \frac{\partial L(y_i, F(x_i))}{\partial F(x_i)} \right]_{F=F_{m-1}} = y_i - F_{m-1}(x_i)
+\end{equation}
+
+\housefig{figures/fig_gb_residuals.png}{Gradient Boosting fits successive regression trees to the target residuals $y - F_{m-1}(x)$.}
+
+\begin{worked}{Gradient Boosting Weight Prediction}
+Consider predicting weight (kg) from height and age:
+
+Actual weights $y = [88, 76, 56, 73, 77, 57]$.
+
+\begin{steps}
+\item \textbf{Initialize Model:} Constant model $F_0(x) = \text{mean}(y) = 71.2$ kg.
+\item \textbf{Compute Residuals:} $h_1(x) = y - F_0(x) = [16.8, 4.8, -15.2, 1.8, 5.8, -14.2]$.
+\item \textbf{Fit Tree:} Train regression tree $h_1(x)$ to predict these residuals.
+\item \textbf{Update Prediction:} With learning rate $\eta = 0.1$, $F_1(x) = F_0(x) + 0.1 \cdot h_1(x)$.
+\end{steps}
+\end{worked}
+
+\subsection{XGBoost (Extreme Gradient Boosting)}
+XGBoost is an optimized, highly scalable implementation of gradient boosting. Key enhancements include:
+\begin{itemize}[leftmargin=*]
+    \item Second-order Taylor expansion of the loss function (using both gradient $g_i$ and Hessian $h_i$).
+    \item Built-in L1 and L2 regularization on tree leaf weights to prevent overfitting.
+    \item Efficient column block structures for fast, parallel split finding.
+\end{itemize}
+
+\section{Summary \& Self-Test}
+\begin{keytake}
+Ensemble methods combine weak learners to produce state-of-the-art predictive performance. Bagging reduces variance via parallel independent bootstrap sampling (Random Forests). Boosting reduces bias sequentially by focusing on previous errors (AdaBoost via sample weights, GBM/XGBoost via gradients and residuals).
+\end{keytake}
+
+\subsection{Self-Test Quiz}
+\textbf{Q1:} Why does Random Forest sample features at each split rather than taking all features?
+
+\flipanswer{Feature sampling decorrelates trees, preventing a single dominant feature from making all trees identical.}
+
+\textbf{Q2:} How does AdaBoost handle misclassified training examples?
+
+\flipanswer{AdaBoost increases the weights of misclassified examples so the next weak learner focuses on them.}
+
+\end{document}

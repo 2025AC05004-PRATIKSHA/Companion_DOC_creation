@@ -1,0 +1,202 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newcommand{\CourseShort}{ML Companion}
+\newcommand{\SessionNo}{14}
+\newcommand{\LectureTitle}{Unsupervised Learning \& GMM}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\newcommand{\flipanswer}[1]{\par\noindent\textbf{Answer:} #1}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]
+  {\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}\par\vspace{9pt}
+  {\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{Machine Learning \textperiodcentered\ Companion Reader}}\par\vspace{6pt}
+  {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} Session 14: Unsupervised Learning \& GMM\par}
+  \vspace{5pt}
+  {\sffamily\large\color{white!88} K-Means, Mixture Models, and Expectation-Maximization (EM)\par}
+  \vspace{9pt}
+  {\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}
+  {\sffamily\footnotesize\color{white!82} Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full\par}
+\end{tcolorbox}
+
+\section{Introduction to Unsupervised Learning}
+\secsub{Discovering hidden patterns and structures in unlabeled data without target ground truth.}
+
+In supervised learning, every training sample comes with a known target label $y$. In \textbf{unsupervised learning}, we receive only feature vectors $x_1, x_2, \dots, x_N$ without ground truth labels. The goal is to discover latent structure, underlying clusters, or generative probability distributions.
+
+\begin{intuition}
+Unsupervised learning is like sorting a large pile of mixed coins into groups based on size and weight without knowing coin names.
+\end{intuition}
+
+\section{K-Means Clustering}
+\secsub{Partitioning $N$ samples into $K$ disjoint clusters by minimizing within-cluster squared distances.}
+
+K-Means is a hard-clustering algorithm that partitions data into $K$ distinct clusters centered at means $\mu_1, \dots, \mu_K$.
+
+\subsection{Objective Function and Algorithm}
+K-Means minimizes the distortion measure $J$:
+\begin{equation}
+J = \sum_{n=1}^{N} \sum_{k=1}^{K} r_{nk} \|x_n - \mu_k\|^2
+\end{equation}
+where $r_{nk} = 1$ if sample $x_n$ is assigned to cluster $k$, and $r_{nk} = 0$ otherwise.
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{E-Step (Assignment):} Assign sample $x_n$ to the nearest centroid $\mu_k$:
+    \begin{equation}
+    r_{nk} = \begin{cases} 1 & \text{if } k = \arg\min_j \|x_n - \mu_j\|^2 \\ 0 & \text{otherwise} \end{cases}
+    \end{equation}
+    \item \textbf{M-Step (Update):} Recompute centroids by averaging assigned points:
+    \begin{equation}
+    \mu_k = \frac{\sum_{n=1}^N r_{nk} x_n}{\sum_{n=1}^N r_{nk}}
+    \end{equation}
+\end{enumerate}
+
+\housefig{figures/fig_kmeans_vs_gmm.png}{Comparison of hard K-Means boundaries versus soft Gaussian Mixture Model probabilistic boundaries.}
+
+\section{Gaussian Mixture Models (GMM)}
+\secsub{Soft probabilistic clustering representing data as a weighted mixture of $K$ Gaussian distributions.}
+
+While K-Means makes hard binary assignments, a \textbf{Gaussian Mixture Model (GMM)} calculates the soft probability (responsibility $\gamma_{nk}$) that point $x_n$ belongs to Gaussian component $k$.
+
+\subsection{GMM Formulation}
+The overall probability density function is a linear combination of $K$ Gaussians:
+\begin{equation}
+p(x) = \sum_{k=1}^{K} \pi_k \mathcal{N}(x \mid \mu_k, \Sigma_k)
+\end{equation}
+where $\pi_k$ are mixture weights satisfying $\sum_{k=1}^K \pi_k = 1$ and $\pi_k \ge 0$.
+
+\section{The Expectation-Maximization (EM) Algorithm}
+\secsub{Iterative optimization framework for finding maximum likelihood parameter estimates in latent variable models.}
+
+\subsection{EM Algorithm Steps}
+\begin{steps}
+\item \textbf{Initialize:} Set initial parameters $\mu_k, \Sigma_k, \pi_k$.
+\item \textbf{Expectation Step (E-Step):} Calculate responsibilities $\gamma_{nk}$:
+\begin{equation}
+\gamma_{nk} = \frac{\pi_k \mathcal{N}(x_n \mid \mu_k, \Sigma_k)}{\sum_{j=1}^K \pi_j \mathcal{N}(x_n \mid \mu_j, \Sigma_j)}
+\end{equation}
+\item \textbf{Maximization Step (M-Step):} Re-estimate parameters using $\gamma_{nk}$:
+\begin{equation}
+N_k = \sum_{n=1}^N \gamma_{nk}, \quad \mu_k^{\text{new}} = \frac{1}{N_k} \sum_{n=1}^N \gamma_{nk} x_n, \quad \pi_k^{\text{new}} = \frac{N_k}{N}
+\end{equation}
+\end{steps}
+
+\housefig{figures/fig_em_convergence.png}{The EM algorithm monotonically increases the log-likelihood $L(\theta)$ until convergence.}
+
+\begin{worked}{GMM Numerical Calculation}
+Let us execute the GMM numerical slide example step-by-step:
+
+Consider 1D data points $X = [1, 2, 5, 6]$. We fit $K=2$ Gaussians.
+
+Initial parameters: $\mu_1 = 1.5$, $\mu_2 = 5.5$, variances $\sigma_1^2 = 1$, $\sigma_2^2 = 1$, weights $\pi_1 = 0.5, \pi_2 = 0.5$.
+
+\begin{steps}
+\item \textbf{E-Step for $x_1 = 1$:}
+Compute $\mathcal{N}(1 \mid 1.5, 1) = \frac{1}{\sqrt{2\pi}} e^{-0.5(1-1.5)^2} = 0.352$.
+Compute $\mathcal{N}(1 \mid 5.5, 1) = \frac{1}{\sqrt{2\pi}} e^{-0.5(1-5.5)^2} = 0.000014$.
+Responsibility $\gamma_{1,1} = \frac{0.5 \times 0.352}{0.5 \times 0.352 + 0.5 \times 0.000014} \approx 0.9999$.
+\item \textbf{M-Step Update for $\mu_1$:}
+Update mean $\mu_1^{\text{new}} = \frac{\sum_n \gamma_{n1} x_n}{\sum_n \gamma_{n1}} \approx \frac{1(1) + 1(2) + 0(5) + 0(6)}{1 + 1 + 0 + 0} = 1.5$.
+\end{steps}
+\end{worked}
+
+\section{Summary \& Self-Test}
+\begin{keytake}
+K-Means performs hard clustering by minimizing squared distance. GMM extends this to soft probabilistic clustering using the EM algorithm, updating responsibilities (E-step) and Gaussian parameters (M-step).
+\end{keytake}
+
+\subsection{Self-Test Quiz}
+\textbf{Q1:} What is the main difference between K-Means and GMM?
+
+\flipanswer{K-Means makes hard assignments, whereas GMM computes soft probabilistic responsibilities.}
+
+\end{document}

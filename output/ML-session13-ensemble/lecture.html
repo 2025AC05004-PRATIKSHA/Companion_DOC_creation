@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Session 13: Ensemble Learning</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --bits-gold: #f59e0b;
+      --bits-blue: #3b82f6;
+      --border: #334155;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .math-scroll {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+    }
+    #sidebar {
+      width: 280px;
+      background-color: #090d16;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--bits-gold);
+      margin-top: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #sidebar nav a {
+      display: block;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    #sidebar nav a:hover, #sidebar nav a.active {
+      background-color: var(--card-bg);
+      color: var(--accent);
+    }
+    #main-content {
+      margin-left: 280px;
+      padding: 2.5rem 3rem;
+      max-width: 900px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--text);
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .chapter {
+      margin-bottom: 3.5rem;
+    }
+    .chapter h2 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .callout {
+      background-color: var(--card-bg);
+      border-left: 4px solid var(--bits-blue);
+      padding: 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .callout.intuition { border-color: var(--accent); }
+    .callout.worked { border-color: #10b981; }
+    .lab-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .lab-box h3 {
+      margin-top: 0;
+      color: var(--bits-gold);
+    }
+    canvas {
+      background-color: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: block;
+      margin: 1rem 0;
+      width: 100%;
+      max-width: 600px;
+      height: 300px;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    input[type=range] {
+      accent-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>WILP BITS Pilani</h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">Session 13: Ensemble Learning</p>
+    <nav>
+      <a href="#ch1" class="active">1. Wisdom of Crowds</a>
+      <a href="#ch2">2. Bagging & Random Forest</a>
+      <a href="#ch3">3. AdaBoost Lab</a>
+      <a href="#ch4">4. Gradient Boosting</a>
+    </nav>
+  </div>
+
+  <div id="main-content">
+    <div class="hero">
+      <h1>Session 13: Ensemble Learning</h1>
+      <p>Master Bagging, Random Forests, AdaBoost, and Extreme Gradient Boosting (XGBoost).</p>
+    </div>
+
+    <section id="ch1" class="chapter">
+      <h2>1. Wisdom of Crowds & Ensemble Intuition</h2>
+      <p>Combining predictions from multiple models reduces error. When weak models make independent errors, averaging them cancels out individual variance.</p>
+      <div class="callout intuition">
+        <strong>Intuition:</strong> A weak learner performs slightly better than random guessing (e.g. 55% accuracy). Combining 100 weak learners yields near-perfect predictions.
+      </div>
+    </section>
+
+    <section id="ch2" class="chapter">
+      <h2>2. Bagging & Random Forests</h2>
+      <p>Bootstrap Aggregation (Bagging) samples data with replacement. Random Forests add feature subsampling to decorrelate individual trees.</p>
+      <div class="callout worked">
+        <strong>Feature Subsampling Formula:</strong>
+        <div class="math-scroll">
+          \[ m = \sqrt{p} \]
+        </div>
+        For \(p\) total features, Random Forests select \(m = \sqrt{p}\) features at each node split.
+      </div>
+    </section>
+
+    <section id="ch3" class="chapter">
+      <h2>3. AdaBoost Interactive Weight Re-weighting Lab</h2>
+      <p>Use the slider below to step through AdaBoost rounds and observe how sample weights adaptively shift to misclassified points.</p>
+
+      <div class="lab-box">
+        <h3>Interactive Lab: AdaBoost Boosting Rounds</h3>
+        <div class="controls">
+          <label for="roundSlider">Boosting Round: <span id="roundVal">1</span></label>
+          <input type="range" id="roundSlider" min="1" max="5" value="1">
+        </div>
+        <canvas id="adaboostCanvas" width="600" height="300"></canvas>
+        <p id="labDesc" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+      </div>
+    </section>
+
+    <section id="ch4" class="chapter">
+      <h2>4. Gradient Boosting & XGBoost</h2>
+      <p>Gradient Boosting iteratively fits new decision trees to the pseudo-residuals (negative gradient of the loss function) of previous predictions.</p>
+    </section>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('adaboostCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('roundSlider');
+    const roundVal = document.getElementById('roundVal');
+    const labDesc = document.getElementById('labDesc');
+
+    function drawLab(round) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      roundVal.innerText = round;
+
+      const pts = [
+        {x: 60, y: 100, label: 1, w: round === 1 ? 20 : (round >= 2 ? 45 : 20)},
+        {x: 120, y: 100, label: 1, w: round === 1 ? 20 : (round >= 2 ? 45 : 20)},
+        {x: 180, y: 100, label: 1, w: round === 1 ? 20 : (round >= 2 ? 45 : 20)},
+        {x: 240, y: 200, label: -1, w: round >= 3 ? 40 : 15},
+        {x: 300, y: 200, label: -1, w: round >= 3 ? 40 : 15},
+        {x: 360, y: 200, label: -1, w: round >= 3 ? 40 : 15},
+        {x: 420, y: 200, label: -1, w: round >= 3 ? 40 : 15},
+        {x: 480, y: 100, label: 1, w: 15},
+        {x: 540, y: 100, label: 1, w: 15}
+      ];
+
+      // Decision boundary line
+      const boundaryX = round === 1 ? 450 : (round === 2 ? 210 : 390);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(boundaryX, 20);
+      ctx.lineTo(boundaryX, 280);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '14px sans-serif';
+      ctx.fillText(`Stump Boundary ${round}`, boundaryX + 10, 40);
+
+      pts.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.w, 0, Math.PI * 2);
+        ctx.fillStyle = p.label === 1 ? '#38bdf8' : '#ef4444';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      if (round === 1) {
+        labDesc.innerText = "Round 1: Initial equal weights (radius 20). Misclassified blue (+1) points on the left get boosted weights in Round 2.";
+      } else if (round === 2) {
+        labDesc.innerText = "Round 2: Leftmost blue (+1) points receive higher weight (larger circles). The stump shifts to isolate them.";
+      } else {
+        labDesc.innerText = `Round ${round}: Boosting converges by progressively expanding weights on hard-to-classify samples.`;
+      }
+    }
+
+    slider.addEventListener('input', (e) => drawLab(parseInt(e.target.value)));
+    drawLab(1);
+  </script>
+</body>
+</html>

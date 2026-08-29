@@ -1,0 +1,176 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newcommand{\CourseShort}{ML Companion}
+\newcommand{\SessionNo}{16}
+\newcommand{\LectureTitle}{Model Evaluation \& FAccT}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\newcommand{\flipanswer}[1]{\par\noindent\textbf{Answer:} #1}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]
+  {\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}\par\vspace{9pt}
+  {\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{Machine Learning \textperiodcentered\ Companion Reader}}\par\vspace{6pt}
+  {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} Session 16: Model Evaluation \& FAccT ML\par}
+  \vspace{5pt}
+  {\sffamily\large\color{white!88} Evaluation Metrics, Algorithmic Bias, Fairness, Accountability, Transparency, and Security\par}
+  \vspace{9pt}
+  {\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}
+  {\sffamily\footnotesize\color{white!82} Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full\par}
+\end{tcolorbox}
+
+\section{Classifier Evaluation Metrics}
+\secsub{Rigorously quantifying model performance across confusion matrix metrics, ROC-AUC, and regression loss.}
+
+Selecting the right evaluation metric is essential. High accuracy can be deceiving on imbalanced datasets.
+
+\subsection{Confusion Matrix Metrics}
+\begin{align}
+\text{Precision} &= \frac{TP}{TP + FP} \\
+\text{Recall (Sensitivity)} &= \frac{TP}{TP + FN} \\
+\text{F1-Score} &= 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\end{align}
+
+\housefig{figures/fig_roc_auc.png}{Receiver Operating Characteristic (ROC) curve plotting TPR vs FPR with Area Under Curve (AUC).}
+
+\begin{worked}{Medical Classification Metrics}
+Consider a medical test on 100 patients: $TP=40, FP=10, FN=5, TN=45$.
+
+\begin{steps}
+\item \textbf{Accuracy:} $\frac{40+45}{100} = 85\%$.
+\item \textbf{Precision:} $\frac{40}{40+10} = \frac{40}{50} = 80\%$.
+\item \textbf{Recall:} $\frac{40}{40+5} = \frac{40}{45} = 88.9\%$.
+\item \textbf{F1-Score:} $2 \cdot \frac{0.80 \times 0.889}{0.80 + 0.889} = 84.2\%$.
+\end{steps}
+\end{worked}
+
+\section{Introduction to FAccT ML}
+\secsub{Ensuring Fairness, Accountability, Transparency, Privacy, and Robustness in real-world AI systems.}
+
+Beyond raw predictive accuracy, deployment of machine learning models in high-stakes domains (healthcare, hiring, judicial sentencing) requires adherence to \textbf{FAccT} principles:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fairness:} Preventing discrimination against protected groups (gender, ethnicity).
+    \item \textbf{Accountability:} Identifying who takes responsibility when automated decisions fail.
+    \item \textbf{Transparency \& Interpretability:} Explaining how decisions are made.
+    \item \textbf{Privacy \& Security:} Protecting sensitive user data against leakage and adversarial attacks.
+\end{itemize}
+
+\section{Algorithmic Bias \& Fairness Through Unawareness}
+\secsub{Why simply excluding sensitive attributes fails to eliminate systemic algorithmic bias.}
+
+A famous real-world example is the COMPAS risk assessment tool used in judicial bail decisions. Analysis revealed that black defendants were misclassified as high risk (false positive) at twice the rate of white defendants.
+
+\subsection{The Fallacy of Fairness Through Unawareness}
+A common misconception is that removing protected features (such as race or gender) guarantees a fair model.
+
+\begin{watchout}
+\textbf{Redundant Encoding:} Non-sensitive features (zip code, income, education level) are often strongly correlated with protected attributes. ML models implicitly reconstruct protected attributes from proxy features.
+\end{watchout}
+
+\section{Interpretability vs Performance Trade-Off}
+\secsub{Balancing predictive accuracy against model transparency across machine learning families.}
+
+\housefig{figures/fig_tradeoff_facct.png}{Trade-off between predictive accuracy and model interpretability across ML model families.}
+
+Simple models like Decision Trees and Linear Regression provide built-in feature attribution coefficients but may lack capacity for complex patterns. Machine Learning provide superior performance but function as black boxes.
+
+\section{Summary \& Self-Test}
+\begin{keytake}
+Evaluation requires going beyond accuracy to include Precision, Recall, and ROC-AUC. FAccT ML ensures models are fair, accountable, transparent, and secure. Removing protected attributes does not prevent bias due to proxy feature correlations.
+\end{keytake}
+
+\subsection{Self-Test Quiz}
+\textbf{Q1:} Why is "Fairness Through Unawareness" ineffective?
+
+\flipanswer{Because correlated proxy features allow models to implicitly reconstruct sensitive attributes.}
+
+\end{document}

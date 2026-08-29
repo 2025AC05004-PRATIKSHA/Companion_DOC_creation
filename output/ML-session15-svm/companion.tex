@@ -1,0 +1,219 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newcommand{\CourseShort}{ML Companion}
+\newcommand{\SessionNo}{15}
+\newcommand{\LectureTitle}{Support Vector Machines}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\newcommand{\flipanswer}[1]{\par\noindent\textbf{Answer:} #1}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]
+  {\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}\par\vspace{9pt}
+  {\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{Machine Learning \textperiodcentered\ Companion Reader}}\par\vspace{6pt}
+  {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} Session 15: Support Vector Machines (SVM)\par}
+  \vspace{5pt}
+  {\sffamily\large\color{white!88} Maximum Margin, Primal/Dual Formulations, KKT Conditions, Soft Margin, and Kernels\par}
+  \vspace{9pt}
+  {\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}
+  {\sffamily\footnotesize\color{white!82} Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full\par}
+\end{tcolorbox}
+
+\section{Introduction to Linear Classifiers \& Maximum Margin}
+\secsub{Finding the optimal separating hyperplane that maximizes the geometric distance to the closest training points.}
+
+A linear classifier separates data points belonging to two classes ($y_i \in \{-1, +1\}$) using a decision boundary (hyperplane):
+\begin{equation}
+f(x) = \text{sign}(w^T x + b)
+\end{equation}
+where $w$ is the weight vector normal to the hyperplane and $b$ is the bias term.
+
+While many hyperplanes can separate linearly separable data, the \textbf{Support Vector Machine (SVM)} selects the unique hyperplane that maximizes the \textbf{margin} (the distance between the decision boundary and the closest data points from either class).
+
+\begin{intuition}
+Think of building a highway between two towns (classes). SVM constructs the widest possible highway so that vehicles stay as far away from town borders as possible.
+\end{intuition}
+
+\housefig{figures/fig_svm_margin.png}{SVM maximum margin boundary and highlighted support vectors controlling hyperplane orientation.}
+
+\section{Primal SVM Optimization Problem}
+\secsub{Formulating maximum margin classification as a constrained quadratic optimization problem.}
+
+The geometric margin distance from a point $x_i$ to hyperplane $w^T x + b = 0$ is $\frac{y_i(w^T x_i + b)}{\|w\|}$. Scaling $w$ and $b$ such that $y_i(w^T x_i + b) = 1$ for the closest points gives a total margin width of $\frac{2}{\|w\|}$.
+
+Maximizing $\frac{2}{\|w\|}$ is equivalent to minimizing $\frac{1}{2} \|w\|^2$.
+
+\subsection{Hard Margin Primal Formulation}
+\begin{equation}
+\min_{w, b} \frac{1}{2} \|w\|^2 \quad \text{subject to } y_i (w^T x_i + b) \ge 1, \quad \forall i = 1, \dots, N
+\end{equation}
+
+\section{Lagrangian Duality and KKT Conditions}
+\secsub{Converting constrained primal optimization into an unconstrained dual problem via Lagrange multipliers.}
+
+Using non-negative Lagrange multipliers $\alpha_i \ge 0$, the Lagrangian function is:
+\begin{equation}
+L(w, b, \alpha) = \frac{1}{2} \|w\|^2 - \sum_{i=1}^{N} \alpha_i \left[ y_i (w^T x_i + b) - 1 \right]
+\end{equation}
+
+Setting derivatives with respect to primal variables $w$ and $b$ to zero yields:
+\begin{align}
+\frac{\partial L}{\partial w} = 0 &\implies w = \sum_{i=1}^{N} \alpha_i y_i x_i \\
+\frac{\partial L}{\partial b} = 0 &\implies \sum_{i=1}^{N} \alpha_i y_i = 0
+\end{align}
+
+\subsection{Karush-Kuhn-Tucker (KKT) Conditions}
+The optimal solution must satisfy complementary slackness:
+\begin{equation}
+\alpha_i \left[ y_i (w^T x_i + b) - 1 \right] = 0, \quad \forall i
+\end{equation}
+This implies that $\alpha_i > 0$ ONLY for points on the margin boundary ($y_i (w^T x_i + b) = 1$). These critical points are called \textbf{Support Vectors}.
+
+\subsection{Dual Optimization Problem}
+Substituting $w = \sum \alpha_i y_i x_i$ back into the Lagrangian produces the Wolfe Dual:
+\begin{equation}
+\max_{\alpha} \sum_{i=1}^{N} \alpha_i - \frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j (x_i^T x_j) \quad \text{s.t. } \alpha_i \ge 0, \, \sum_{i=1}^{N} \alpha_i y_i = 0
+\end{equation}
+
+\section{Soft Margin SVM and Slack Variables}
+\secsub{Allowing controlled misclassifications in noisy data using slack variables $\xi_i$ and penalty parameter $C$.}
+
+Real-world data is rarely perfectly separable. We introduce non-negative slack variables $\xi_i \ge 0$ allowing samples to fall inside the margin or be misclassified.
+
+\begin{equation}
+\min_{w, b, \xi} \frac{1}{2} \|w\|^2 + C \sum_{i=1}^{N} \xi_i \quad \text{s.t. } y_i (w^T x_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0
+\end{equation}
+The parameter $C > 0$ controls the trade-off: large $C$ penalizes misclassifications heavily (narrower margin), while small $C$ tolerates errors for a wider margin.
+
+\section{The Kernel Trick and Non-linear SVM}
+\secsub{Implicitly mapping low-dimensional input vectors into high-dimensional feature space using kernel functions.}
+
+When data is non-linearly separable, we map $x \to \Phi(x)$ into a higher-dimensional space where linear separation is possible.
+
+\housefig{figures/fig_kernel_trick.png}{Kernel transformation maps non-linear 2D data into a linearly separable 3D space.}
+
+By Mercer's Theorem, instead of explicitly calculating $\Phi(x_i)^T \Phi(x_j)$, we replace dot products with a kernel function $K(x_i, x_j) = \Phi(x_i)^T \Phi(x_j)$:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Polynomial Kernel:} $K(x, z) = (x^T z + c)^d$
+    \item \textbf{Gaussian RBF Kernel:} $K(x, z) = \exp(-\gamma \|x - z\|^2)$
+\end{itemize}
+
+\begin{worked}{1D SVM Dual Solution}
+Let us solve a 1D SVM numerical problem step-by-step:
+
+Given points $x_1 = 1 (y_1 = -1)$ and $x_2 = 3 (y_2 = +1)$.
+
+\begin{steps}
+\item \textbf{Dual Equation:}
+$\max \alpha_1 + \alpha_2 - \frac{1}{2} [ \alpha_1^2(1)(1) + 2 \alpha_1 \alpha_2 (-1)(+1)(3) + \alpha_2^2(9) ]$
+Constraint: $-\alpha_1 + \alpha_2 = 0 \implies \alpha_1 = \alpha_2 = \alpha$.
+\item \textbf{Optimize Alpha:}
+Substitute $\alpha$: $f(\alpha) = 2\alpha - \frac{1}{2} [\alpha^2 - 6\alpha^2 + 9\alpha^2] = 2\alpha - 2\alpha^2$.
+Derivative: $\frac{df}{d\alpha} = 2 - 4\alpha = 0 \implies \alpha = 0.5$.
+\item \textbf{Compute Weight $w$ and Bias $b$:}
+$w = \alpha_1 y_1 x_1 + \alpha_2 y_2 x_2 = 0.5(-1)(1) + 0.5(+1)(3) = 1.0$.
+Using support vector $x_2$: $y_2(w x_2 + b) = 1 \implies 1(1(3) + b) = 1 \implies b = -2$.
+Final Hyperplane: $f(x) = x - 2 = 0 \implies x = 2$.
+\end{steps}
+\end{worked}
+
+\section{Summary \& Self-Test}
+\begin{keytake}
+SVM maximizes margin $2/\|w\|$, expressed in dual form via Lagrange multipliers. Non-linear boundaries are efficiently created via the Kernel trick without explicitly computing high-dimensional features.
+\end{keytake}
+
+\subsection{Self-Test Quiz}
+\textbf{Q1:} What is a support vector?
+
+\flipanswer{A data point lying exactly on the margin boundary ($\alpha_i > 0$) that defines the hyperplane.}
+
+\end{document}

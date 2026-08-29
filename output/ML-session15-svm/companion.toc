@@ -1,0 +1,10 @@
+\contentsline {section}{\numberline {1}Introduction to Linear Classifiers \& Maximum Margin}{2}{section.1}%
+\contentsline {section}{\numberline {2}Primal SVM Optimization Problem}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Hard Margin Primal Formulation}{2}{subsection.2.1}%
+\contentsline {section}{\numberline {3}Lagrangian Duality and KKT Conditions}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Karush-Kuhn-Tucker (KKT) Conditions}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Dual Optimization Problem}{3}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Soft Margin SVM and Slack Variables}{3}{section.4}%
+\contentsline {section}{\numberline {5}The Kernel Trick and Non-linear SVM}{3}{section.5}%
+\contentsline {section}{\numberline {6}Summary \& Self-Test}{4}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Self-Test Quiz}{4}{subsection.6.1}%
