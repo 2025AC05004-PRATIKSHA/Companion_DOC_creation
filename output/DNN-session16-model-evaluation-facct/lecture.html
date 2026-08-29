@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Session 16: Model Evaluation & FAccT ML</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --bits-gold: #f59e0b;
+      --bits-blue: #3b82f6;
+      --border: #334155;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .math-scroll {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+    }
+    #sidebar {
+      width: 280px;
+      background-color: #090d16;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--bits-gold);
+      margin-top: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #sidebar nav a {
+      display: block;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    #sidebar nav a:hover, #sidebar nav a.active {
+      background-color: var(--card-bg);
+      color: var(--accent);
+    }
+    #main-content {
+      margin-left: 280px;
+      padding: 2.5rem 3rem;
+      max-width: 900px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--text);
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .chapter {
+      margin-bottom: 3.5rem;
+    }
+    .chapter h2 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .callout {
+      background-color: var(--card-bg);
+      border-left: 4px solid var(--bits-blue);
+      padding: 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .callout.intuition { border-color: var(--accent); }
+    .callout.worked { border-color: #10b981; }
+    .lab-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .lab-box h3 {
+      margin-top: 0;
+      color: var(--bits-gold);
+    }
+    canvas {
+      background-color: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: block;
+      margin: 1rem 0;
+      width: 100%;
+      max-width: 600px;
+      height: 300px;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    input[type=range] {
+      accent-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>WILP BITS Pilani</h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">Session 16: Evaluation & FAccT</p>
+    <nav>
+      <a href="#ch1" class="active">1. Classifier Metrics</a>
+      <a href="#ch2">2. FAccT Principles</a>
+      <a href="#ch3">3. ROC & Threshold Lab</a>
+    </nav>
+  </div>
+
+  <div id="main-content">
+    <div class="hero">
+      <h1>Session 16: Model Evaluation & FAccT ML</h1>
+      <p>Master Evaluation Metrics, Algorithmic Bias, Fairness, Accountability, Transparency, and Security.</p>
+    </div>
+
+    <section id="ch1" class="chapter">
+      <h2>1. Classifier Evaluation Metrics</h2>
+      <p>Precision, Recall, F1-Score, and ROC-AUC quantify model performance across threshold choices.</p>
+    </section>
+
+    <section id="ch2" class="chapter">
+      <h2>2. FAccT Principles & Algorithmic Bias</h2>
+      <p>Fairness Through Unawareness fails because proxy features encode sensitive attributes.</p>
+      <div class="callout worked">
+        <strong>F1-Score Equation:</strong>
+        <div class="math-scroll">
+          \[ F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}} \]
+        </div>
+      </div>
+    </section>
+
+    <section id="ch3" class="chapter">
+      <h2>3. Interactive ROC Curve & Decision Threshold Lab</h2>
+      <p>Move the decision threshold slider below to observe the trade-off between True Positive Rate (Recall) and False Positive Rate.</p>
+
+      <div class="lab-box">
+        <h3>Interactive Lab: Decision Threshold Trade-off</h3>
+        <div class="controls">
+          <label for="threshSlider">Probability Threshold: <span id="threshVal">0.50</span></label>
+          <input type="range" id="threshSlider" min="0.05" max="0.95" step="0.05" value="0.50">
+        </div>
+        <canvas id="rocCanvas" width="600" height="300"></canvas>
+        <p id="threshDesc" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('rocCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('threshSlider');
+    const threshVal = document.getElementById('threshVal');
+    const threshDesc = document.getElementById('threshDesc');
+
+    function drawROC(thresh) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      threshVal.innerText = thresh.toFixed(2);
+
+      // Draw ROC curve line
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let x = 0; x <= 500; x += 10) {
+        let fpr = x / 500;
+        let tpr = Math.sqrt(fpr);
+        let py = 250 - tpr * 200;
+        let px = 50 + x;
+        if (x === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Current operating point based on thresh
+      let currFpr = Math.pow(1 - thresh, 2);
+      let currTpr = Math.sqrt(currFpr);
+      let ptX = 50 + currFpr * 500;
+      let ptY = 250 - currTpr * 200;
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(ptX, ptY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      threshDesc.innerText = `Threshold = ${thresh.toFixed(2)}: Operating point gives TPR = ${currTpr.toFixed(2)} and FPR = ${currFpr.toFixed(2)}. ${thresh > 0.6 ? 'High threshold increases precision but lowers recall.' : 'Low threshold increases recall but raises false alarms.'}`;
+    }
+
+    slider.addEventListener('input', (e) => drawROC(parseFloat(e.target.value)));
+    drawROC(0.50);
+  </script>
+</body>
+</html>

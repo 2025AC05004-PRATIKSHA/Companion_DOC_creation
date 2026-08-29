@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WILP, BITS Pilani · Session 15: Support Vector Machines</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --bits-gold: #f59e0b;
+      --bits-blue: #3b82f6;
+      --border: #334155;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .math-scroll {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+    }
+    #sidebar {
+      width: 280px;
+      background-color: #090d16;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--bits-gold);
+      margin-top: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #sidebar nav a {
+      display: block;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    #sidebar nav a:hover, #sidebar nav a.active {
+      background-color: var(--card-bg);
+      color: var(--accent);
+    }
+    #main-content {
+      margin-left: 280px;
+      padding: 2.5rem 3rem;
+      max-width: 900px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--text);
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .chapter {
+      margin-bottom: 3.5rem;
+    }
+    .chapter h2 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .callout {
+      background-color: var(--card-bg);
+      border-left: 4px solid var(--bits-blue);
+      padding: 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .callout.intuition { border-color: var(--accent); }
+    .callout.worked { border-color: #10b981; }
+    .lab-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .lab-box h3 {
+      margin-top: 0;
+      color: var(--bits-gold);
+    }
+    canvas {
+      background-color: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: block;
+      margin: 1rem 0;
+      width: 100%;
+      max-width: 600px;
+      height: 300px;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    input[type=range] {
+      accent-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>WILP BITS Pilani</h2>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">Session 15: SVM</p>
+    <nav>
+      <a href="#ch1" class="active">1. Maximum Margin</a>
+      <a href="#ch2">2. Dual & KKT</a>
+      <a href="#ch3">3. Interactive Margin Lab</a>
+    </nav>
+  </div>
+
+  <div id="main-content">
+    <div class="hero">
+      <h1>Session 15: Support Vector Machines</h1>
+      <p>Master Maximum Margin Classification, Duality, Soft Margins, and the Kernel Trick.</p>
+    </div>
+
+    <section id="ch1" class="chapter">
+      <h2>1. Maximum Margin Classification</h2>
+      <p>SVM finds the hyper-plane that maximizes geometric distance to nearest support vectors.</p>
+    </section>
+
+    <section id="ch2" class="chapter">
+      <h2>2. Duality & KKT Conditions</h2>
+      <p>The Wolfe dual reduces optimization to dot products solved via quadratic programming.</p>
+      <div class="callout worked">
+        <strong>Dual Formulation:</strong>
+        <div class="math-scroll">
+          \[ \max_{\alpha} \sum_{i=1}^N \alpha_i - \frac{1}{2} \sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j y_i y_j K(x_i, x_j) \]
+        </div>
+      </div>
+    </section>
+
+    <section id="ch3" class="chapter">
+      <h2>3. Interactive SVM Margin & C Parameter Lab</h2>
+      <p>Adjust the soft margin parameter C below to observe how the margin width and support vector count change.</p>
+
+      <div class="lab-box">
+        <h3>Interactive Lab: Soft Margin & C Penalty</h3>
+        <div class="controls">
+          <label for="cSlider">Penalty C Parameter: <span id="cVal">1.0</span></label>
+          <input type="range" id="cSlider" min="0.1" max="5.0" step="0.1" value="1.0">
+        </div>
+        <canvas id="svmCanvas" width="600" height="300"></canvas>
+        <p id="cDesc" style="font-size: 0.9rem; color: var(--text-muted);"></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('svmCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('cSlider');
+    const cVal = document.getElementById('cVal');
+    const cDesc = document.getElementById('cDesc');
+
+    function drawSVM(C) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      cVal.innerText = C.toFixed(1);
+
+      const marginWidth = Math.max(15, 80 / C);
+
+      // Draw hyperplane
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(300, 20);
+      ctx.lineTo(300, 280);
+      ctx.stroke();
+
+      // Draw margin boundaries
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+
+      ctx.beginPath();
+      ctx.moveTo(300 - marginWidth, 20);
+      ctx.lineTo(300 - marginWidth, 280);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(300 + marginWidth, 20);
+      ctx.lineTo(300 + marginWidth, 280);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+
+      // Draw support vectors
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(300 - marginWidth, 150, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(300 + marginWidth, 150, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      cDesc.innerText = `C = ${C.toFixed(1)}: Margin width is ${marginWidth.toFixed(1)}px. ${C > 2 ? 'Large C enforces strict margin with fewer slack violations.' : 'Small C allows wider margin with higher slack tolerance.'}`;
+    }
+
+    slider.addEventListener('input', (e) => drawSVM(parseFloat(e.target.value)));
+    drawSVM(1.0);
+  </script>
+</body>
+</html>
