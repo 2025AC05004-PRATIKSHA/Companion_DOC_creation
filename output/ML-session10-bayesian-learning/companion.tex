@@ -1,0 +1,70 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{\usepackage{bbding}\newcommand{\glyphHand}{\Pointinghand}\newcommand{\glyphPencil}{\Pencil}}{\newcommand{\glyphHand}{\ding{43}}\newcommand{\glyphPencil}{\ding{46}}}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},leftmargin=4.4em,labelwidth=3.8em,labelsep=0.6em,labelindent=0pt,align=left,topsep=5pt,itemsep=6pt}
+\usepackage{parskip,fancyhdr,titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+\definecolor{navy}{HTML}{21355E}\definecolor{navyrule}{HTML}{21355E}\definecolor{inktext}{HTML}{1A202C}\definecolor{mutedtext}{HTML}{6B7280}
+\definecolor{intuFrame}{HTML}{2C5AA0}\definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{workFrame}{HTML}{2E7D52}\definecolor{workFill}{HTML}{F1F8F3}
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+\newcommand{\CourseShort}{Machine Learning}
+\newcommand{\SessionNo}{10}
+\newcommand{\LectureTitle}{Bayesian Learning \& Parameter Estimation}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0pt}
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\tcbset{housecallout/.style 2 args={enhanced, breakable, colback=#2, colframe=#1, boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt, left=10pt, right=10pt, top=9pt, bottom=9pt, before skip=11pt, after skip=11pt, fontupper=\normalsize, coltitle=white, fonttitle=\bfseries\sffamily\small, attach boxed title to top left={xshift=6mm,yshift=-3mm}, boxed title style={colback=#1, colframe=#1, rounded corners, arc=3pt, boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt}}}
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\titlebanner}[4]{\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]\noindent\begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}\hfill\par\vspace{9pt}{\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{#1}}\par\vspace{6pt}{\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} #2\par}\vspace{5pt}{\sffamily\large\color{white!88} #3\par}\vspace{9pt}{\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}{\sffamily\footnotesize\color{white!82} #4\par}\end{tcolorbox}}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+\begin{document}
+\thispagestyle{fancy}
+\titlebanner{Machine Learning \textperiodcentered\ Companion Reader}{Bayesian Learning \& Parameter Estimation}{Bayes Theorem, Prior/Posterior, Maximum Likelihood Estimation (MLE), MAP, and Loss Derivations}{Session 10 \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full}
+\smallskip\noindent{\small\color{mutedtext}Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}\smallskip
+\section{Foundations of Bayesian Learning}
+\secsub{Bayes' theorem updates initial prior beliefs using observed training data.}
+\begin{equation}
+P(h \mid D) = \frac{P(D \mid h) \, P(h)}{P(D)}.
+\end{equation}
+\housefig{figures/fig_bayes_updating.png}{Bayesian updating: Prior distribution updated by Likelihood function.}
+\section{MAP vs Maximum Likelihood Estimation (MLE)}
+\secsub{MAP incorporates prior distributions, while MLE maximizes data likelihood alone.}
+\housefig{figures/fig_mle_optimization.png}{Log-likelihood function optimization.}
+\section{Deriving Loss Functions from Probabilistic Principles}
+\secsub{Standard loss functions like Sum-of-Squares are direct consequences of MLE.}
+\housefig{figures/fig_gaussian_mle.png}{Gaussian probability density function.}
+\begin{worked}{Gaussian Distribution Parameter Estimation via MLE}
+Given $N$ independent observations drawn from $\mathcal{N}(\mu, \sigma^2)$, derive MLE for mean $\mu$:
+\begin{steps}
+  \item \textbf{Partial derivative:} $\frac{\partial \ln L}{\partial \mu} = \frac{1}{\sigma^2}\sum_{i=1}^N (x_i - \mu) = 0$.
+  \item \textbf{Solve:} $\hat{\mu}_{\text{MLE}} = \frac{1}{N}\sum_{i=1}^N x_i$. Sample mean is the MLE!
+\end{steps}
+\end{worked}
+\end{document}

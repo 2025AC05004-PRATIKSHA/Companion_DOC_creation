@@ -1,0 +1,279 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+
+\IfFileExists{bbding.sty}{%
+  \usepackage{bbding}%
+  \newcommand{\glyphHand}{\Pointinghand}%
+  \newcommand{\glyphPencil}{\Pencil}%
+}{%
+  \newcommand{\glyphHand}{\ding{43}}%
+  \newcommand{\glyphPencil}{\ding{46}}%
+}
+
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},
+  leftmargin=4.4em, labelwidth=3.8em, labelsep=0.6em, labelindent=0pt,
+  align=left, topsep=5pt, itemsep=6pt}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+
+\definecolor{navy}{HTML}{21355E}
+\definecolor{navyrule}{HTML}{21355E}
+\definecolor{inktext}{HTML}{1A202C}
+\definecolor{mutedtext}{HTML}{6B7280}
+
+\definecolor{intuFrame}{HTML}{2C5AA0}   \definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{everyFrame}{HTML}{8A5A1E}  \definecolor{everyFill}{HTML}{FBF1E3}
+\definecolor{workFrame}{HTML}{2E7D52}   \definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{watchFrame}{HTML}{B23A48}  \definecolor{watchFill}{HTML}{FBF1F2}
+\definecolor{keyFrame}{HTML}{6A4C93}    \definecolor{keyFill}{HTML}{F4F0F9}
+\definecolor{waitFrame}{HTML}{0F766E}   \definecolor{waitFill}{HTML}{EEF7F5}
+
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+
+\newcommand{\CourseShort}{Machine Learning}
+\newcommand{\SessionNo}{12}
+\newcommand{\LectureTitle}{Ensemble Methods \& Text Classification}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyrule!55}\leaders\hrule height \headrulewidth\hfill}}
+
+\titleformat{\section}
+  {\sffamily\Large\bfseries\color{navy}}
+  {\thesection}
+  {0.8em}
+  {}
+  [{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}
+  {\sffamily\large\bfseries\color{navy!92}}
+  {\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+
+\newcommand{\secsub}[1]{%
+  \noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+
+\newcommand{\flipanswer}[1]{\rotatebox[origin=c]{180}{\parbox{0.92\linewidth}{\small #1}}}
+
+\tcbset{
+  housecallout/.style 2 args={
+    enhanced, breakable,
+    colback=#2, colframe=#1,
+    boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt,
+    left=10pt, right=10pt, top=9pt, bottom=9pt,
+    before skip=11pt, after skip=11pt,
+    fontupper=\normalsize,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    attach boxed title to top left={xshift=6mm,yshift=-3mm},
+    boxed title style={
+      colback=#1, colframe=#1,
+      rounded corners, arc=3pt,
+      boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt
+    }
+  }
+}
+
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{everyday}{housecallout={everyFrame}{everyFill}, title={\raisebox{-0.05ex}{$\bigstar$}\,\ Everyday picture}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{watchout}{housecallout={watchFrame}{watchFill}, title={\raisebox{-0.05ex}{\ding{55}}\,\ Watch out}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newtcolorbox{waitwhat}{housecallout={waitFrame}{waitFill}, title={\raisebox{-0.05ex}{\ding{93}}\,\ Wait --- really?}}
+
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\bitslogochip}{}
+
+\newcommand{\titlebanner}[4]{%
+  \begin{tcolorbox}[
+    enhanced, breakable=false,
+    colback=navy, colframe=navy,
+    boxrule=0pt, arc=3pt, outer arc=3pt,
+    left=16pt, right=16pt, top=16pt, bottom=16pt,
+    before skip=2pt, after skip=14pt,
+    width=\linewidth ]
+    \noindent
+    \begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.26\linewidth}\raggedleft\bitslogochip\end{minipage}\par
+    \vspace{9pt}
+    {\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{#1}}\par
+    \vspace{6pt}
+    {\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} #2\par}
+    \vspace{5pt}
+    {\sffamily\large\color{white!88} #3\par}
+    \vspace{9pt}
+    {\color{white!55}\rule{\linewidth}{0.4pt}}\par
+    \vspace{6pt}
+    {\sffamily\footnotesize\color{white!82} #4\par}
+  \end{tcolorbox}%
+}
+
+\newcommand{\housefig}[2]{%
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{#1}%
+    \caption{#2}
+  \end{figure}%
+}
+
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+
+\begin{document}
+
+\thispagestyle{fancy}
+
+\titlebanner
+  {Machine Learning \textperiodcentered\ Companion Reader}
+  {Ensemble Methods \& Text Classification}
+  {Committee Models, Bagging, Boosting, Multinomial Naïve Bayes, and the Connection to Logistic Regression}
+  {Session 12 \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full}
+
+\smallskip
+\noindent{\small\color{mutedtext}Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}
+\smallskip
+
+\section{Ensemble Philosophy \& Committee Models}
+\secsub{Combining multiple diverse base classifiers reduces variance and produces superior predictive performance.}
+
+According to the \vocab{No Free Lunch Theorem}, no single learning algorithm outperforms all others across all tasks. \vocab{Ensemble Learning} constructs a committee of base models $C_1, C_2, \dots, C_T$ and aggregates their predictions.
+
+\begin{intuition}
+Wisdom of the crowd: A committee of diverse, independent decision-makers makes far fewer errors than any single individual expert.
+\end{intuition}
+
+\housefig{figures/fig_ensemble_variance.png}{Bagging ensemble averaging reduces variance while maintaining low model bias.}
+
+\section{Bagging (Bootstrap Aggregating)}
+\secsub{Bagging creates diverse base models by training each on an independent bootstrap sample of the dataset.}
+
+Given a training set $D$ of size $N$:
+\begin{enumerate}
+  \item Generate $T$ bootstrap samples $D_1, D_2, \dots, D_T$ by sampling $N$ instances from $D$ \vocab{with replacement}.
+  \item On average, each bootstrap sample contains $1 - (1 - 1/N)^N \approx 63.2\%$ of unique original instances, leaving $36.8\%$ as Out-Of-Bag (OOB) validation data.
+  \item Train base classifier $C_t$ on $D_t$.
+  \item Predict using majority voting (classification) or averaging (regression).
+\end{enumerate}
+
+\begin{worked}{1D Bagging Ensemble Voting Across 8 Rounds}
+Consider 10 points $x \in \{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0\}$.
+Decision stump base classifiers pick split thresholds across 8 bagging rounds:
+\begin{steps}
+  \item \textbf{Round 1 (Split $x=0.35$):} Predicts $+1$ for $x \le 0.35$, $-1$ for $x > 0.35$.
+  \item \textbf{Round 2 (Split $x=0.70$):} Predicts $+1$ for $x \le 0.70$, $+1$ for $x > 0.70$.
+  \item \textbf{Round 6 (Split $x=0.75$):} Predicts $-1$ for $x \le 0.75$, $+1$ for $x > 0.75$.
+  \item \textbf{Majority Vote Aggregation:} Taking the mode vote across all 8 rounds smooths out local variance and produces a stable, solid decision boundary.
+\end{steps}
+\end{worked}
+
+\section{Multinomial Naïve Bayes for Text Classification}
+\secsub{Multinomial Naïve Bayes models document term frequencies for text categorization.}
+
+In the \vocab{Bag of Words (BoW)} model, text order is ignored and word counts $f_i$ represent the document. The posterior class score is:
+\begin{equation}
+P(c \mid d) \propto P(c) \prod_{i=1}^{|V|} P(w_i \mid c)^{f_i}, \quad P(w_i \mid c) = \frac{N_{c, w_i} + 1}{N_c + |V|}.
+\end{equation}
+
+\housefig{figures/fig_multinomial_nb.png}{Multinomial word likelihood probabilities P(w|c) for Sports vs Not Sports text classification.}
+
+\begin{worked}{Sentence Tagging: "A very close game"}
+Classify sentence $d = \text{"A very close game"}$ into $c \in \{\text{Sports}, \text{Not Sports}\}$.
+Vocabulary size $|V| = 6$. Total words in Sports $N_{\text{Sports}} = 8$, in Not Sports $N_{\text{NotSports}} = 3$.
+Word count in Sports: $N_{\text{Sports, close}} = 1$, $N_{\text{Sports, game}} = 1$.
+\begin{steps}
+  \item \textbf{Compute Smoothed Word Probabilities for Sports:}
+        \begin{equation}
+        P(\text{close} \mid \text{Sports}) = \frac{1 + 1}{8 + 6} = \frac{2}{14} = \frac{1}{7}, \quad P(\text{game} \mid \text{Sports}) = \frac{1 + 1}{8 + 6} = \frac{2}{14} = \frac{1}{7}.
+        \end{equation}
+  \item \textbf{Compute Smoothed Word Probabilities for Not Sports:}
+        \begin{equation}
+        P(\text{close} \mid \text{NotSports}) = \frac{0 + 1}{3 + 6} = \frac{1}{9}, \quad P(\text{game} \mid \text{NotSports}) = \frac{0 + 1}{3 + 6} = \frac{1}{9}.
+        \end{equation}
+  \item \textbf{Compare Class Scores:}
+        \begin{align}
+        P(\text{Sports} \mid d) &\propto 0.5 \times \frac{1}{7} \times \frac{1}{7} = \frac{1}{98} \approx 0.0204,\\
+        P(\text{NotSports} \mid d) &\propto 0.5 \times \frac{1}{9} \times \frac{1}{9} = \frac{1}{162} \approx 0.0123.
+        \end{align}
+        Since $0.0204 > 0.0123$, the sentence is correctly classified as \textbf{Sports}!
+\end{steps}
+\end{worked}
+
+\section{Mathematical Link: Gaussian Naïve Bayes \& Logistic Regression}
+\secsub{Gaussian Naïve Bayes with equal variances mathematically implies the Logistic Regression functional form.}
+
+For binary classification $Y \in \{0, 1\}$, assume features $X_i \mid Y=y \sim \mathcal{N}(\mu_{iy}, \sigma_i^2)$ with equal class variances $\sigma_{i0} = \sigma_{i1} = \sigma_i$.
+
+\housefig{figures/fig_gnb_logistic_link.png}{Logistic sigmoid curve derived from Gaussian Naïve Bayes log-odds ratio.}
+
+Applying Bayes' rule:
+\begin{align}
+P(Y=1 \mid \mathbf{X}) &= \frac{P(Y=1) P(\mathbf{X} \mid Y=1)}{P(Y=1) P(\mathbf{X} \mid Y=1) + P(Y=0) P(\mathbf{X} \mid Y=0)} \nonumber\\
+&= \frac{1}{1 + \exp\left( -\ln \frac{P(Y=1)P(\mathbf{X}\mid Y=1)}{P(Y=0)P(\mathbf{X}\mid Y=0)} \right)}.
+\end{align}
+
+Expanding the log-odds ratio with Gaussian densities:
+\begin{equation}
+\ln \frac{P(Y=1)}{P(Y=0)} + \sum_{i=1}^d \ln \frac{p(X_i \mid Y=1)}{p(X_i \mid Y=0)} = \theta_0 + \sum_{i=1}^d \theta_i X_i = \boldsymbol{\theta}^T \mathbf{X},
+\end{equation}
+where $\theta_i = \frac{\mu_{i1} - \mu_{i0}}{\sigma_i^2}$. So:
+\begin{equation}
+P(Y=1 \mid \mathbf{X}) = \frac{1}{1 + e^{-\boldsymbol{\theta}^T \mathbf{X}}}.
+\end{equation}
+Gaussian Naïve Bayes directly implies the exact sigmoid functional form of Logistic Regression!
+
+\section*{Glossary \& Symbols}
+\addcontentsline{toc}{section}{Glossary \& Symbols}
+
+\noindent\textbf{Key Terms}
+\begin{description}[leftmargin=8.5em,style=nextline,font=\normalfont\bfseries\color{navy}]
+  \item[Ensemble Learning] Combining predictions from multiple base models to improve stability and accuracy.
+  \item[Bagging] Bootstrap Aggregating; sampling data with replacement to reduce variance.
+  \item[Multinomial Naïve Bayes] Naïve Bayes model for discrete word frequency distributions.
+  \item[Out-Of-Bag (OOB)] The $\approx 36.8\%$ of training samples excluded from a bootstrap sample.
+\end{description}
+
+\medskip
+\noindent\textbf{Symbols at a Glance}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Symbol} & \textbf{Meaning} \\
+\midrule
+$C_t$ & Base classifier model $t$ in ensemble \\
+$|V|$ & Vocabulary size in text classification \\
+$\boldsymbol{\theta}^T \mathbf{X}$ & Linear log-odds decision boundary score \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

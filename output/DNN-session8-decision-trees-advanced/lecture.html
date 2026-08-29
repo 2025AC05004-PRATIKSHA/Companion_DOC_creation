@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WILP, BITS Pilani · Advanced Decision Trees & Pruning</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+<style>
+:root{
+  --bg:#070b16; --bg2:#0b1120; --panel:#0e1729; --panel2:#121d36; --line:#1f2d4d;
+  --ink:#e7edf9; --muted:#93a4c8; --dim:#64759c; --cyan:#38f0d8; --cyan2:#19c4ff;
+  --violet:#9b8cff; --pink:#ff6ec7; --amber:#ffcb6b; --green:#62e88a; --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45); --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink); font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.bits-credit{color:var(--muted);font-size:13.5px;margin:6px 0 0}
+.bits-credit strong{color:var(--ink)}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"⚡ INTERACTIVE LAB";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px}
+.ctrl label{min-width:100px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan)}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+canvas{display:block;max-width:100%}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);padding:9px 14px;border-radius:30px;cursor:pointer;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+</style>
+</head>
+<body>
+<div class="progress"><i id="progbar"></i></div>
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">▶ Guided tour</button>
+  <button class="topbtn" id="themeBtn">☀ Light</button>
+</div>
+
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><div>WILP, BITS Pilani<small>Machine Learning · Session 8</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Navigation</div>
+    <a href="#intro"><span class="n">00</span> Overview</a>
+    <a href="#continuous"><span class="n">01</span> Continuous Attributes</a>
+    <a href="#overfitting"><span class="n">02</span> Overfitting & Pruning</a>
+    <a href="#prune_lab"><span class="n">03</span> Interactive Pruning Lab</a>
+    <a href="#gini_ratio"><span class="n">04</span> Gini & Gain Ratio</a>
+    <a href="#summary"><span class="n">05</span> Summary</a>
+  </nav>
+</aside>
+<main>
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Session 8 · Advanced Decision Trees</div>
+  <h1>Advanced Decision Trees & Pruning</h1>
+  <p class="bits-credit">Prepared for <strong>Work Integrated Learning Programmes (WILP), BITS Pilani</strong>.</p>
+  <p class="lead">Master continuous split selection, tree pruning strategies (pre/post-pruning), Gini Index, Gain Ratio, and the Minimum Description Length principle.</p>
+ </div>
+</section>
+<section id="continuous">
+ <div class="wrap">
+  <div class="kicker">01 · Continuous Features</div>
+  <h2>Continuous Attribute Thresholds</h2>
+  <p>Sort continuous values in ascending order and test midpoint candidate thresholds $c_i = (a_i + a_{i+1})/2$ to find the split that maximizes Information Gain.</p>
+ </div>
+</section>
+<section id="overfitting">
+ <div class="wrap">
+  <div class="kicker">02 · Generalization</div>
+  <h2>Overfitting & Pruning Strategies</h2>
+  <p>Pre-pruning halts tree expansion early (Gain thresholds, min samples). Post-pruning trims fully grown trees using validation accuracy (Reduced Error Pruning).</p>
+ </div>
+</section>
+<section id="prune_lab">
+ <div class="wrap">
+  <div class="kicker">03 · Interactive Lab</div>
+  <h2>Interactive Tree Complexity & Pruning Simulator</h2>
+  <div class="lab">
+    <h4>⚡ Adjust Tree Depth / Node Limit</h4>
+    <div class="grid2">
+      <div>
+        <div id="pruneSliders"></div>
+        <div class="readout" id="pruneOut"></div>
+      </div>
+      <div><canvas id="pruneCanvas" width="400" height="280"></canvas></div>
+    </div>
+  </div>
+ </div>
+</section>
+<section id="gini_ratio">
+ <div class="wrap">
+  <div class="kicker">04 · Impurity Metrics</div>
+  <h2>Gini Index & Gain Ratio</h2>
+  <div class="eqbox">$$ \text{Gini}(S) = 1 - \sum p_i^2, \quad \text{GainRatio}(S, A) = \frac{\text{Gain}(S, A)}{\text{SplitInfo}(S, A)} $$</div>
+ </div>
+</section>
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">05 · Summary</div>
+  <h2>Key Takeaways</h2>
+  <ul>
+    <li>Continuous splits use sorted midpoints.</li>
+    <li>Pruning eliminates overfitting by trading training accuracy for validation generalization.</li>
+    <li>Gain Ratio prevents bias towards high-cardinality attributes.</li>
+  </ul>
+ </div>
+</section>
+</main>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const show=()=>{val.textContent=inp.value;};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+function initPruneLab(){
+  const host=$('#pruneSliders'); if(!host)return; host.innerHTML='';
+  const c=$('#pruneCanvas'); if(!c)return; const ctx=c.getContext('2d');
+  const getDepth=makeSlider(host,{id:'nDepth',label:'Tree Depth',min:'1',max:'20',step:'1',value:'5'},()=>render());
+  function render(){
+    const d=getDepth();
+    const trainErr=Math.max(0.02, 0.45*Math.exp(-d/3.0));
+    const testErr=Math.max(0.12, 0.45*Math.exp(-d/5.0) + 0.003*Math.pow(Math.max(0, d-6), 2));
+    const W=c.width, H=c.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#1f2d4d';ctx.strokeRect(30,20,W-60,H-50);
+
+    ctx.strokeStyle='#38f0d8';ctx.lineWidth=2;ctx.beginPath();
+    for(let x=1;x<=20;x++){
+      const terr=Math.max(0.02, 0.45*Math.exp(-x/3.0));
+      const px=30+(x-1)/19*(W-60), py=(H-30) - (terr/0.5)*(H-60);
+      if(x===1) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle='#ff6b81';ctx.lineWidth=2;ctx.beginPath();
+    for(let x=1;x<=20;x++){
+      const terr=Math.max(0.12, 0.45*Math.exp(-x/5.0) + 0.003*Math.pow(Math.max(0, x-6), 2));
+      const px=30+(x-1)/19*(W-60), py=(H-30) - (terr/0.5)*(H-60);
+      if(x===1) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+
+    const curX=30+(d-1)/19*(W-60);
+    ctx.strokeStyle='#ffcb6b';ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(curX,20);ctx.lineTo(curX,H-30);ctx.stroke();ctx.setLineDash([]);
+
+    $('#pruneOut').innerHTML='Depth: '+d+'\nTrain Error: <span class="g">'+(trainErr*100).toFixed(1)+'%</span>\nTest Error: <span class="hl">'+(testErr*100).toFixed(1)+'%</span>\nStatus: '+(d>8?'<span style="color:var(--red)">Overfitting detected (prune tree!)</span>':(d<4?'Underfitting':'Optimal Tree Complexity'));
+  }
+  render();
+}
+window.addEventListener('load',()=>{ initPruneLab(); if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise(); });
+</script>
+</body>
+</html>

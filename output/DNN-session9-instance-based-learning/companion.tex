@@ -1,0 +1,81 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{\usepackage{bbding}\newcommand{\glyphHand}{\Pointinghand}\newcommand{\glyphPencil}{\Pencil}}{\newcommand{\glyphHand}{\ding{43}}\newcommand{\glyphPencil}{\ding{46}}}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},leftmargin=4.4em,labelwidth=3.8em,labelsep=0.6em,labelindent=0pt,align=left,topsep=5pt,itemsep=6pt}
+\usepackage{parskip,fancyhdr,titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+\definecolor{navy}{HTML}{21355E}\definecolor{navyrule}{HTML}{21355E}\definecolor{inktext}{HTML}{1A202C}\definecolor{mutedtext}{HTML}{6B7280}
+\definecolor{intuFrame}{HTML}{2C5AA0}\definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{workFrame}{HTML}{2E7D52}\definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{keyFrame}{HTML}{6A4C93}\definecolor{keyFill}{HTML}{F4F0F9}
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+\newcommand{\CourseShort}{Machine Learning}
+\newcommand{\SessionNo}{9}
+\newcommand{\LectureTitle}{Instance-Based Learning \& k-NN}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0pt}
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\tcbset{housecallout/.style 2 args={enhanced, breakable, colback=#2, colframe=#1, boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt, left=10pt, right=10pt, top=9pt, bottom=9pt, before skip=11pt, after skip=11pt, fontupper=\normalsize, coltitle=white, fonttitle=\bfseries\sffamily\small, attach boxed title to top left={xshift=6mm,yshift=-3mm}, boxed title style={colback=#1, colframe=#1, rounded corners, arc=3pt, boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt}}}
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\titlebanner}[4]{\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]\noindent\begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}\hfill\par\vspace{9pt}{\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{#1}}\par\vspace{6pt}{\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} #2\par}\vspace{5pt}{\sffamily\large\color{white!88} #3\par}\vspace{9pt}{\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}{\sffamily\footnotesize\color{white!82} #4\par}\end{tcolorbox}}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+\begin{document}
+\thispagestyle{fancy}
+\titlebanner{Machine Learning \textperiodcentered\ Companion Reader}{Instance-Based Learning \& k-NN}{Lazy vs Eager Learning, Distance Metrics, k-NN Regression, Distance Weighting, and Dimensionality}{Session 9 \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full}
+\smallskip\noindent{\small\color{mutedtext}Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}\smallskip
+\section{Lazy vs Eager Learning}
+\secsub{Lazy learners store training data and defer computation until a query arrives.}
+\begin{intuition}
+Instance-based learning classifies a new object by looking at its most similar stored neighbors.
+\end{intuition}
+\housefig{figures/fig_knn_classification.png}{k-NN classification for query $x_q$.}
+\section{Distance Metrics for Feature Spaces}
+\secsub{Distance measures define the geometrical similarity between data points.}
+Given two $d$-dimensional feature vectors $\mathbf{x}$ and $\mathbf{y}$, distance metrics formalize similarity.
+\begin{equation}
+L_p(\mathbf{x}, \mathbf{y}) = \left( \sum_{i=1}^{d} |x_i - y_i|^p \right)^{1/p}.
+\end{equation}
+\housefig{figures/fig_minkowski_norms.png}{Unit distance contours for Manhattan ($L_1$), Euclidean ($L_2$), and Chebyshev ($L_\infty$) metrics.}
+\section{k-NN Classification \& Regression}
+\secsub{k-NN predicts discrete labels via majority voting and continuous targets via local averaging.}
+\housefig{figures/fig_knn_regression.png}{k-NN regression for house price prediction ($k=3$).}
+\begin{worked}{k-NN Regression for House Price Prediction}
+Predict house price for size $x_q = 1850\text{ sq ft}$ using $k=3$ nearest neighbors:
+\begin{steps}
+  \item $k=3$ nearest sizes are $1700$ (\$340k), $2000$ (\$400k), and $1500$ (\$300k).
+  \item Compute average price: $\hat{y} = (340 + 400 + 300)/3 = \$346.67\text{k}$.
+\end{steps}
+\end{worked}
+\section*{Glossary \& Symbols}
+\noindent\textbf{Key Terms}
+\begin{description}[leftmargin=8.5em,style=nextline,font=\normalfont\bfseries\color{navy}]
+  \item[Lazy Learning] Storing training instances without explicit model training until prediction time.
+  \item[k-Nearest Neighbors] A non-parametric method classifying/regressing based on $k$ closest training points.
+\end{description}
+\end{document}

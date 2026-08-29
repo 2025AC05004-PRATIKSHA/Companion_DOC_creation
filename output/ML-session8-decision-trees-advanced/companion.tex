@@ -1,0 +1,76 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=1in,headheight=15pt,headsep=14pt]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{pifont}
+\IfFileExists{bbding.sty}{\usepackage{bbding}\newcommand{\glyphHand}{\Pointinghand}\newcommand{\glyphPencil}{\Pencil}}{\newcommand{\glyphHand}{\ding{43}}\newcommand{\glyphPencil}{\ding{46}}}
+\usepackage{enumitem}
+\setlist{leftmargin=1.5em,topsep=4pt,itemsep=3pt}
+\newlist{steps}{enumerate}{1}
+\setlist[steps]{label=\textbf{Step \arabic*.},leftmargin=4.4em,labelwidth=3.8em,labelsep=0.6em,labelindent=0pt,align=left,topsep=5pt,itemsep=6pt}
+\usepackage{parskip,fancyhdr,titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\hypersetup{breaklinks=true}
+\definecolor{navy}{HTML}{21355E}\definecolor{navyrule}{HTML}{21355E}\definecolor{inktext}{HTML}{1A202C}\definecolor{mutedtext}{HTML}{6B7280}
+\definecolor{intuFrame}{HTML}{2C5AA0}\definecolor{intuFill}{HTML}{F4F7FC}
+\definecolor{workFrame}{HTML}{2E7D52}\definecolor{workFill}{HTML}{F1F8F3}
+\definecolor{keyFrame}{HTML}{6A4C93}\definecolor{keyFill}{HTML}{F4F0F9}
+\color{inktext}
+\hypersetup{linkcolor=navy,urlcolor=navy,citecolor=navy}
+\newcommand{\CourseShort}{Machine Learning}
+\newcommand{\SessionNo}{8}
+\newcommand{\LectureTitle}{Advanced Decision Trees \& Pruning}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\footnotesize\color{mutedtext}\textsf{\CourseShort}}
+\fancyhead[R]{\footnotesize\color{mutedtext}\textsf{Session \SessionNo\ \textperiodcentered\ \LectureTitle}}
+\fancyfoot[L]{\footnotesize\color{mutedtext}\textsf{WILP, BITS Pilani}}
+\fancyfoot[C]{\footnotesize\color{mutedtext}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0pt}
+\titleformat{\section}{\sffamily\Large\bfseries\color{navy}}{\thesection}{0.8em}{}[{\vspace{2pt}\color{navy!70}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\sffamily\large\bfseries\color{navy!92}}{\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{16pt}{8pt}\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\newif\ifmlkfirstsec \mlkfirstsectrue
+\newcommand{\sectionbreak}{\ifmlkfirstsec\mlkfirstsecfalse\else\clearpage\fi}
+\newcommand{\secsub}[1]{\noindent{\sffamily\bfseries\itshape\color{navy!85}\large #1}\par\medskip}
+\tcbset{housecallout/.style 2 args={enhanced, breakable, colback=#2, colframe=#1, boxrule=0.6pt, arc=2.4pt, outer arc=2.4pt, left=10pt, right=10pt, top=9pt, bottom=9pt, before skip=11pt, after skip=11pt, fontupper=\normalsize, coltitle=white, fonttitle=\bfseries\sffamily\small, attach boxed title to top left={xshift=6mm,yshift=-3mm}, boxed title style={colback=#1, colframe=#1, rounded corners, arc=3pt, boxrule=0pt, left=6pt, right=6pt, top=2pt, bottom=2pt}}}
+\newtcolorbox{intuition}{housecallout={intuFrame}{intuFill}, title={\raisebox{-0.05ex}{\glyphHand}\,\ The intuition}}
+\newtcolorbox{worked}[1]{housecallout={workFrame}{workFill}, title={\raisebox{-0.05ex}{\glyphPencil}\,\ Worked example: #1}}
+\newtcolorbox{keytake}{housecallout={keyFrame}{keyFill}, title={\raisebox{-0.05ex}{\ding{51}}\,\ Key takeaway}}
+\newcommand{\bitswordmark}{{\sffamily\bfseries\color{white}\fontsize{12.5}{15}\selectfont WILP, BITS Pilani}}
+\newcommand{\titlebanner}[4]{\begin{tcolorbox}[enhanced, breakable=false, colback=navy, colframe=navy, boxrule=0pt, arc=3pt, outer arc=3pt, left=16pt, right=16pt, top=16pt, bottom=16pt, before skip=2pt, after skip=14pt, width=\linewidth]\noindent\begin{minipage}[c]{0.72\linewidth}\bitswordmark\end{minipage}\hfill\par\vspace{9pt}{\sffamily\footnotesize\bfseries\color{white!85}\MakeUppercase{#1}}\par\vspace{6pt}{\sffamily\bfseries\fontsize{26}{30}\selectfont\color{white} #2\par}\vspace{5pt}{\sffamily\large\color{white!88} #3\par}\vspace{9pt}{\color{white!55}\rule{\linewidth}{0.4pt}}\par\vspace{6pt}{\sffamily\footnotesize\color{white!82} #4\par}\end{tcolorbox}}
+\newcommand{\housefig}[2]{\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{#1}\caption{#2}\end{figure}}
+\newcommand{\vocab}[1]{\textbf{\color{navy}#1}}
+\begin{document}
+\thispagestyle{fancy}
+\titlebanner{Machine Learning \textperiodcentered\ Companion Reader}{Advanced Decision Trees \& Pruning}{Continuous Attributes, Overfitting, Pre/Post-Pruning, Gini Index, Gain Ratio, and MDL}{Session 8 \textperiodcentered\ Read alongside the lecture slides \textperiodcentered\ Every slide example worked out in full}
+\smallskip\noindent{\small\color{mutedtext}Prepared for the Work Integrated Learning Programmes (WILP), BITS Pilani.}\smallskip
+\section{Continuous Attributes in Decision Trees}
+\secsub{Continuous features are converted into binary decision thresholds by sorting values and testing candidate midpoints.}
+Given sorted values $a_1 < a_2 < \dots < a_N$, candidate midpoints $c_i = (a_i + a_{i+1})/2$ are evaluated for maximum Information Gain.
+\housefig{figures/fig_continuous_split.png}{Candidate split thresholds for a continuous attribute.}
+\section{Model Overfitting \& Tree Pruning}
+\secsub{Overfitting occurs when a tree memorizes training noise at the expense of generalization accuracy.}
+\housefig{figures/fig_tree_overfitting.png}{Training versus test error as decision tree complexity increases.}
+\subsection{Pruning Strategies}
+\begin{enumerate}
+  \item \textbf{Pre-Pruning:} Halt node expansion early if Information Gain is below a threshold.
+  \item \textbf{Post-Pruning:} Trim subtrees from a fully grown tree using validation data.
+\end{enumerate}
+\section{Alternative Impurity Measures: Gini \& Gain Ratio}
+\secsub{Gini Index and Gain Ratio address the limitations of standard Information Gain.}
+\housefig{figures/fig_impurity_comparison.png}{Comparison of impurity metrics: Gini Index vs Scaled Entropy.}
+\begin{equation}
+\text{Gini}(S) = 1 - \sum_{i=1}^c p_i^2, \quad \text{GainRatio}(S, A) = \frac{\text{Gain}(S, A)}{\text{SplitInfo}(S, A)}.
+\end{equation}
+\section{Minimum Description Length (MDL) Principle}
+\secsub{MDL balances model complexity against training error.}
+\begin{equation}
+\text{Cost}(\text{Model}, \text{Data}) = \text{Cost}(\text{Model}) + \text{Cost}(\text{Data} \mid \text{Model}).
+\end{equation}
+\end{document}
