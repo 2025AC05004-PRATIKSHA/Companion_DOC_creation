@@ -72,4 +72,4 @@ plt.tight_layout()
 plt.savefig(os.path.join(fig_dir, 'fig_gb_residuals.png'), dpi=300)
 plt.close()
 
-print('Figures generated for DNN-session13-ensemble successfully.')
+print('Figures generated for ML-session13-ensemble successfully.')

@@ -60,4 +60,4 @@ plt.tight_layout()
 plt.savefig(os.path.join(fig_dir, 'fig_em_convergence.png'), dpi=300)
 plt.close()
 
-print('Figures generated for DNN-session14-unsupervised-gmm successfully.')
+print('Figures generated for ML-session14-unsupervised-gmm successfully.')

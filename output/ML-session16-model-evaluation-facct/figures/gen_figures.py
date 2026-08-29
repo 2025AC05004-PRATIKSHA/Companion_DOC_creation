@@ -48,4 +48,4 @@ plt.tight_layout()
 plt.savefig(os.path.join(fig_dir, 'fig_tradeoff_facct.png'), dpi=300)
 plt.close()
 
-print('Figures generated for DNN-session16-model-evaluation-facct successfully.')
+print('Figures generated for ML-session16-model-evaluation-facct successfully.')

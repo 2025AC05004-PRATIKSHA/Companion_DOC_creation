@@ -60,4 +60,4 @@ plt.tight_layout()
 plt.savefig(os.path.join(fig_dir, 'fig_kernel_trick.png'), dpi=300)
 plt.close()
 
-print('Figures generated for DNN-session15-svm successfully.')
+print('Figures generated for ML-session15-svm successfully.')
